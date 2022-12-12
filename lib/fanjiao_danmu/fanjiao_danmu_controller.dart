@@ -1,0 +1,448 @@
+import 'dart:ui' as ui;
+import 'dart:collection';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/widgets.dart';
+
+import 'adapter/danmu_adapter.dart';
+import 'model/danmu_item_model.dart';
+import 'fanjiao_danmu_widget.dart';
+import 'listener_helpers.dart';
+
+class FanjiaoDanmuController
+    with
+        FanjiaoLocalListenersMixin,
+        FanjiaoLocalStatusListenersMixin,
+        FanjiaoEagerListenerMixin {
+  final Function(DanmuItem)? onTap;
+  final Map<ImageProvider, ImgInfo> _imagesPool = {};
+  final List<DanmuItem> _tempList = <DanmuItem>[];
+  final ImageProvider? praiseImageProvider;
+  final Duration startTime;
+  final Duration endTime;
+  Queue<DanmuItem> danmuItems = Queue<DanmuItem>();
+  DanmuStatus _status = DanmuStatus.stop;
+  DanmuStatus _lastReportedStatus = DanmuStatus.dismissed;
+  bool willChange = false;
+  DanmuAdapter adapter;
+  int maxSize;
+  int filter;
+
+  ///秒
+  late double _progress;
+  DanmuItem? selected;
+  Ticker? _ticker;
+  Widget? tooltip;
+  ImgInfo? _iconPraise;
+  Duration? _lastElapsedDuration;
+
+  double get progress => _progress;
+
+  DanmuStatus get state => _status;
+
+  Duration? get lastElapsedDuration => _lastElapsedDuration;
+
+  ///秒
+  set progress(double progress) {
+    assert(progress != null);
+    clearDanmu();
+    _internalSetValue(progress);
+    notifyListeners();
+    _checkStatusChanged();
+  }
+
+  bool get isAnimating => _ticker != null && _ticker!.isActive;
+
+  FanjiaoDanmuController({
+    required this.adapter,
+    required this.startTime,
+    required this.endTime,
+    this.maxSize = 100,
+    this.onTap,
+    this.tooltip,
+    this.praiseImageProvider,
+    this.filter = DanmuFilter.all,
+  }) {
+    init();
+  }
+
+  clearDanmu() {
+    danmuItems.clear();
+    adapter.clear();
+    selected = null;
+  }
+
+  addImage(BuildContext context, ImageProvider asset) async {
+    var image = await loadImage(context, asset);
+    if (image != null) {
+      _imagesPool[asset] = ImgInfo(image,
+          Rect.fromLTRB(0, 0, image.width.toDouble(), image.height.toDouble()));
+      notifyListeners();
+    }
+  }
+
+  ImgInfo? getImage(BuildContext context, ImageProvider? asset) {
+    if (asset == null) {
+      return null;
+    }
+    if (_imagesPool[asset] == null) {
+      _imagesPool[asset] = ImgInfo.empty;
+      addImage(context, asset);
+      return null;
+    } else {
+      return _imagesPool[asset];
+    }
+  }
+
+  ImgInfo? iconPraise(BuildContext context) {
+    _iconPraise = getImage(context, praiseImageProvider);
+    return _iconPraise;
+  }
+
+  setup(BuildContext context, TickerProvider vsync, Rect rect) {
+    _ticker = vsync.createTicker(_tick);
+    adapter.initData(rect);
+  }
+
+  _tick(Duration elapsed) {
+    Duration dElapsed = elapsed - (_lastElapsedDuration ?? startTime);
+    _lastElapsedDuration = elapsed;
+    if ((_status == DanmuStatus.pause && dElapsed > Duration.zero) ||
+        dElapsed == Duration.zero) {
+      return;
+    }
+    final double dTime =
+        dElapsed.inMicroseconds / Duration.microsecondsPerSecond;
+    _progress += dTime;
+    assert(progress >= 0.0);
+    _internalSetValue(progress);
+    if (state == DanmuStatus.completed) {
+      _checkStatusChanged();
+      clearDanmu();
+      notifyListeners();
+      return;
+    }
+    if (danmuItems.isEmpty) {
+      return;
+    }
+    for (var entry in danmuItems) {
+      if (entry.position == null) {
+        entry.dTime = _progress - entry.startTime;
+        entry.position = entry.simulation.offset(_progress - entry.startTime);
+      } else {
+        Offset? position;
+        if (entry.isSelected) {
+          position = entry.simulation.isDone(entry.position!, 0);
+        }else {
+          position = entry.simulation.isDone(entry.position!, dTime);
+        }
+        if (position == null) {
+          _tempList.add(entry);
+        } else if (!entry.isSelected) {
+          entry.position = position;
+        }
+      }
+    }
+    for (var element in _tempList) {
+      danmuItems.remove(element);
+      adapter.removeItem(element);
+    }
+    _tempList.clear();
+    if (danmuItems.isEmpty) {
+      _status = DanmuStatus.idle;
+      _checkStatusChanged();
+    }
+    notifyListeners();
+  }
+
+  clearSelection() {
+    if (selected != null) {
+      selected!.isSelected = false;
+      selected = null;
+    }
+  }
+
+  tapPosition(Offset position) {
+    clearSelection();
+    for (var entry in danmuItems) {
+      if (entry.rect.contains(position)) {
+        entry.isSelected = true;
+        selected = entry;
+        break;
+      }
+    }
+    if (selected != null) {
+      onTap?.call(selected!);
+    }
+  }
+
+  markRepeated() {
+    List<String> temp = [];
+    for (var entry in danmuItems) {
+      if (temp.contains(entry.text)) {
+        ///不去重 高级弹幕 自己发的弹幕 高点赞数的弹幕
+        if (!entry.flag.isAdvanced && !entry.isSelf && !entry.isHighPraise) {
+          entry.flag = entry.flag.addRepeated;
+        }
+      } else {
+        entry.flag = entry.flag.removeRepeated;
+        temp.add(entry.text);
+      }
+    }
+  }
+
+  _addEntry(DanmuModel model) {
+    if (model.text.isEmpty) {
+      return;
+    }
+    if (model.startTime >
+        endTime.inMilliseconds / Duration.millisecondsPerSecond) {
+      return;
+    }
+    if (danmuItems.length > maxSize) {
+      return;
+    }
+    for (var element in danmuItems) {
+      if (element.id == model.id) {
+        return;
+      }
+      if (!filter.isRepeated) {
+        if (element.text == model.text) {
+          return;
+        }
+      }
+    }
+    if (filter.check(model.flag)) {
+      var item = adapter.getItem(model);
+      if (item != null) {
+        danmuItems.add(item);
+      }
+    }
+  }
+
+  addDanmu(DanmuModel model) {
+    assert(_ticker != null);
+    if (model.text.isEmpty) {
+      return;
+    }
+    _addEntry(model);
+    if (danmuItems.isNotEmpty && isAnimating && _status == DanmuStatus.idle) {
+      _status = DanmuStatus.playing;
+      _checkStatusChanged();
+    }
+  }
+
+  addAllDanmu(Iterable<DanmuModel> models) {
+    assert(_ticker != null);
+    if (danmuItems.length > maxSize) {
+      return;
+    }
+    for (var model in models) {
+      _addEntry(model);
+    }
+    if (danmuItems.isNotEmpty && isAnimating && _status == DanmuStatus.idle) {
+      _status = DanmuStatus.playing;
+      _checkStatusChanged();
+    }
+  }
+
+  ///秒
+  void _internalSetValue(double progress) {
+    var newProgress = progress * Duration.microsecondsPerSecond;
+    if (newProgress > endTime.inMicroseconds) {
+      _progress =
+          endTime.inMicroseconds.toDouble() / Duration.microsecondsPerSecond;
+      _status = DanmuStatus.completed;
+    } else if (newProgress < startTime.inMicroseconds) {
+      _progress =
+          startTime.inMilliseconds.toDouble() / Duration.microsecondsPerSecond;
+      _status = DanmuStatus.playing;
+    } else {
+      _progress = progress;
+      _status = DanmuStatus.playing;
+    }
+  }
+
+  init() {
+    _lastElapsedDuration = startTime;
+    _progress = startTime.inMicroseconds / Duration.microsecondsPerSecond;
+  }
+
+  pause() {
+    assert(_ticker != null);
+    _status = DanmuStatus.pause;
+    _checkStatusChanged();
+  }
+
+  start() {
+    assert(_ticker != null);
+    if (!_ticker!.isActive) {
+      final TickerFuture result = _ticker!.start();
+    }
+    _status = DanmuStatus.playing;
+    _checkStatusChanged();
+  }
+
+  stop({bool canceled = true}) {
+    assert(_ticker != null);
+    _status = DanmuStatus.stop;
+    danmuItems.clear();
+    _lastElapsedDuration = null;
+    _checkStatusChanged();
+    _ticker!.stop(canceled: canceled);
+  }
+
+  /// flag [DanmuFilter]
+  changeFilter(int flag, {bool? need}) {
+    if (need == null) {
+      filter = filter.change(flag);
+    } else if (need) {
+      filter = filter.add(flag);
+    } else {
+      filter = filter.remove(flag);
+    }
+    notifyListeners();
+  }
+
+  _checkStatusChanged() {
+    final DanmuStatus newStatus = state;
+    if (_lastReportedStatus != newStatus) {
+      _lastReportedStatus = newStatus;
+      notifyStatusListeners(newStatus);
+    }
+  }
+
+  @override
+  dispose() {
+    assert(() {
+      if (_ticker == null) {
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary(
+              'FanjiaoDanmuController.dispose() called more than once.'),
+          ErrorDescription(
+              'A given $runtimeType cannot be disposed more than once.\n'),
+          DiagnosticsProperty<FanjiaoDanmuController>(
+            'The following $runtimeType object was disposed multiple times',
+            this,
+            style: DiagnosticsTreeStyle.errorProperty,
+          ),
+        ]);
+      }
+      return true;
+    }());
+    clearDanmu();
+    _ticker!.dispose();
+    _ticker = null;
+    _imagesPool.clear();
+    clearStatusListeners();
+    clearListeners();
+    super.dispose();
+  }
+}
+
+typedef DanmuStatusListener = Function(DanmuStatus status);
+
+enum DanmuStatus {
+  dismissed,
+  playing,
+  pause,
+  idle,
+  completed,
+  stop,
+}
+
+class ImgInfo {
+  final ui.Image? image;
+  final Rect? rect;
+  static const ImgInfo empty = ImgInfo(null, null);
+
+  bool get isEmpty => image == null;
+
+  const ImgInfo(this.image, this.rect);
+}
+
+extension DanmuFilter on int {
+  ///普通的滚动弹幕
+  static const int scroll = 1;
+
+  ///固定从顶部中间往下开始排序的弹幕
+  static const int top = 1 << 1;
+
+  ///固定从底部中间往上开始排序的弹幕
+  static const int bottom = 1 << 2;
+
+  ///高级弹幕
+  static const int advanced = 1 << 3;
+
+  ///是否允许重复弹幕出现
+  static const int repeated = 1 << 4;
+
+  ///是否允许彩色弹幕
+  static const int colorful = 1 << 5;
+
+  ///全部允许
+  static const int all = DanmuFilter.scroll |
+      DanmuFilter.top |
+      DanmuFilter.bottom |
+      DanmuFilter.advanced |
+      DanmuFilter.repeated |
+      DanmuFilter.colorful;
+
+  bool check(int flag) => this & flag == flag;
+
+  int add(int flag) => this | flag;
+
+  int remove(int flag) => (this | flag) ^ flag;
+
+  int change(int flag) => this ^ flag;
+
+  bool get isScroll => check(scroll);
+
+  bool get isTop => check(top);
+
+  bool get isBottom => check(bottom);
+
+  bool get isAdvanced => check(advanced);
+
+  bool get isRepeated => check(repeated);
+
+  bool get isColorful => check(colorful);
+
+  int get addScroll => add(scroll);
+
+  int get addTop => add(top);
+
+  int get addBottom => add(bottom);
+
+  int get addAdvanced => add(advanced);
+
+  int get addRepeated => add(repeated);
+
+  int get addColorful => add(colorful);
+
+  int get removeScroll => remove(scroll);
+
+  int get removeTop => remove(top);
+
+  int get removeBottom => remove(bottom);
+
+  int get removeAdvanced => remove(advanced);
+
+  int get removeRepeated => remove(repeated);
+
+  int get removeColorful => remove(colorful);
+
+  int get changeScroll => change(scroll);
+
+  int get changeTop => change(top);
+
+  int get changeBottom => change(bottom);
+
+  int get changeAdvanced => change(advanced);
+
+  int get changeRepeated => change(repeated);
+
+  int get changeColorful => change(colorful);
+}
