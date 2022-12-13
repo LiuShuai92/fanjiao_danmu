@@ -38,8 +38,6 @@ class _MyAppState extends State<MyApp> {
           '[饭角]': const NetworkImage(
               "https://www.fanjiao.co/h5/img/logo.12b2d5a6.png"),
         }),
-        startTime: Duration.zero,
-        endTime: duration,
         praiseImageProvider: const AssetImage("assets/images/icon_duck.png"),
         onTap: (DanmuItem danmuItem) {
           setState(() {
@@ -47,6 +45,8 @@ class _MyAppState extends State<MyApp> {
             selectedText = danmuItem.text;
           });
         });
+
+    danmuController.setDuration(duration);
 
     textController = TextEditingController()..text = '[饭角]';
   }
