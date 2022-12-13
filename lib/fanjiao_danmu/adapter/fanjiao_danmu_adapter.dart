@@ -10,10 +10,10 @@ import '../model/danmu_item_model.dart';
 import '../simulation/clamp_simulation.dart';
 import 'danmu_adapter.dart';
 
-class FanjiaoDanmuAdapter extends DanmuAdapter {
+class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
   final Size imageSize;
-  final List<Queue<DanmuItem>> scrollRows = [];
-  final List<DanmuItem?> centerRows = [];
+  final List<Queue<DanmuItem<T>>> scrollRows = [];
+  final List<DanmuItem<T>?> centerRows = [];
   final Map<String, ImageProvider> imageMap;
   final double lineHeight;
   int? maxLines;
@@ -36,7 +36,7 @@ class FanjiaoDanmuAdapter extends DanmuAdapter {
     var lines = rect.height ~/ lineHeight;
     this.maxLines = math.min(maxLines ?? lines, lines);
     for (int i = 0; i < this.maxLines!; i++) {
-      scrollRows.add(Queue<DanmuItem>());
+      scrollRows.add(Queue<DanmuItem<T>>());
       centerRows.add(null);
     }
   }
@@ -52,8 +52,8 @@ class FanjiaoDanmuAdapter extends DanmuAdapter {
   }
 
   @override
-  DanmuItem? getItem(DanmuModel model) {
-    DanmuItem? item;
+  DanmuItem<T>? getItem(T model) {
+    DanmuItem<T>? item;
     if (model.flag.isScroll) {
       item = _getScrollItem(model);
     } else if (model.flag.isTop) {
@@ -65,7 +65,7 @@ class FanjiaoDanmuAdapter extends DanmuAdapter {
   }
 
   @override
-  removeItem(DanmuItem item) {
+  removeItem(DanmuItem<T> item) {
     if (item.flag.isScroll) {
       for (var row in scrollRows) {
         if (row.remove(item)) {
@@ -85,11 +85,11 @@ class FanjiaoDanmuAdapter extends DanmuAdapter {
     imageMap.clear();
   }
 
-  DanmuItem? _getTopCenterItem(DanmuModel model) {
+  DanmuItem<T>? _getTopCenterItem(T model) {
     assert(maxLines != null, "需要先调用 initData()");
-    DanmuItem? item;
+    DanmuItem<T>? item;
     final SpanInfo textSpanInfo =
-        transformText(model.text, model.textStyle, imageMap: imageMap);
+    transformText(model.text, model.textStyle, imageMap: imageMap);
     Size size = spanSize(textSpanInfo) + const Offset(8, 4);
     for (int i = 0; i < centerRows.length; i++) {
       var centerRow = centerRows[i];
@@ -108,11 +108,11 @@ class FanjiaoDanmuAdapter extends DanmuAdapter {
     return item;
   }
 
-  DanmuItem? _getBottomCenterItem(DanmuModel model) {
+  DanmuItem<T>? _getBottomCenterItem(T model) {
     assert(maxLines != null, "需要先调用 initData()");
-    DanmuItem? item;
+    DanmuItem<T>? item;
     final SpanInfo textSpanInfo =
-        transformText(model.text, model.textStyle, imageMap: imageMap);
+    transformText(model.text, model.textStyle, imageMap: imageMap);
     Size size = spanSize(textSpanInfo) + const Offset(8, 4);
     for (int i = centerRows.length - 1; i >= 0; i--) {
       var centerRow = centerRows[i];
@@ -131,18 +131,18 @@ class FanjiaoDanmuAdapter extends DanmuAdapter {
     return item;
   }
 
-  DanmuItem? _getScrollItem(DanmuModel model) {
+  DanmuItem<T>? _getScrollItem(T model) {
     assert(maxLines != null, "需要先调用 initData()");
 
     ///第一次循环只判断前一半的行数或前三行
-    DanmuItem? item;
+    DanmuItem<T>? item;
     final SpanInfo textSpanInfo =
-        transformText(model.text, model.textStyle, imageMap: imageMap);
+    transformText(model.text, model.textStyle, imageMap: imageMap);
     Size size = spanSize(textSpanInfo) + const Offset(8, 4);
     for (int i = 0; i < math.min(scrollRows.length / 2, 3); i++) {
-      Queue<DanmuItem> row = scrollRows[i];
+      Queue<DanmuItem<T>> row = scrollRows[i];
       HorizontalScrollSimulation simulation =
-          HorizontalScrollSimulation(start: rect.width, end: -size.width);
+      HorizontalScrollSimulation(start: rect.width, end: -size.width);
       if (row.isEmpty) {
         simulation.paddingTop = getPaddingTop(i, size.height);
         item = DanmuItem(
@@ -159,8 +159,8 @@ class FanjiaoDanmuAdapter extends DanmuAdapter {
           rx -= iconExtra;
         }
         var lx = row.last.simulation
-                .offset(model.insertTime - row.last.startTime)
-                .dx +
+            .offset(model.insertTime - row.last.startTime)
+            .dx +
             row.last.size.width;
         if (lx < rx) {
           var lx = simulation.offset(row.last.endTime - model.startTime).dx -
@@ -186,9 +186,9 @@ class FanjiaoDanmuAdapter extends DanmuAdapter {
     ///如果第一次循环没有找到合适位置，就进行第二次循环
     if (item == null) {
       for (int i = 0; i < scrollRows.length; i++) {
-        Queue<DanmuItem> row = scrollRows[i];
+        Queue<DanmuItem<T>> row = scrollRows[i];
         HorizontalScrollSimulation simulation =
-            HorizontalScrollSimulation(start: rect.width, end: -size.width);
+        HorizontalScrollSimulation(start: rect.width, end: -size.width);
         if (row.isEmpty) {
           simulation.paddingTop = getPaddingTop(i, size.height);
           item = DanmuItem(
@@ -205,8 +205,8 @@ class FanjiaoDanmuAdapter extends DanmuAdapter {
             rx -= iconExtra;
           }
           var lx = row.last.simulation
-                  .offset(model.insertTime - row.last.startTime)
-                  .dx +
+              .offset(model.insertTime - row.last.startTime)
+              .dx +
               row.last.size.width;
           if (lx < rx) {
             var dx = simulation.offset(row.last.endTime - model.startTime).dx -
@@ -231,7 +231,7 @@ class FanjiaoDanmuAdapter extends DanmuAdapter {
     }
     if (item == null && model.isSelf) {
       HorizontalScrollSimulation simulation =
-          HorizontalScrollSimulation(start: rect.width, end: -size.width);
+      HorizontalScrollSimulation(start: rect.width, end: -size.width);
       item = DanmuItem(
           model: model,
           simulation: simulation,
