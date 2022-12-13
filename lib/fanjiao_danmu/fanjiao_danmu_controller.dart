@@ -20,8 +20,8 @@ class FanjiaoDanmuController
   final Map<ImageProvider, ImgInfo> _imagesPool = {};
   final List<DanmuItem> _tempList = <DanmuItem>[];
   final ImageProvider? praiseImageProvider;
-  final Duration startTime;
-  final Duration endTime;
+  Duration startTime = Duration.zero;
+  Duration? endTime;
   Queue<DanmuItem> danmuItems = Queue<DanmuItem>();
   DanmuStatus _status = DanmuStatus.stop;
   DanmuStatus _lastReportedStatus = DanmuStatus.dismissed;
@@ -57,15 +57,20 @@ class FanjiaoDanmuController
 
   FanjiaoDanmuController({
     required this.adapter,
-    required this.startTime,
-    required this.endTime,
     this.maxSize = 100,
     this.onTap,
     this.tooltip,
     this.praiseImageProvider,
     this.filter = DanmuFilter.all,
+  });
+
+  setDuration(Duration duration, {
+    Duration startTime = Duration.zero,
   }) {
-    init();
+    this.startTime = startTime;
+    endTime = startTime + duration;
+    _lastElapsedDuration = startTime;
+    _progress = startTime.inMicroseconds / Duration.microsecondsPerSecond;
   }
 
   clearDanmu() {
@@ -197,8 +202,8 @@ class FanjiaoDanmuController
     if (model.text.isEmpty) {
       return;
     }
-    if (model.startTime >
-        endTime.inMilliseconds / Duration.millisecondsPerSecond) {
+    if (endTime != null && model.startTime >
+        endTime!.inMilliseconds / Duration.millisecondsPerSecond) {
       return;
     }
     if (danmuItems.length > maxSize) {
@@ -251,9 +256,9 @@ class FanjiaoDanmuController
   ///秒
   void _internalSetValue(double progress) {
     var newProgress = progress * Duration.microsecondsPerSecond;
-    if (newProgress > endTime.inMicroseconds) {
+    if (endTime != null && newProgress > endTime!.inMicroseconds) {
       _progress =
-          endTime.inMicroseconds.toDouble() / Duration.microsecondsPerSecond;
+          endTime!.inMicroseconds.toDouble() / Duration.microsecondsPerSecond;
       _status = DanmuStatus.completed;
     } else if (newProgress < startTime.inMicroseconds) {
       _progress =
@@ -263,11 +268,6 @@ class FanjiaoDanmuController
       _progress = progress;
       _status = DanmuStatus.playing;
     }
-  }
-
-  init() {
-    _lastElapsedDuration = startTime;
-    _progress = startTime.inMicroseconds / Duration.microsecondsPerSecond;
   }
 
   pause() {
