@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import '../fanjiao_danmu_controller.dart';
 import '../simulation/danmu_simulation.dart';
 
-class DanmuItem {
-  final DanmuModel model;
+class DanmuItem<T extends DanmuModel> {
+  final T model;
   final int lineNum;
   final DanmuSimulation simulation;
 

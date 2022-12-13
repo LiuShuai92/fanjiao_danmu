@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../model/danmu_item_model.dart';
 
 ///用于计算弹幕插入位置
-abstract class DanmuAdapter {
+abstract class DanmuAdapter<T extends DanmuModel> {
   late Rect rect;
   final double preExtra = 10;
   double iconExtra = 30;
@@ -13,9 +13,9 @@ abstract class DanmuAdapter {
     this.rect = rect;
   }
 
-  DanmuItem? getItem(DanmuModel model);
+  DanmuItem<T>? getItem(T model);
 
-  removeItem(DanmuItem item);
+  removeItem(DanmuItem<T> item);
 
   clear();
 }

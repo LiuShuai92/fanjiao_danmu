@@ -11,11 +11,11 @@ import '../simulation/clamp_simulation.dart';
 import 'danmu_adapter.dart';
 
 class FanjiaoDanmuAdapter extends DanmuAdapter {
-  static const Size imageSize = Size(52, 20);
+  final Size imageSize;
   final List<Queue<DanmuItem>> scrollRows = [];
   final List<DanmuItem?> centerRows = [];
-  Map<String, ImageProvider>? imageMap;
-  double lineHeight;
+  final Map<String, ImageProvider> imageMap;
+  final double lineHeight;
   int? maxLines;
 
   double getPaddingTop(int lineIndex, double textHeight) =>
@@ -23,19 +23,19 @@ class FanjiaoDanmuAdapter extends DanmuAdapter {
 
   FanjiaoDanmuAdapter({
     this.lineHeight = 30,
-    this.maxLines,
-    this.imageMap,
+    this.imageSize = const Size(52, 20),
+    this.imageMap = const <String, ImageProvider>{},
   });
 
   @override
-  initData(Rect rect) {
+  initData(Rect rect, {int? maxLines}) {
     super.initData(rect);
     this.rect = rect;
     scrollRows.clear();
     centerRows.clear();
     var lines = rect.height ~/ lineHeight;
-    maxLines = math.min(maxLines ?? lines, lines);
-    for (int i = 0; i < maxLines!; i++) {
+    this.maxLines = math.min(maxLines ?? lines, lines);
+    for (int i = 0; i < this.maxLines!; i++) {
       scrollRows.add(Queue<DanmuItem>());
       centerRows.add(null);
     }
@@ -75,6 +75,14 @@ class FanjiaoDanmuAdapter extends DanmuAdapter {
     } else if (item.flag.isTop || item.flag.isBottom) {
       centerRows.replace(item, null);
     }
+  }
+
+  addImageMap(Map<String, ImageProvider> imageMap){
+    imageMap.addAll(imageMap);
+  }
+
+  clearImageMap(Map<String, ImageProvider> imageMap){
+    imageMap.clear();
   }
 
   DanmuItem? _getTopCenterItem(DanmuModel model) {
@@ -235,42 +243,42 @@ class FanjiaoDanmuAdapter extends DanmuAdapter {
     }
     return item;
   }
-}
 
-TextPainter textPainter = TextPainter(textDirection: TextDirection.ltr);
+  final TextPainter _textPainter = TextPainter(textDirection: TextDirection.ltr);
 
-Size spanSize(SpanInfo spanInfo) {
-  if (spanInfo.isTextSpan) {
-    textPainter.text = spanInfo.span;
-    textPainter.layout();
-    final double width = textPainter.width;
-    final double height = textPainter.height;
-    return Size(width, height);
-  } else {
-    return FanjiaoDanmuAdapter.imageSize;
+  Size spanSize(SpanInfo spanInfo) {
+    if (spanInfo.isTextSpan) {
+      _textPainter.text = spanInfo.span;
+      _textPainter.layout();
+      final double width = _textPainter.width;
+      final double height = _textPainter.height;
+      return Size(width, height);
+    } else {
+      return imageSize;
+    }
   }
-}
 
-SpanInfo transformText(String text, TextStyle textStyle,
-    {Map<String, ImageProvider>? imageMap}) {
-  if (imageMap != null && imageMap.containsKey(text)) {
+  SpanInfo transformText(String text, TextStyle textStyle,
+      {Map<String, ImageProvider>? imageMap}) {
+    if (imageMap != null && imageMap.containsKey(text)) {
+      return SpanInfo(
+        text,
+        iconAsset: imageMap[text],
+      );
+    }
     return SpanInfo(
       text,
-      iconAsset: imageMap[text],
+      span: TextSpan(text: text, style: textStyle),
+      textStrokeSpan: TextSpan(
+        text: text,
+        style: textStyle.copyWith(
+            foreground: Paint()
+              ..style = PaintingStyle.stroke
+              ..strokeWidth = 1
+              ..color = Colors.black),
+      ),
     );
   }
-  return SpanInfo(
-    text,
-    span: TextSpan(text: text, style: textStyle),
-    textStrokeSpan: TextSpan(
-      text: text,
-      style: textStyle.copyWith(
-          foreground: Paint()
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 1
-            ..color = Colors.black),
-    ),
-  );
 }
 
 extension ReplaceList<T> on List<T?> {

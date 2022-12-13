@@ -1,5 +1,5 @@
-import 'dart:ui' as ui;
 import 'dart:collection';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -7,32 +7,32 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'adapter/danmu_adapter.dart';
-import 'model/danmu_item_model.dart';
 import 'fanjiao_danmu_widget.dart';
 import 'listener_helpers.dart';
+import 'model/danmu_item_model.dart';
 
-class FanjiaoDanmuController
+class FanjiaoDanmuController<T extends DanmuModel>
     with
         FanjiaoLocalListenersMixin,
         FanjiaoLocalStatusListenersMixin,
         FanjiaoEagerListenerMixin {
-  final Function(DanmuItem)? onTap;
+  final Function(DanmuItem<T>)? onTap;
   final Map<ImageProvider, ImgInfo> _imagesPool = {};
-  final List<DanmuItem> _tempList = <DanmuItem>[];
+  final List<DanmuItem<T>> _tempList = <DanmuItem<T>>[];
   final ImageProvider? praiseImageProvider;
   Duration startTime = Duration.zero;
   Duration? endTime;
-  Queue<DanmuItem> danmuItems = Queue<DanmuItem>();
+  Queue<DanmuItem<T>> danmuItems = Queue<DanmuItem<T>>();
   DanmuStatus _status = DanmuStatus.stop;
   DanmuStatus _lastReportedStatus = DanmuStatus.dismissed;
   bool willChange = false;
-  DanmuAdapter adapter;
+  DanmuAdapter<T> adapter;
   int maxSize;
   int filter;
 
   ///秒
   late double _progress;
-  DanmuItem? selected;
+  DanmuItem<T>? selected;
   Ticker? _ticker;
   Widget? tooltip;
   ImgInfo? _iconPraise;
@@ -198,7 +198,7 @@ class FanjiaoDanmuController
     }
   }
 
-  _addEntry(DanmuModel model) {
+  _addEntry(T model) {
     if (model.text.isEmpty) {
       return;
     }
@@ -227,7 +227,7 @@ class FanjiaoDanmuController
     }
   }
 
-  addDanmu(DanmuModel model) {
+  addDanmu(T model) {
     assert(_ticker != null);
     if (model.text.isEmpty) {
       return;
@@ -239,7 +239,7 @@ class FanjiaoDanmuController
     }
   }
 
-  addAllDanmu(Iterable<DanmuModel> models) {
+  addAllDanmu(Iterable<T> models) {
     assert(_ticker != null);
     if (danmuItems.length > maxSize) {
       return;
