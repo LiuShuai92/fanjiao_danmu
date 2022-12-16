@@ -12,6 +12,7 @@ import 'danmu_adapter.dart';
 
 class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
   final Size imageSize;
+  final EdgeInsets padding = const EdgeInsets.symmetric(vertical: 2, horizontal: 8);
   final List<Queue<DanmuItem<T>>> scrollRows = [];
   final List<DanmuItem<T>?> centerRows = [];
   final Map<String, ImageProvider> imageMap;
@@ -30,7 +31,6 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
   @override
   initData(Rect rect, {int? maxLines}) {
     super.initData(rect);
-    this.rect = rect;
     scrollRows.clear();
     centerRows.clear();
     var lines = rect.height ~/ lineHeight;
@@ -77,11 +77,11 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
     }
   }
 
-  addImageMap(Map<String, ImageProvider> imageMap){
+  addImageMap(Map<String, ImageProvider> imageMap) {
     imageMap.addAll(imageMap);
   }
 
-  clearImageMap(Map<String, ImageProvider> imageMap){
+  clearImageMap(Map<String, ImageProvider> imageMap) {
     imageMap.clear();
   }
 
@@ -89,8 +89,8 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
     assert(maxLines != null, "需要先调用 initData()");
     DanmuItem<T>? item;
     final SpanInfo textSpanInfo =
-    transformText(model.text, model.textStyle, imageMap: imageMap);
-    Size size = spanSize(textSpanInfo) + const Offset(8, 4);
+        transformText(model.text, model.textStyle, imageMap: imageMap);
+    Size size = spanSize(textSpanInfo, padding);
     for (int i = 0; i < centerRows.length; i++) {
       var centerRow = centerRows[i];
       if (centerRow == null) {
@@ -98,6 +98,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
         Offset offset = Offset(rect.center.dx - size.width / 2, paddingTop);
         item = DanmuItem(
             model: model,
+            padding: padding,
             simulation: ClampSimulation(clampOffset: offset),
             spanInfo: textSpanInfo,
             size: size);
@@ -112,8 +113,8 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
     assert(maxLines != null, "需要先调用 initData()");
     DanmuItem<T>? item;
     final SpanInfo textSpanInfo =
-    transformText(model.text, model.textStyle, imageMap: imageMap);
-    Size size = spanSize(textSpanInfo) + const Offset(8, 4);
+        transformText(model.text, model.textStyle, imageMap: imageMap);
+    Size size = spanSize(textSpanInfo, padding);
     for (int i = centerRows.length - 1; i >= 0; i--) {
       var centerRow = centerRows[i];
       if (centerRow == null) {
@@ -121,6 +122,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
         Offset offset = Offset(rect.center.dx - size.width / 2, paddingTop);
         item = DanmuItem(
             model: model,
+            padding: padding,
             simulation: ClampSimulation(clampOffset: offset),
             spanInfo: textSpanInfo,
             size: size);
@@ -137,16 +139,17 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
     ///第一次循环只判断前一半的行数或前三行
     DanmuItem<T>? item;
     final SpanInfo textSpanInfo =
-    transformText(model.text, model.textStyle, imageMap: imageMap);
-    Size size = spanSize(textSpanInfo) + const Offset(8, 4);
+        transformText(model.text, model.textStyle, imageMap: imageMap);
+    Size size = spanSize(textSpanInfo, padding);
     for (int i = 0; i < math.min(scrollRows.length / 2, 3); i++) {
       Queue<DanmuItem<T>> row = scrollRows[i];
       HorizontalScrollSimulation simulation =
-      HorizontalScrollSimulation(start: rect.width, end: -size.width);
-      if (row.isEmpty) {
+          HorizontalScrollSimulation(start: rect.width, end: -size.width);
+      if (row.isEmpty || row.last.isSelected) {
         simulation.paddingTop = getPaddingTop(i, size.height);
         item = DanmuItem(
             model: model,
+            padding: padding,
             simulation: simulation,
             spanInfo: textSpanInfo,
             size: size);
@@ -158,13 +161,12 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
         if (model.isHighPraise) {
           rx -= iconExtra;
         }
-        var lx = row.last.simulation
-            .offset(model.insertTime - row.last.startTime)
-            .dx +
-            row.last.size.width;
+        var last = row.lastWhere((element) => !element.isSelected);
+        var lx = last.simulation.offset(model.insertTime - last.startTime).dx +
+            last.size.width;
         if (lx < rx) {
-          var lx = simulation.offset(row.last.endTime - model.startTime).dx -
-              preExtra;
+          var lx =
+              simulation.offset(last.endTime - model.startTime).dx - preExtra;
           if (model.isHighPraise) {
             lx -= iconExtra;
           }
@@ -173,6 +175,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
             simulation.paddingTop = getPaddingTop(i, size.height);
             item = DanmuItem(
                 model: model,
+                padding: padding,
                 simulation: simulation,
                 spanInfo: textSpanInfo,
                 size: size);
@@ -188,11 +191,12 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
       for (int i = 0; i < scrollRows.length; i++) {
         Queue<DanmuItem<T>> row = scrollRows[i];
         HorizontalScrollSimulation simulation =
-        HorizontalScrollSimulation(start: rect.width, end: -size.width);
-        if (row.isEmpty) {
+            HorizontalScrollSimulation(start: rect.width, end: -size.width);
+        if (row.isEmpty || row.last.isSelected) {
           simulation.paddingTop = getPaddingTop(i, size.height);
           item = DanmuItem(
               model: model,
+              padding: padding,
               simulation: simulation,
               spanInfo: textSpanInfo,
               size: size);
@@ -204,13 +208,13 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
           if (model.isHighPraise) {
             rx -= iconExtra;
           }
-          var lx = row.last.simulation
-              .offset(model.insertTime - row.last.startTime)
-              .dx +
-              row.last.size.width;
+          var last = row.lastWhere((element) => !element.isSelected);
+          var lx =
+              last.simulation.offset(model.insertTime - last.startTime).dx +
+                  last.size.width;
           if (lx < rx) {
-            var dx = simulation.offset(row.last.endTime - model.startTime).dx -
-                preExtra;
+            var dx =
+                simulation.offset(last.endTime - model.startTime).dx - preExtra;
             if (model.isHighPraise) {
               dx -= iconExtra;
             }
@@ -219,6 +223,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
               simulation.paddingTop = getPaddingTop(i, size.height);
               item = DanmuItem(
                   model: model,
+                  padding: padding,
                   simulation: simulation,
                   spanInfo: textSpanInfo,
                   size: size);
@@ -231,9 +236,10 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
     }
     if (item == null && model.isSelf) {
       HorizontalScrollSimulation simulation =
-      HorizontalScrollSimulation(start: rect.width, end: -size.width);
+          HorizontalScrollSimulation(start: rect.width, end: -size.width);
       item = DanmuItem(
           model: model,
+          padding: padding,
           simulation: simulation,
           spanInfo: textSpanInfo,
           size: size);
@@ -244,17 +250,18 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
     return item;
   }
 
-  final TextPainter _textPainter = TextPainter(textDirection: TextDirection.ltr);
+  final TextPainter _textPainter =
+      TextPainter(textDirection: TextDirection.ltr);
 
-  Size spanSize(SpanInfo spanInfo) {
+  Size spanSize(SpanInfo spanInfo, EdgeInsets padding) {
     if (spanInfo.isTextSpan) {
       _textPainter.text = spanInfo.span;
       _textPainter.layout();
-      final double width = _textPainter.width;
-      final double height = _textPainter.height;
+      final double width = _textPainter.width + padding.horizontal;
+      final double height = _textPainter.height + padding.vertical;
       return Size(width, height);
     } else {
-      return imageSize;
+      return imageSize + Offset(padding.horizontal, padding.vertical);
     }
   }
 

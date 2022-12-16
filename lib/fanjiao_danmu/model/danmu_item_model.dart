@@ -9,6 +9,7 @@ class DanmuItem<T extends DanmuModel> {
   final T model;
   final int lineNum;
   final DanmuSimulation simulation;
+  final EdgeInsets padding;
 
   ///[DanmuFilter] 可能会发生改变 比如[DanmuFilter.repeated]是否是重复内容
   int flag;
@@ -17,14 +18,24 @@ class DanmuItem<T extends DanmuModel> {
   Offset? position;
   ui.Image? icon;
 
+  RRect get rRect => RRect.fromRectAndRadius(rect, const Radius.circular(12));
+
   Rect get rect =>
-      position == null ? Rect.zero : position! + const Offset(-4, -2) & size;
+      position == null ? Rect.zero : position! - padding.topLeft & size;
+
+  Rect get imageRect => position == null
+      ? Rect.zero
+      : position! & size + padding.bottomRight + padding.bottomRight;
 
   double get insertTime => model.insertTime;
 
   double get startTime => model.startTime;
 
   double get endTime => startTime + simulation.duration;
+
+  Offset get startPosition => simulation.offset(0);
+
+  Offset get endPosition => simulation.offset(simulation.duration);
 
   int get id => model.id;
 
@@ -47,6 +58,7 @@ class DanmuItem<T extends DanmuModel> {
     required this.simulation,
     required this.spanInfo,
     required this.size,
+    this.padding = const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
     this.isSelected = false,
     this.lineNum = 0,
   }) : flag = model.flag;

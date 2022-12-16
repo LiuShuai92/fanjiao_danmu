@@ -100,15 +100,15 @@ class _FanjiaoDanmuPainter extends CustomPainter {
   double? width;
   DanmuStatus state = DanmuStatus.stop;
 
-  _FanjiaoDanmuPainter(
-    this.context, {
+  _FanjiaoDanmuPainter(this.context, {
     required this.controller,
     this.touchPosition,
     this.backgroundRadius = 8,
     this.iconProvider,
     this.iconWidth = 14,
     this.iconHeight = 14,
-  })  : _textPainter = TextPainter(textDirection: TextDirection.ltr),
+  })
+      : _textPainter = TextPainter(textDirection: TextDirection.ltr),
         _painter = Paint();
 
   @override
@@ -118,29 +118,40 @@ class _FanjiaoDanmuPainter extends CustomPainter {
     }
     height ??= size.height;
     width ??= size.width;
+    DanmuItem? selected;
     for (var entry in controller.danmuItems) {
       if (controller.filter.check(entry.flag)) {
         if (entry.position == null) {
           continue;
         }
-        if (entry.isSelf) {
-          drawBorder(entry, canvas);
+        if (entry.isSelected) {
+          selected = entry;
+          continue;
         }
-        if (entry.spanInfo.isTextSpan) {
-          drawText(entry, canvas);
-        } else if (entry.spanInfo.iconAsset != null) {
-          var imageInfo =
-              controller.getImage(context, entry.spanInfo.iconAsset!);
-          if (imageInfo != null &&
-              imageInfo.image != null &&
-              imageInfo.rect != null) {
-            drawImage(imageInfo.image, canvas, imageInfo.rect!, entry.rect);
-          }
-        }
-        if (entry.isHighPraise) {
-          drawPraise(entry, canvas);
-        }
+        drawItem(entry, canvas);
       }
+    }
+    if (selected != null) {
+      drawItem(selected, canvas);
+    }
+  }
+
+  void drawItem(DanmuItem<DanmuModel> entry, ui.Canvas canvas) {
+    if (entry.isSelf) {
+      drawBorder(entry, canvas);
+    }
+    if (entry.spanInfo.isTextSpan) {
+      drawText(entry, canvas);
+    } else if (entry.spanInfo.iconAsset != null) {
+      var imageInfo = controller.getImage(context, entry.spanInfo.iconAsset!);
+      if (imageInfo != null &&
+          imageInfo.image != null &&
+          imageInfo.rect != null) {
+        drawImage(imageInfo.image, canvas, imageInfo.rect!, entry.imageRect);
+      }
+    }
+    if (entry.isHighPraise) {
+      drawPraise(entry, canvas);
     }
   }
 
@@ -161,8 +172,8 @@ class _FanjiaoDanmuPainter extends CustomPainter {
   }
 
   ///绘制图片
-  void drawImage(
-      ui.Image? iconPraise, ui.Canvas canvas, Rect srcRect, Rect dstRect) {
+  void drawImage(ui.Image? iconPraise, ui.Canvas canvas, Rect srcRect,
+      Rect dstRect) {
     _painter
       ..color = const Color.fromARGB(200, 0, 0, 0)
       ..style = PaintingStyle.fill;
@@ -186,14 +197,14 @@ class _FanjiaoDanmuPainter extends CustomPainter {
   ///绘制单个弹幕边框
   void drawBorder(DanmuItem entry, ui.Canvas canvas) {
     _painter
-      ..color = const Color.fromARGB(25, 0, 0, 0)
+      ..color = const Color(0xCCFF9C6B)
       ..style = PaintingStyle.fill;
-    canvas.drawRect(entry.rect, _painter);
+    canvas.drawRRect(entry.rRect, _painter);
     _painter
-      ..strokeWidth = 0.5
-      ..color = const Color.fromARGB(200, 255, 255, 255)
+      ..strokeWidth = 1
+      ..color = Colors.white
       ..style = PaintingStyle.stroke;
-    canvas.drawRect(entry.rect, _painter);
+    canvas.drawRRect(entry.rRect, _painter);
   }
 
   ///shouldRepaint则决定当条件变化时是否需要重画。
@@ -205,8 +216,8 @@ class _FanjiaoDanmuPainter extends CustomPainter {
     return shouldRepaint;
   }
 
-  void drawDashedLine(
-      Canvas canvas, double left, double right, double y, Paint paint) {
+  void drawDashedLine(Canvas canvas, double left, double right, double y,
+      Paint paint) {
     const double dashWidth = 4;
     const double dashSpace = 4;
     const space = (dashSpace + dashWidth);

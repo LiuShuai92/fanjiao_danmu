@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
@@ -16,10 +17,14 @@ class FanjiaoDanmuController<T extends DanmuModel>
         FanjiaoLocalListenersMixin,
         FanjiaoLocalStatusListenersMixin,
         FanjiaoEagerListenerMixin {
-  final Function(DanmuItem<T>)? onTap;
+  final bool Function(DanmuItem<T>, Offset)? onTap;
   final Map<ImageProvider, ImgInfo> _imagesPool = {};
   final List<DanmuItem<T>> _tempList = <DanmuItem<T>>[];
   final ImageProvider? praiseImageProvider;
+
+  ///字幕露出多少就可以点击
+  final double _shown = 50;
+  final double popMenuPadding;
   Duration startTime = Duration.zero;
   Duration? endTime;
   Queue<DanmuItem<T>> danmuItems = Queue<DanmuItem<T>>();
@@ -29,6 +34,8 @@ class FanjiaoDanmuController<T extends DanmuModel>
   DanmuAdapter<T> adapter;
   int maxSize;
   int filter;
+  Size menuSize = const Size(96, 35);
+  bool isShowPopupMenu = false;
 
   ///秒
   late double _progress;
@@ -37,6 +44,17 @@ class FanjiaoDanmuController<T extends DanmuModel>
   Widget? tooltip;
   ImgInfo? _iconPraise;
   Duration? _lastElapsedDuration;
+  Rect? _menuRect;
+
+  Rect get menuRect => _menuRect ?? Rect.zero;
+
+  double? _menupeak;
+
+  double get menupeak => _menupeak ?? 0;
+
+  bool? _menuIsAbove;
+
+  bool get menuIsAbove => _menuIsAbove ?? false;
 
   double get progress => _progress;
 
@@ -60,11 +78,13 @@ class FanjiaoDanmuController<T extends DanmuModel>
     this.maxSize = 100,
     this.onTap,
     this.tooltip,
+    this.popMenuPadding = 50,
     this.praiseImageProvider,
     this.filter = DanmuFilter.all,
   });
 
-  setDuration(Duration duration, {
+  setDuration(
+    Duration duration, {
     Duration startTime = Duration.zero,
   }) {
     this.startTime = startTime;
@@ -140,7 +160,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
         Offset? position;
         if (entry.isSelected) {
           position = entry.simulation.isDone(entry.position!, 0);
-        }else {
+        } else {
           position = entry.simulation.isDone(entry.position!, dTime);
         }
         if (position == null) {
@@ -165,22 +185,28 @@ class FanjiaoDanmuController<T extends DanmuModel>
   clearSelection() {
     if (selected != null) {
       selected!.isSelected = false;
+      isShowPopupMenu = false;
       selected = null;
     }
   }
 
   tapPosition(Offset position) {
     clearSelection();
+    DanmuItem<T>? selectedTemp;
     for (var entry in danmuItems) {
       if (entry.rect.contains(position)) {
-        entry.isSelected = true;
-        selected = entry;
+        selectedTemp = entry;
         break;
       }
     }
-    if (selected != null) {
-      onTap?.call(selected!);
+    if (selectedTemp != null) {
+      if (onTap?.call(selectedTemp, position) ?? false) {
+        selectedTemp.isSelected = true;
+        isShowPopupMenu = true;
+        selected = selectedTemp;
+      }
     }
+    notifyListeners();
   }
 
   markRepeated() {
@@ -202,8 +228,9 @@ class FanjiaoDanmuController<T extends DanmuModel>
     if (model.text.isEmpty) {
       return;
     }
-    if (endTime != null && model.startTime >
-        endTime!.inMilliseconds / Duration.millisecondsPerSecond) {
+    if (endTime != null &&
+        model.startTime >
+            endTime!.inMilliseconds / Duration.millisecondsPerSecond) {
       return;
     }
     if (danmuItems.length > maxSize) {
@@ -305,6 +332,39 @@ class FanjiaoDanmuController<T extends DanmuModel>
     }
     notifyListeners();
   }
+
+  bool showPopupMenu(DanmuItem danmuItem, Offset position) {
+    double x, y;
+    if (danmuItem.rect.left > adapter.rect.right - _shown ||
+        danmuItem.rect.right < adapter.rect.left + _shown) {
+      return false;
+    }
+    x = (position.dx - menuSize.width / 2)
+        .clamp(0, adapter.rect.right - menuSize.width);
+    print(
+        'LiuShuai: x = $x, adapter.rect.right = ${adapter.rect.right}, menuSize.width = ${menuSize.width}');
+    _menuIsAbove =
+        danmuItem.rect.bottom > adapter.rect.bottom - menuSize.height;
+    if (menuIsAbove) {
+      y = danmuItem.rect.top - menuSize.height;
+    } else {
+      y = danmuItem.rect.bottom;
+    }
+    Offset offset = Offset(x, y);
+    _menuRect = offset & menuSize;
+    _menupeak =
+        menuRect.center.dx.clamp(danmuItem.rect.left, danmuItem.rect.right) -
+            menuRect.left;
+    /* double bias = ((danmuItem.position! - danmuItem.endPosition).dx - _shown) /
+        ((danmuItem.startPosition - danmuItem.endPosition).dx - _shown * 2);
+    print('LiuShuai: bias = $bias');*/
+    print('LiuShuai: peak = $_menupeak, rect = $_menuRect');
+    return true;
+  }
+
+  /*hidePopupMenu(DanmuItem danmuItem) {
+    Positioned _popupMenu = Positioned(child: child);
+  }*/
 
   _checkStatusChanged() {
     final DanmuStatus newStatus = state;

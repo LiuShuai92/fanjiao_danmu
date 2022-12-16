@@ -39,11 +39,16 @@ class _MyAppState extends State<MyApp> {
               "https://www.fanjiao.co/h5/img/logo.12b2d5a6.png"),
         }),
         praiseImageProvider: const AssetImage("assets/images/icon_duck.png"),
-        onTap: (DanmuItem danmuItem) {
-          setState(() {
-            print('LiuShuai: onTap selectedText = ${danmuItem.text}');
-            selectedText = danmuItem.text;
-          });
+        onTap: (DanmuItem danmuItem, Offset position) {
+          var isEnable = danmuController.showPopupMenu(danmuItem, position);
+          print('LiuShuai: onTap isEnable = $isEnable');
+          if(isEnable){
+            setState(() {
+              print('LiuShuai: onTap selectedText = ${danmuItem.text}, rect = ${danmuItem.rect}');
+              selectedText = danmuItem.text;
+            });
+          }
+          return isEnable;
         });
 
     danmuController.setDuration(duration);
