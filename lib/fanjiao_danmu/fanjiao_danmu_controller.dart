@@ -377,7 +377,7 @@ mixin DanmuTooltipMixin{
 
   bool get menuIsAbove => _menuIsAbove ?? false;
 
-  Size menuSize = const Size(96, 35);
+  Size get menuSize => const Size(96, 35);
 
   Widget get tooltipContent;
 
