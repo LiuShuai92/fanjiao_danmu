@@ -100,15 +100,15 @@ class _FanjiaoDanmuPainter extends CustomPainter {
   double? width;
   DanmuStatus state = DanmuStatus.stop;
 
-  _FanjiaoDanmuPainter(this.context, {
+  _FanjiaoDanmuPainter(
+    this.context, {
     required this.controller,
     this.touchPosition,
     this.backgroundRadius = 8,
     this.iconProvider,
     this.iconWidth = 14,
     this.iconHeight = 14,
-  })
-      : _textPainter = TextPainter(textDirection: TextDirection.ltr),
+  })  : _textPainter = TextPainter(textDirection: TextDirection.ltr),
         _painter = Paint();
 
   @override
@@ -172,8 +172,8 @@ class _FanjiaoDanmuPainter extends CustomPainter {
   }
 
   ///绘制图片
-  void drawImage(ui.Image? iconPraise, ui.Canvas canvas, Rect srcRect,
-      Rect dstRect) {
+  void drawImage(
+      ui.Image? iconPraise, ui.Canvas canvas, Rect srcRect, Rect dstRect) {
     _painter
       ..color = const Color.fromARGB(200, 0, 0, 0)
       ..style = PaintingStyle.fill;
@@ -196,15 +196,9 @@ class _FanjiaoDanmuPainter extends CustomPainter {
 
   ///绘制单个弹幕边框
   void drawBorder(DanmuItem entry, ui.Canvas canvas) {
-    _painter
-      ..color = const Color(0xCCFF9C6B)
-      ..style = PaintingStyle.fill;
-    canvas.drawRRect(entry.rRect, _painter);
-    _painter
-      ..strokeWidth = 1
-      ..color = Colors.white
-      ..style = PaintingStyle.stroke;
-    canvas.drawRRect(entry.rRect, _painter);
+    var boxPainter = entry.mineDecoration.createBoxPainter();
+    boxPainter.paint(
+        canvas, entry.position! - entry.padding.topLeft, entry.configuration);
   }
 
   ///shouldRepaint则决定当条件变化时是否需要重画。
@@ -216,8 +210,8 @@ class _FanjiaoDanmuPainter extends CustomPainter {
     return shouldRepaint;
   }
 
-  void drawDashedLine(Canvas canvas, double left, double right, double y,
-      Paint paint) {
+  void drawDashedLine(
+      Canvas canvas, double left, double right, double y, Paint paint) {
     const double dashWidth = 4;
     const double dashSpace = 4;
     const space = (dashSpace + dashWidth);

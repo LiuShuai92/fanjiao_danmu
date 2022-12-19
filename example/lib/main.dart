@@ -74,9 +74,12 @@ class _MyAppState extends State<MyApp> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              FanjiaoDanmuWidget(
-                size: const Size(375, 300),
-                danmuController: danmuController,
+              Container(
+                color: Colors.greenAccent,
+                child: FanjiaoDanmuWidget(
+                  size: const Size(375, 300),
+                  danmuController: danmuController,
+                ),
               ),
               danmuButton,
               SizedBox(

@@ -10,6 +10,7 @@ class DanmuItem<T extends DanmuModel> {
   final int lineNum;
   final DanmuSimulation simulation;
   final EdgeInsets padding;
+  final ImageConfiguration configuration;
 
   ///[DanmuFilter] 可能会发生改变 比如[DanmuFilter.repeated]是否是重复内容
   int flag;
@@ -17,8 +18,6 @@ class DanmuItem<T extends DanmuModel> {
   double? dTime;
   Offset? position;
   ui.Image? icon;
-
-  RRect get rRect => RRect.fromRectAndRadius(rect, const Radius.circular(12));
 
   Rect get rect =>
       position == null ? Rect.zero : position! - padding.topLeft & size;
@@ -47,6 +46,8 @@ class DanmuItem<T extends DanmuModel> {
 
   bool get isSelf => model.isSelf;
 
+  BoxDecoration get mineDecoration => model.mineDecoration;
+
   Size size;
 
   SpanInfo spanInfo;
@@ -61,7 +62,8 @@ class DanmuItem<T extends DanmuModel> {
     this.padding = const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
     this.isSelected = false,
     this.lineNum = 0,
-  }) : flag = model.flag;
+  })  : flag = model.flag,
+        configuration = ImageConfiguration(size: size);
 }
 
 /*
@@ -102,6 +104,9 @@ class DanmuModel {
   final InlineSpan? span;
   final String? package;
 
+  ///用于"我的"弹幕
+  final BoxDecoration mineDecoration;
+
   DanmuModel({
     required this.id,
     required this.text,
@@ -119,6 +124,12 @@ class DanmuModel {
       fontSize: 18,
       fontWeight: FontWeight.w500,
       decoration: TextDecoration.none,
+    ),
+    this.mineDecoration = const BoxDecoration(
+      color: Color(0xCCFF9C6B),
+      borderRadius: BorderRadius.all(Radius.circular(12)),
+      border: Border.fromBorderSide(
+          BorderSide(color: Colors.white, width: 1, style: BorderStyle.solid)),
     ),
   })  : assert(textStyle != null),
         insertTime = insertTime ?? startTime;
