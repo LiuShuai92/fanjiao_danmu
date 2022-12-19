@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'dart:ui' as ui;
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
         FanjiaoLocalListenersMixin,
         FanjiaoLocalStatusListenersMixin,
         FanjiaoEagerListenerMixin {
+  /// return true 选中并暂停这条弹幕
   final bool Function(DanmuItem<T>, Offset)? onTap;
   final Map<ImageProvider, ImgInfo> _imagesPool = {};
   final List<DanmuItem<T>> _tempList = <DanmuItem<T>>[];
@@ -34,8 +36,6 @@ class FanjiaoDanmuController<T extends DanmuModel>
   DanmuAdapter<T> adapter;
   int maxSize;
   int filter;
-  Size menuSize = const Size(96, 35);
-  bool isShowPopupMenu = false;
 
   ///秒
   late double _progress;
@@ -44,23 +44,14 @@ class FanjiaoDanmuController<T extends DanmuModel>
   Widget? tooltip;
   ImgInfo? _iconPraise;
   Duration? _lastElapsedDuration;
-  Rect? _menuRect;
-
-  Rect get menuRect => _menuRect ?? Rect.zero;
-
-  double? _menupeak;
-
-  double get menupeak => _menupeak ?? 0;
-
-  bool? _menuIsAbove;
-
-  bool get menuIsAbove => _menuIsAbove ?? false;
 
   double get progress => _progress;
 
   DanmuStatus get state => _status;
 
   Duration? get lastElapsedDuration => _lastElapsedDuration;
+
+  bool get isSelected => selected != null;
 
   ///秒
   set progress(double progress) {
@@ -83,8 +74,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
     this.filter = DanmuFilter.all,
   });
 
-  setDuration(
-    Duration duration, {
+  setDuration(Duration duration, {
     Duration startTime = Duration.zero,
   }) {
     this.startTime = startTime;
@@ -185,7 +175,6 @@ class FanjiaoDanmuController<T extends DanmuModel>
   clearSelection() {
     if (selected != null) {
       selected!.isSelected = false;
-      isShowPopupMenu = false;
       selected = null;
     }
   }
@@ -202,8 +191,9 @@ class FanjiaoDanmuController<T extends DanmuModel>
     if (selectedTemp != null) {
       if (onTap?.call(selectedTemp, position) ?? false) {
         selectedTemp.isSelected = true;
-        isShowPopupMenu = true;
         selected = selectedTemp;
+      } else {
+        selected = null;
       }
     }
     notifyListeners();
@@ -214,7 +204,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
     for (var entry in danmuItems) {
       if (temp.contains(entry.text)) {
         ///不去重 高级弹幕 自己发的弹幕 高点赞数的弹幕
-        if (!entry.flag.isAdvanced && !entry.isSelf && !entry.isHighPraise) {
+        if (!entry.flag.isAdvanced && !entry.isMine && !entry.isHighPraise) {
           entry.flag = entry.flag.addRepeated;
         }
       } else {
@@ -333,35 +323,6 @@ class FanjiaoDanmuController<T extends DanmuModel>
     notifyListeners();
   }
 
-  bool showPopupMenu(DanmuItem danmuItem, Offset position) {
-    double x, y;
-    if (danmuItem.rect.left > adapter.rect.right - _shown ||
-        danmuItem.rect.right < adapter.rect.left + _shown) {
-      return false;
-    }
-    x = (position.dx - menuSize.width / 2)
-        .clamp(0, adapter.rect.right - menuSize.width);
-    print(
-        'LiuShuai: x = $x, adapter.rect.right = ${adapter.rect.right}, menuSize.width = ${menuSize.width}');
-    _menuIsAbove =
-        danmuItem.rect.bottom > adapter.rect.bottom - menuSize.height;
-    if (menuIsAbove) {
-      y = danmuItem.rect.top - menuSize.height;
-    } else {
-      y = danmuItem.rect.bottom;
-    }
-    Offset offset = Offset(x, y);
-    _menuRect = offset & menuSize;
-    _menupeak =
-        menuRect.center.dx.clamp(danmuItem.rect.left, danmuItem.rect.right) -
-            menuRect.left;
-    /* double bias = ((danmuItem.position! - danmuItem.endPosition).dx - _shown) /
-        ((danmuItem.startPosition - danmuItem.endPosition).dx - _shown * 2);
-    print('LiuShuai: bias = $bias');*/
-    print('LiuShuai: peak = $_menupeak, rect = $_menuRect');
-    return true;
-  }
-
   /*hidePopupMenu(DanmuItem danmuItem) {
     Positioned _popupMenu = Positioned(child: child);
   }*/
@@ -399,6 +360,104 @@ class FanjiaoDanmuController<T extends DanmuModel>
     clearStatusListeners();
     clearListeners();
     super.dispose();
+  }
+}
+
+mixin DanmuTooltipMixin{
+
+  Rect? _menuRect;
+
+  Rect get menuRect => _menuRect ?? Rect.zero;
+
+  double? _menupeak;
+
+  double get menupeak => _menupeak ?? 0;
+
+  bool? _menuIsAbove;
+
+  bool get menuIsAbove => _menuIsAbove ?? false;
+
+  Size menuSize = const Size(96, 35);
+
+  Widget get tooltipContent;
+
+  bool isSelect(DanmuItem danmuItem, Offset position, Rect rect) {
+    double x, y;
+    if (danmuItem.rect.left >
+        rect.right - danmuItem.size.height ||
+        danmuItem.rect.right <
+            rect.left + danmuItem.size.height) {
+      return false;
+    }
+    x = (position.dx - menuSize.width / 2)
+        .clamp(0, rect.right - menuSize.width);
+    _menuIsAbove = danmuItem.rect.bottom >
+        rect.bottom - menuSize.height;
+    if (menuIsAbove) {
+      y = danmuItem.rect.top - menuSize.height;
+    } else {
+      y = danmuItem.rect.bottom;
+    }
+    Offset offset = Offset(x, y);
+    _menuRect = offset & menuSize;
+    _menupeak = position.dx.clamp(
+        math.max(danmuItem.rect.left, rect.left) +
+            danmuItem.size.height / 2,
+        math.min(danmuItem.rect.right, rect.right) -
+            danmuItem.size.height / 2) -
+        menuRect.left;
+    return true;
+  }
+
+  Positioned tooltip() {
+    Positioned widget;
+    List<Widget>? children;
+    if (menuIsAbove) {
+      children = [
+        Container(
+          width: menuSize.width,
+          height: menuSize.height - 5,
+          decoration: const BoxDecoration(image: DecorationImage(
+              image: AssetImage('assets/images/danmu_report.png'))),
+          child: tooltipContent,
+        ),
+        Padding(
+          padding: EdgeInsets.only(left: menupeak - 5),
+          child: Image.asset(
+            'assets/images/danmu_report_arrow_down.png',
+            width: 11,
+            height: 5,
+          ),
+        ),
+      ];
+    } else {
+      children = [
+        Padding(
+          padding: EdgeInsets.only(left: menupeak - 5),
+          child: Image.asset(
+            'assets/images/danmu_report_arrow_up.png',
+            width: 11,
+            height: 5,
+          ),
+        ),
+        Container(
+          width: menuSize.width,
+          height: menuSize.height - 5,
+          decoration: const BoxDecoration(image: DecorationImage(
+              image: AssetImage('assets/images/danmu_report.png'))),
+          child: tooltipContent,
+        ),
+      ];
+    }
+    widget = Positioned(
+      left: menuRect.left,
+      top: menuRect.top,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: children,
+      ),
+    );
+    return widget;
   }
 }
 
@@ -444,11 +503,11 @@ extension DanmuFilter on int {
 
   ///全部允许
   static const int all = DanmuFilter.scroll |
-      DanmuFilter.top |
-      DanmuFilter.bottom |
-      DanmuFilter.advanced |
-      DanmuFilter.repeated |
-      DanmuFilter.colorful;
+  DanmuFilter.top |
+  DanmuFilter.bottom |
+  DanmuFilter.advanced |
+  DanmuFilter.repeated |
+  DanmuFilter.colorful;
 
   bool check(int flag) => this & flag == flag;
 

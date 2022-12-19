@@ -11,13 +11,13 @@ class FanjiaoDanmuWidget extends StatefulWidget {
   final FanjiaoDanmuController danmuController;
   final Size size;
 
-  Widget? child;
+  Positioned Function()? tooltip;
 
   FanjiaoDanmuWidget({
     Key? key,
     required this.size,
     required this.danmuController,
-    this.child,
+    this.tooltip,
   })  : assert(danmuController != null),
         super(key: key);
 
@@ -45,6 +45,26 @@ class _FanjiaoDanmuWidgetState extends State<FanjiaoDanmuWidget>
 
   @override
   Widget build(BuildContext context) {
+    List<Widget> children = [
+      RepaintBoundary(
+        child: CustomPaint(
+          size: widget.size,
+          isComplex: true,
+          willChange: widget.danmuController.willChange,
+          // foregroundPainter: _ForegroundPainter(widget.danmuController),
+          painter: _FanjiaoDanmuPainter(
+            context,
+            controller: widget.danmuController,
+          ),
+        ),
+      ),
+    ];
+    if (widget.danmuController.isSelected) {
+      var tooltip = widget.tooltip?.call();
+      if(tooltip != null){
+        children.add(tooltip);
+      }
+    }
     return SizedBox(
       width: widget.size.width,
       height: widget.size.height,
@@ -52,48 +72,20 @@ class _FanjiaoDanmuWidgetState extends State<FanjiaoDanmuWidget>
         onTapDown: (details) {
           widget.danmuController.tapPosition(details.localPosition);
         },
-        child: RepaintBoundary(
-          child: CustomPaint(
-            size: widget.size,
-            isComplex: true,
-            willChange: widget.danmuController.willChange,
-            // foregroundPainter: _ForegroundPainter(widget.danmuController),
-            painter: _FanjiaoDanmuPainter(
-              context,
-              controller: widget.danmuController,
-            ),
-            child: widget.child,
-          ),
+        child: Stack(
+          children: children,
         ),
       ),
     );
   }
 }
 
-/*class _ForegroundPainter extends CustomPainter {
-  final FanjiaoDanmuController controller;
-
-  _ForegroundPainter(this.controller);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.drawColor(const Color.fromRGBO(0, 0, 0, 0.8), BlendMode.dstOut);
-  }
-
-  @override
-  bool shouldRepaint(covariant _ForegroundPainter oldDelegate) {
-    return controller.shouldRepaint(oldDelegate.controller);
-  }
-}*/
-
 class _FanjiaoDanmuPainter extends CustomPainter {
   final BuildContext context;
   final FanjiaoDanmuController controller;
-  final double backgroundRadius;
   final ImageProvider? iconProvider;
   final double iconWidth;
   final double iconHeight;
-  final Offset? touchPosition;
   final Paint _painter;
   final TextPainter _textPainter;
   double? height;
@@ -103,8 +95,6 @@ class _FanjiaoDanmuPainter extends CustomPainter {
   _FanjiaoDanmuPainter(
     this.context, {
     required this.controller,
-    this.touchPosition,
-    this.backgroundRadius = 8,
     this.iconProvider,
     this.iconWidth = 14,
     this.iconHeight = 14,
@@ -118,26 +108,21 @@ class _FanjiaoDanmuPainter extends CustomPainter {
     }
     height ??= size.height;
     width ??= size.width;
-    DanmuItem? selected;
     for (var entry in controller.danmuItems) {
       if (controller.filter.check(entry.flag)) {
-        if (entry.position == null) {
-          continue;
-        }
-        if (entry.isSelected) {
-          selected = entry;
+        if (entry.position == null || entry.isSelected) {
           continue;
         }
         drawItem(entry, canvas);
       }
     }
-    if (selected != null) {
-      drawItem(selected, canvas);
+    if (controller.selected != null) {
+      drawItem(controller.selected!, canvas);
     }
   }
 
   void drawItem(DanmuItem<DanmuModel> entry, ui.Canvas canvas) {
-    if (entry.isSelf) {
+    if (entry.isMine) {
       drawBorder(entry, canvas);
     }
     if (entry.spanInfo.isTextSpan) {

@@ -234,7 +234,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
         }
       }
     }
-    if (item == null && model.isSelf) {
+    if (item == null && model.isMine) {
       HorizontalScrollSimulation simulation =
           HorizontalScrollSimulation(start: rect.width, end: -size.width);
       item = DanmuItem(

@@ -16,7 +16,7 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
   late FanjiaoDanmuController danmuController;
   late TextEditingController textController;
   Timer? timer;
@@ -40,15 +40,14 @@ class _MyAppState extends State<MyApp> {
         }),
         praiseImageProvider: const AssetImage("assets/images/icon_duck.png"),
         onTap: (DanmuItem danmuItem, Offset position) {
-          var isEnable = danmuController.showPopupMenu(danmuItem, position);
-          print('LiuShuai: onTap isEnable = $isEnable');
-          if(isEnable){
+          var result =
+              isSelect(danmuItem, position, danmuController.adapter.rect);
+          if (result) {
             setState(() {
-              print('LiuShuai: onTap selectedText = ${danmuItem.text}, rect = ${danmuItem.rect}');
               selectedText = danmuItem.text;
             });
           }
-          return isEnable;
+          return result;
         });
 
     danmuController.setDuration(duration);
@@ -76,10 +75,13 @@ class _MyAppState extends State<MyApp> {
             children: [
               Container(
                 color: Colors.greenAccent,
-                child: FanjiaoDanmuWidget(
-                  size: const Size(375, 300),
-                  danmuController: danmuController,
-                ),
+                child: LayoutBuilder(builder: (context, constraints) {
+                  return FanjiaoDanmuWidget(
+                    size: Size(constraints.maxWidth, 300),
+                    danmuController: danmuController,
+                    tooltip: tooltip,
+                  );
+                }),
               ),
               danmuButton,
               SizedBox(
@@ -96,7 +98,7 @@ class _MyAppState extends State<MyApp> {
                           danmuController.addDanmu(DanmuModel(
                             id: ++id,
                             text: text,
-                            isSelf: true,
+                            isMine: true,
                             startTime: danmuController.progress,
                             textStyle: rngTextStyle,
                           ));
@@ -111,7 +113,7 @@ class _MyAppState extends State<MyApp> {
                               danmuController.addDanmu(DanmuModel(
                                 id: ++id,
                                 text: textController.text,
-                                isSelf: true,
+                                isMine: true,
                                 startTime: danmuController.progress,
                                 textStyle: rngTextStyle,
                               ));
@@ -278,7 +280,7 @@ class _MyAppState extends State<MyApp> {
               danmuController.addDanmu(DanmuModel(
                 id: ++id,
                 text: rngText,
-                isSelf: true,
+                isMine: true,
                 startTime: danmuController.progress,
                 textStyle: rngTextStyle,
               ));
@@ -336,6 +338,12 @@ class _MyAppState extends State<MyApp> {
       ),
     );
   }
+
+  @override
+  Widget get tooltipContent => Container(
+        alignment: Alignment.center,
+        child: Text(selectedText),
+      );
 }
 
 class SwitchButton extends StatefulWidget {

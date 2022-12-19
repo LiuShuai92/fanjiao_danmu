@@ -44,7 +44,7 @@ class DanmuItem<T extends DanmuModel> {
 
   bool get isHighPraise => model.isHighPraise;
 
-  bool get isSelf => model.isSelf;
+  bool get isMine => model.isMine;
 
   BoxDecoration get mineDecoration => model.mineDecoration;
 
@@ -92,7 +92,7 @@ class SpanInfo {
 class DanmuModel {
   final int id;
   final String text;
-  final bool isSelf;
+  final bool isMine;
 
   ///[DanmuFilter] 一个弹幕创建时确定，不会发生改变
   final int flag;
@@ -111,7 +111,7 @@ class DanmuModel {
     required this.id,
     required this.text,
     required this.startTime,
-    this.isSelf = false,
+    this.isMine = false,
     this.imageProvider,
     this.isHighPraise = false,
     this.span,
