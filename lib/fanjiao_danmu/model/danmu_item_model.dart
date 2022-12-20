@@ -12,7 +12,7 @@ class DanmuItem<T extends DanmuModel> {
   final EdgeInsets padding;
   final ImageConfiguration configuration;
 
-  ///[DanmuFilter] 可能会发生改变 比如[DanmuFilter.repeated]是否是重复内容
+  ///[DanmuFlag] 可能会发生改变 比如[DanmuFlag.repeated]是否是重复内容
   int flag;
   bool isSelected;
   double? dTime;
@@ -94,7 +94,7 @@ class DanmuModel {
   final String text;
   final bool isMine;
 
-  ///[DanmuFilter] 一个弹幕创建时确定，不会发生改变
+  ///[DanmuFlag] 一个弹幕创建时确定，不会发生改变
   final int flag;
   final TextStyle textStyle;
   final double insertTime;
@@ -116,7 +116,7 @@ class DanmuModel {
     this.isHighPraise = false,
     this.span,
     this.package,
-    this.flag = DanmuFilter.scroll,
+    this.flag = DanmuFlag.scroll,
     double? insertTime,
     Map<String, ImageProvider>? imageMap,
     this.textStyle = const TextStyle(

@@ -54,14 +54,16 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
   @override
   DanmuItem<T>? getItem(T model) {
     DanmuItem<T>? item;
-    if (model.flag.isScroll) {
-      item = _getScrollItem(model);
-    } else if (model.flag.isTop) {
+    if (model.flag.isTop) {
       item = _getTopCenterItem(model);
     } else if (model.flag.isBottom) {
       item = _getBottomCenterItem(model);
+    } else if (model.flag.isAdvanced) {
+      ///todo
+    }else {
+      item = _getScrollItem(model);
     }
-    return item;
+      return item;
   }
 
   @override

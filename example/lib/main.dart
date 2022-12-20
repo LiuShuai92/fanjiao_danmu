@@ -40,6 +40,9 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
         }),
         praiseImageProvider: const AssetImage("assets/images/icon_duck.png"),
         onTap: (DanmuItem danmuItem, Offset position) {
+          if(danmuItem.flag.isAnnouncement){
+            return false;
+          }
           var result =
               isSelect(danmuItem, position, danmuController.adapter.rect);
           if (result) {
@@ -147,35 +150,35 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
           SwitchButton(
             "滚动",
             (isTurnOn) {
-              danmuController.changeFilter(DanmuFilter.scroll);
+              danmuController.changeFilter(DanmuFlag.scroll);
             },
             isTurnOn: danmuController.filter.isScroll,
           ),
           SwitchButton(
             "顶部",
             (isTurnOn) {
-              danmuController.changeFilter(DanmuFilter.top);
+              danmuController.changeFilter(DanmuFlag.top);
             },
             isTurnOn: danmuController.filter.isTop,
           ),
           SwitchButton(
             "底部",
             (isTurnOn) {
-              danmuController.changeFilter(DanmuFilter.bottom);
+              danmuController.changeFilter(DanmuFlag.bottom);
             },
             isTurnOn: danmuController.filter.isBottom,
           ),
           SwitchButton(
             "彩色",
             (isTurnOn) {
-              danmuController.changeFilter(DanmuFilter.colorful);
+              danmuController.changeFilter(DanmuFlag.colorful);
             },
             isTurnOn: danmuController.filter.isColorful,
           ),
           SwitchButton(
             "高级",
             (isTurnOn) {
-              danmuController.changeFilter(DanmuFilter.advanced);
+              danmuController.changeFilter(DanmuFlag.advanced);
             },
             isTurnOn: danmuController.filter.isAdvanced,
           ),
@@ -183,7 +186,7 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
             "重复",
             (isTurnOn) {
               danmuController.markRepeated();
-              danmuController.changeFilter(DanmuFilter.repeated);
+              danmuController.changeFilter(DanmuFlag.repeated);
             },
             isTurnOn: danmuController.filter.isRepeated,
           ),
@@ -225,7 +228,7 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
                 text: rngText,
                 startTime: danmuController.progress,
                 textStyle: rngTextStyle,
-                flag: DanmuFilter.colorful | DanmuFilter.scroll,
+                flag: DanmuFlag.colorful | DanmuFlag.scroll,
               ));
             },
           ),
@@ -247,7 +250,7 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
                 id: ++id,
                 text: rngText,
                 startTime: danmuController.progress,
-                flag: DanmuFilter.top,
+                flag: DanmuFlag.top,
               ));
             },
           ),
@@ -258,7 +261,7 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
                 id: ++id,
                 text: rngText,
                 startTime: danmuController.progress,
-                flag: DanmuFilter.bottom,
+                flag: DanmuFlag.bottom,
               ));
             },
           ),
@@ -270,7 +273,7 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
                 text: rngText,
                 startTime: danmuController.progress,
                 textStyle: rngTextStyle,
-                flag: DanmuFilter.advanced,
+                flag: DanmuFlag.advanced,
               ));
             },
           ),
@@ -283,6 +286,19 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
                 isMine: true,
                 startTime: danmuController.progress,
                 textStyle: rngTextStyle,
+              ));
+            },
+          ),
+          getButton(
+            "公告",
+            () {
+              danmuController.addDanmu(DanmuModel(
+                id: ++id,
+                text: rngText,
+                isMine: true,
+                startTime: danmuController.progress,
+                textStyle: rngTextStyle,
+                flag: DanmuFlag.announcement,
               ));
             },
           ),

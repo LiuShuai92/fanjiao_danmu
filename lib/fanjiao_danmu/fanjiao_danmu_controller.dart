@@ -71,7 +71,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
     this.tooltip,
     this.popMenuPadding = 50,
     this.praiseImageProvider,
-    this.filter = DanmuFilter.all,
+    this.filter = DanmuFlag.all,
   });
 
   setDuration(Duration duration, {
@@ -311,7 +311,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
     _ticker!.stop(canceled: canceled);
   }
 
-  /// flag [DanmuFilter]
+  /// flag [DanmuFlag]
   changeFilter(int flag, {bool? need}) {
     if (need == null) {
       filter = filter.change(flag);
@@ -482,7 +482,7 @@ class ImgInfo {
   const ImgInfo(this.image, this.rect);
 }
 
-extension DanmuFilter on int {
+extension DanmuFlag on int {
   ///普通的滚动弹幕
   static const int scroll = 1;
 
@@ -501,13 +501,18 @@ extension DanmuFilter on int {
   ///是否允许彩色弹幕
   static const int colorful = 1 << 5;
 
+  ///公告
+  static const int announcement = 1 << 6;
+
   ///全部允许
-  static const int all = DanmuFilter.scroll |
-  DanmuFilter.top |
-  DanmuFilter.bottom |
-  DanmuFilter.advanced |
-  DanmuFilter.repeated |
-  DanmuFilter.colorful;
+  static const
+  int all = DanmuFlag.scroll |
+  DanmuFlag.top |
+  DanmuFlag.bottom |
+  DanmuFlag.advanced |
+  DanmuFlag.repeated |
+  DanmuFlag.colorful|
+  DanmuFlag.announcement;
 
   bool check(int flag) => this & flag == flag;
 
@@ -529,6 +534,8 @@ extension DanmuFilter on int {
 
   bool get isColorful => check(colorful);
 
+  bool get isAnnouncement => check(announcement);
+
   int get addScroll => add(scroll);
 
   int get addTop => add(top);
@@ -540,6 +547,8 @@ extension DanmuFilter on int {
   int get addRepeated => add(repeated);
 
   int get addColorful => add(colorful);
+
+  int get addAnnouncement => add(announcement);
 
   int get removeScroll => remove(scroll);
 
@@ -553,6 +562,8 @@ extension DanmuFilter on int {
 
   int get removeColorful => remove(colorful);
 
+  int get removeAnnouncement => remove(announcement);
+
   int get changeScroll => change(scroll);
 
   int get changeTop => change(top);
@@ -564,4 +575,6 @@ extension DanmuFilter on int {
   int get changeRepeated => change(repeated);
 
   int get changeColorful => change(colorful);
+
+  int get changeAnnouncement => change(announcement);
 }
