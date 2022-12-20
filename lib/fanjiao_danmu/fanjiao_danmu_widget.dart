@@ -50,8 +50,6 @@ class _FanjiaoDanmuWidgetState extends State<FanjiaoDanmuWidget>
         child: CustomPaint(
           size: widget.size,
           isComplex: true,
-          willChange: widget.danmuController.willChange,
-          // foregroundPainter: _ForegroundPainter(widget.danmuController),
           painter: _FanjiaoDanmuPainter(
             context,
             controller: widget.danmuController,

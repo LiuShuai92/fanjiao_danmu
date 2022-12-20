@@ -23,16 +23,11 @@ class FanjiaoDanmuController<T extends DanmuModel>
   final Map<ImageProvider, ImgInfo> _imagesPool = {};
   final List<DanmuItem<T>> _tempList = <DanmuItem<T>>[];
   final ImageProvider? praiseImageProvider;
-
-  ///字幕露出多少就可以点击
-  final double _shown = 50;
-  final double popMenuPadding;
   Duration startTime = Duration.zero;
   Duration? endTime;
   Queue<DanmuItem<T>> danmuItems = Queue<DanmuItem<T>>();
   DanmuStatus _status = DanmuStatus.stop;
   DanmuStatus _lastReportedStatus = DanmuStatus.dismissed;
-  bool willChange = false;
   DanmuAdapter<T> adapter;
   int maxSize;
   int filter;
@@ -41,15 +36,12 @@ class FanjiaoDanmuController<T extends DanmuModel>
   late double _progress;
   DanmuItem<T>? selected;
   Ticker? _ticker;
-  Widget? tooltip;
   ImgInfo? _iconPraise;
   Duration? _lastElapsedDuration;
 
   double get progress => _progress;
 
   DanmuStatus get state => _status;
-
-  Duration? get lastElapsedDuration => _lastElapsedDuration;
 
   bool get isSelected => selected != null;
 
@@ -68,8 +60,6 @@ class FanjiaoDanmuController<T extends DanmuModel>
     required this.adapter,
     this.maxSize = 100,
     this.onTap,
-    this.tooltip,
-    this.popMenuPadding = 50,
     this.praiseImageProvider,
     this.filter = DanmuFlag.all,
   });
@@ -177,10 +167,14 @@ class FanjiaoDanmuController<T extends DanmuModel>
       selected!.isSelected = false;
       selected = null;
     }
+    notifyListeners();
   }
 
   tapPosition(Offset position) {
-    clearSelection();
+    if (isSelected) {
+      clearSelection();
+      return;
+    }
     DanmuItem<T>? selectedTemp;
     for (var entry in danmuItems) {
       if (entry.rect.contains(position)) {
@@ -202,7 +196,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
   markRepeated() {
     List<String> temp = [];
     for (var entry in danmuItems) {
-      if (temp.contains(entry.text)) {
+      if (!entry.flag.isAnnouncement && temp.contains(entry.text)) {
         ///不去重 高级弹幕 自己发的弹幕 高点赞数的弹幕
         if (!entry.flag.isAdvanced && !entry.isMine && !entry.isHighPraise) {
           entry.flag = entry.flag.addRepeated;
@@ -322,10 +316,6 @@ class FanjiaoDanmuController<T extends DanmuModel>
     }
     notifyListeners();
   }
-
-  /*hidePopupMenu(DanmuItem danmuItem) {
-    Positioned _popupMenu = Positioned(child: child);
-  }*/
 
   _checkStatusChanged() {
     final DanmuStatus newStatus = state;
