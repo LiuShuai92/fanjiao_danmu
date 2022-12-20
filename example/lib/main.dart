@@ -295,7 +295,6 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
               danmuController.addDanmu(DanmuModel(
                 id: ++id,
                 text: rngText,
-                isMine: true,
                 startTime: danmuController.progress,
                 textStyle: rngTextStyle,
                 flag: DanmuFlag.announcement,
