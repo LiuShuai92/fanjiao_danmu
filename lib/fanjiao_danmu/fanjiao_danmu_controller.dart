@@ -64,7 +64,8 @@ class FanjiaoDanmuController<T extends DanmuModel>
     this.filter = DanmuFlag.all,
   });
 
-  setDuration(Duration duration, {
+  setDuration(
+    Duration duration, {
     Duration startTime = Duration.zero,
   }) {
     this.startTime = startTime;
@@ -212,7 +213,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
       return;
     }
     if (model.startTime >
-            endTime.inMilliseconds / Duration.millisecondsPerSecond) {
+        endTime.inMilliseconds / Duration.millisecondsPerSecond) {
       return;
     }
     if (danmuItems.length > maxSize) {
@@ -351,8 +352,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
   }
 }
 
-mixin DanmuTooltipMixin{
-
+mixin DanmuTooltipMixin {
   Rect? _menuRect;
 
   Rect get menuRect => _menuRect ?? Rect.zero;
@@ -371,16 +371,13 @@ mixin DanmuTooltipMixin{
 
   bool isSelect(DanmuItem danmuItem, Offset position, Rect rect) {
     double x, y;
-    if (danmuItem.rect.left >
-        rect.right - danmuItem.size.height ||
-        danmuItem.rect.right <
-            rect.left + danmuItem.size.height) {
+    if (danmuItem.rect.left > rect.right - danmuItem.size.height ||
+        danmuItem.rect.right < rect.left + danmuItem.size.height) {
       return false;
     }
     x = (position.dx - menuSize.width / 2)
         .clamp(0, rect.right - menuSize.width);
-    _menuIsAbove = danmuItem.rect.bottom >
-        rect.bottom - menuSize.height;
+    _menuIsAbove = danmuItem.rect.bottom > rect.bottom - menuSize.height;
     if (menuIsAbove) {
       y = danmuItem.rect.top - menuSize.height;
     } else {
@@ -389,10 +386,10 @@ mixin DanmuTooltipMixin{
     Offset offset = Offset(x, y);
     _menuRect = offset & menuSize;
     _menupeak = position.dx.clamp(
-        math.max(danmuItem.rect.left, rect.left) +
-            danmuItem.size.height / 2,
-        math.min(danmuItem.rect.right, rect.right) -
-            danmuItem.size.height / 2) -
+            math.max(danmuItem.rect.left, rect.left) +
+                danmuItem.size.height / 2,
+            math.min(danmuItem.rect.right, rect.right) -
+                danmuItem.size.height / 2) -
         menuRect.left;
     return true;
   }
@@ -405,8 +402,9 @@ mixin DanmuTooltipMixin{
         Container(
           width: menuSize.width,
           height: menuSize.height - 5,
-          decoration: const BoxDecoration(image: DecorationImage(
-              image: AssetImage('assets/images/danmu_report.png'))),
+          decoration: const BoxDecoration(
+              image: DecorationImage(
+                  image: AssetImage('assets/images/danmu_report.png'))),
           child: tooltipContent,
         ),
         Padding(
@@ -431,8 +429,9 @@ mixin DanmuTooltipMixin{
         Container(
           width: menuSize.width,
           height: menuSize.height - 5,
-          decoration: const BoxDecoration(image: DecorationImage(
-              image: AssetImage('assets/images/danmu_report.png'))),
+          decoration: const BoxDecoration(
+              image: DecorationImage(
+                  image: AssetImage('assets/images/danmu_report.png'))),
           child: tooltipContent,
         ),
       ];
@@ -492,15 +491,17 @@ extension DanmuFlag on int {
   ///公告
   static const int announcement = 1 << 6;
 
+  ///全部不允许
+  static const int none = 0;
+
   ///全部允许
-  static const
-  int all = DanmuFlag.scroll |
-  DanmuFlag.top |
-  DanmuFlag.bottom |
-  DanmuFlag.advanced |
-  DanmuFlag.repeated |
-  DanmuFlag.colorful|
-  DanmuFlag.announcement;
+  static const int all = DanmuFlag.scroll |
+      DanmuFlag.top |
+      DanmuFlag.bottom |
+      DanmuFlag.advanced |
+      DanmuFlag.repeated |
+      DanmuFlag.colorful |
+      DanmuFlag.announcement;
 
   bool check(int flag) => this & flag == flag;
 
