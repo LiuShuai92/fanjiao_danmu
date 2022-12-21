@@ -24,7 +24,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
   final List<DanmuItem<T>> _tempList = <DanmuItem<T>>[];
   final ImageProvider? praiseImageProvider;
   Duration startTime = Duration.zero;
-  Duration? endTime;
+  Duration endTime = const Duration(hours: 24);
   Queue<DanmuItem<T>> danmuItems = Queue<DanmuItem<T>>();
   DanmuStatus _status = DanmuStatus.stop;
   DanmuStatus _lastReportedStatus = DanmuStatus.dismissed;
@@ -69,7 +69,6 @@ class FanjiaoDanmuController<T extends DanmuModel>
   }) {
     this.startTime = startTime;
     endTime = startTime + duration;
-    _lastElapsedDuration = startTime;
     _progress = startTime.inMicroseconds / Duration.microsecondsPerSecond;
   }
 
@@ -212,9 +211,8 @@ class FanjiaoDanmuController<T extends DanmuModel>
     if (model.text.isEmpty) {
       return;
     }
-    if (endTime != null &&
-        model.startTime >
-            endTime!.inMilliseconds / Duration.millisecondsPerSecond) {
+    if (model.startTime >
+            endTime.inMilliseconds / Duration.millisecondsPerSecond) {
       return;
     }
     if (danmuItems.length > maxSize) {
@@ -267,9 +265,9 @@ class FanjiaoDanmuController<T extends DanmuModel>
   ///秒
   void _internalSetValue(double progress) {
     var newProgress = progress * Duration.microsecondsPerSecond;
-    if (endTime != null && newProgress > endTime!.inMicroseconds) {
+    if (newProgress > endTime.inMicroseconds) {
       _progress =
-          endTime!.inMicroseconds.toDouble() / Duration.microsecondsPerSecond;
+          endTime.inMicroseconds.toDouble() / Duration.microsecondsPerSecond;
       _status = DanmuStatus.completed;
     } else if (newProgress < startTime.inMicroseconds) {
       _progress =
