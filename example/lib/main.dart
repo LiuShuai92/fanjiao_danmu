@@ -59,12 +59,6 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
   }
 
   @override
-  void dispose() {
-    danmuController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
