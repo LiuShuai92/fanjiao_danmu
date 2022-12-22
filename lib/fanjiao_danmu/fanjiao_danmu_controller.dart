@@ -9,6 +9,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'adapter/danmu_adapter.dart';
+import 'fanjiao_danmu.dart';
 import 'fanjiao_danmu_widget.dart';
 import 'listener_helpers.dart';
 import 'model/danmu_item_model.dart';
@@ -404,7 +405,10 @@ mixin DanmuTooltipMixin {
           height: menuSize.height - 5,
           decoration: const BoxDecoration(
               image: DecorationImage(
-                  image: AssetImage('assets/images/danmu_report.png', package: 'fanjiao_danmu'))),
+                  image: AssetImage(
+            'assets/images/danmu_report.png',
+            package: package,
+          ))),
           child: tooltipContent,
         ),
         Padding(
@@ -413,6 +417,7 @@ mixin DanmuTooltipMixin {
             'assets/images/danmu_report_arrow_down.png',
             width: 11,
             height: 5,
+            package: package,
           ),
         ),
       ];
@@ -424,6 +429,7 @@ mixin DanmuTooltipMixin {
             'assets/images/danmu_report_arrow_up.png',
             width: 11,
             height: 5,
+            package: package,
           ),
         ),
         Container(
@@ -431,7 +437,10 @@ mixin DanmuTooltipMixin {
           height: menuSize.height - 5,
           decoration: const BoxDecoration(
               image: DecorationImage(
-                  image: AssetImage('assets/images/danmu_report.png'))),
+                  image: AssetImage(
+            'assets/images/danmu_report.png',
+            package: package,
+          ))),
           child: tooltipContent,
         ),
       ];
