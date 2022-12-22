@@ -51,8 +51,11 @@ class FanjiaoDanmuController<T extends DanmuModel>
     assert(progress != null);
     clearDanmu();
     _internalSetValue(progress);
-    notifyListeners();
+    if (_lastReportedStatus != DanmuStatus.pause) {
+      _status = DanmuStatus.playing;
+    }
     _checkStatusChanged();
+    notifyListeners();
   }
 
   bool get isAnimating => _ticker != null && _ticker!.isActive;
@@ -158,8 +161,8 @@ class FanjiaoDanmuController<T extends DanmuModel>
     _tempList.clear();
     if (danmuItems.isEmpty) {
       _status = DanmuStatus.idle;
-      _checkStatusChanged();
     }
+    _checkStatusChanged();
     notifyListeners();
   }
 
@@ -298,9 +301,9 @@ class FanjiaoDanmuController<T extends DanmuModel>
 
   stop({bool canceled = true}) {
     assert(_ticker != null);
-    _status = DanmuStatus.stop;
     danmuItems.clear();
     _lastElapsedDuration = null;
+    _status = DanmuStatus.stop;
     _checkStatusChanged();
     _ticker!.stop(canceled: canceled);
   }
