@@ -49,7 +49,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
   ///秒
   set progress(double progress) {
     assert(progress != null);
-    clearDanmu();
+    _clearDanmu();
     _internalSetValue(progress);
     if (_lastReportedStatus != DanmuStatus.pause) {
       _status = DanmuStatus.playing;
@@ -77,7 +77,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
     _progress = startTime.inMicroseconds / Duration.microsecondsPerSecond;
   }
 
-  clearDanmu() {
+  _clearDanmu() {
     danmuItems.clear();
     adapter.clear();
     selected = null;
@@ -129,7 +129,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
     _internalSetValue(progress);
     if (state == DanmuStatus.completed) {
       _checkStatusChanged();
-      clearDanmu();
+      _clearDanmu();
       notifyListeners();
       return;
     }
@@ -277,10 +277,8 @@ class FanjiaoDanmuController<T extends DanmuModel>
     } else if (newProgress < startTime.inMicroseconds) {
       _progress =
           startTime.inMilliseconds.toDouble() / Duration.microsecondsPerSecond;
-      _status = DanmuStatus.playing;
     } else {
       _progress = progress;
-      _status = DanmuStatus.playing;
     }
   }
 
@@ -346,7 +344,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
       }
       return true;
     }());
-    clearDanmu();
+    _clearDanmu();
     _ticker!.dispose();
     _ticker = null;
     _imagesPool.clear();
