@@ -404,7 +404,7 @@ mixin DanmuTooltipMixin {
           height: menuSize.height - 5,
           decoration: const BoxDecoration(
               image: DecorationImage(
-                  image: AssetImage('assets/images/danmu_report.png'))),
+                  image: AssetImage('assets/images/danmu_report.png', package: 'fanjiao_danmu'))),
           child: tooltipContent,
         ),
         Padding(
