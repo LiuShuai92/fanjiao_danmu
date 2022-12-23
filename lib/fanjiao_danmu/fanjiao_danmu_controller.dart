@@ -241,6 +241,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
     }
   }
 
+  ///最好按照时间顺序插入弹幕
   addDanmu(T model) {
     assert(_ticker != null);
     if (model.text.isEmpty) {
@@ -253,6 +254,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
     }
   }
 
+  ///传入的列表最好按照时间顺序排序
   addAllDanmu(Iterable<T> models) {
     assert(_ticker != null);
     if (danmuItems.length > maxSize) {

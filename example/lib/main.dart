@@ -40,7 +40,7 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
         }),
         praiseImageProvider: const AssetImage("assets/images/icon_duck.png"),
         onTap: (DanmuItem danmuItem, Offset position) {
-          if(danmuItem.flag.isAnnouncement){
+          if (danmuItem.flag.isAnnouncement) {
             return false;
           }
           var result =
@@ -350,67 +350,71 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
 
   @override
   Widget get tooltipContent => Row(
-    mainAxisSize: MainAxisSize.max,
-    children: [
-      Expanded(
-        child: GestureDetector(
-          child: Container(
-            height: 30,
-            alignment: Alignment.center,
-            child: const Text(
-              '加一',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                  decoration: TextDecoration.none,
-                  fontSize: 12.0,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.white),
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Expanded(
+            child: GestureDetector(
+              child: Container(
+                height: 30,
+                alignment: Alignment.center,
+                child: const Text(
+                  '加一',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                      decoration: TextDecoration.none,
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.white),
+                ),
+              ),
+              onTap: () {
+                if(danmuController.selected != null){
+                  danmuController.addDanmu(DanmuModel(
+                    id: ++id,
+                    text: danmuController.selected!.text,
+                    isMine: true,
+                    startTime: danmuController.progress,
+                  ));
+                }
+                danmuController.clearSelection();
+              },
+              behavior: HitTestBehavior.opaque,
             ),
           ),
-          onTap: () {
-            danmuController.clearSelection();
-            /*widget.onAddOneDanmakuListener?.call(danmuModel);
-            _dismissReport();*/
-          },
-          behavior: HitTestBehavior.opaque,
-        ),
-      ),
-      Container(
-        width: 1.0,
-        alignment: Alignment.center,
-        child: Container(
-          width: 1.0,
-          height: 6.0,
-          color: Colors.white.withOpacity(0.5),
-        ),
-      ),
-      Expanded(
-        child: GestureDetector(
-          child: Container(
-            height: 30,
+          Container(
+            width: 1.0,
             alignment: Alignment.center,
-            child: const Text(
-              '举报',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                  decoration: TextDecoration.none,
-                  fontSize: 12.0,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.white),
+            child: Container(
+              width: 1.0,
+              height: 6.0,
+              color: Colors.white.withOpacity(0.5),
             ),
           ),
-          onTap: () {
-            danmuController.clearSelection();
-            /*widget.onDanmakuReportListener?.call(danmuModel);
-            _dismissReport();*/
-          },
-          behavior: HitTestBehavior.opaque,
-        ),
-      ),
-    ],
-  );
+          Expanded(
+            child: GestureDetector(
+              child: Container(
+                height: 30,
+                alignment: Alignment.center,
+                child: const Text(
+                  '举报',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                      decoration: TextDecoration.none,
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.white),
+                ),
+              ),
+              onTap: () {
+                danmuController.clearSelection();
+              },
+              behavior: HitTestBehavior.opaque,
+            ),
+          ),
+        ],
+      );
 }
 
 class SwitchButton extends StatefulWidget {

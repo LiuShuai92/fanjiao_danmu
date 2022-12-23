@@ -11,6 +11,8 @@ class DanmuItem<T extends DanmuModel> {
   final DanmuSimulation simulation;
   final EdgeInsets padding;
   final ImageConfiguration configuration;
+  late final TextPainter? textStrokePainter;
+  late final TextPainter textPainter;
 
   ///[DanmuFlag] 可能会发生改变 比如[DanmuFlag.repeated]是否是重复内容
   int flag;
@@ -52,8 +54,6 @@ class DanmuItem<T extends DanmuModel> {
 
   SpanInfo spanInfo;
 
-  InlineSpan? get span => model.span;
-
   DanmuItem({
     required this.model,
     required this.simulation,
@@ -63,7 +63,19 @@ class DanmuItem<T extends DanmuModel> {
     this.isSelected = false,
     this.lineNum = 0,
   })  : flag = model.flag,
-        configuration = ImageConfiguration(size: size);
+        configuration = ImageConfiguration(size: size) {
+    if (spanInfo.isTextSpan) {
+      ///由于绘制时大量layout比较耗时，所以提前用空间换时间
+      if (spanInfo.textStrokeSpan != null) {
+        textStrokePainter = TextPainter(textDirection: TextDirection.ltr)
+          ..text = spanInfo.textStrokeSpan;
+        textStrokePainter!.layout();
+      }
+      textPainter = TextPainter(textDirection: TextDirection.ltr)
+        ..text = spanInfo.span;
+      textPainter.layout();
+    }
+  }
 }
 
 /*
@@ -101,7 +113,6 @@ class DanmuModel {
   final double startTime;
   final bool isHighPraise;
   final ImageProvider? imageProvider;
-  final InlineSpan? span;
   final String? package;
 
   ///用于"我的"弹幕
@@ -114,7 +125,6 @@ class DanmuModel {
     this.isMine = false,
     this.imageProvider,
     this.isHighPraise = false,
-    this.span,
     this.package,
     this.flag = DanmuFlag.scroll,
     double? insertTime,

@@ -12,14 +12,15 @@ import 'danmu_adapter.dart';
 
 class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
   final Size imageSize;
-  final EdgeInsets padding = const EdgeInsets.symmetric(vertical: 2, horizontal: 8);
+  final EdgeInsets padding =
+      const EdgeInsets.symmetric(vertical: 2, horizontal: 8);
   final List<Queue<DanmuItem<T>>> scrollRows = [];
   final List<DanmuItem<T>?> centerRows = [];
   final Map<String, ImageProvider> imageMap;
   final double lineHeight;
   int? maxLines;
 
-  double getPaddingTop(int lineIndex, double textHeight) =>
+  double _getPaddingTop(int lineIndex, double textHeight) =>
       lineIndex * lineHeight + (lineHeight - textHeight) / 2;
 
   FanjiaoDanmuAdapter({
@@ -60,10 +61,10 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
       item = _getBottomCenterItem(model);
     } else if (model.flag.isAdvanced) {
       ///todo
-    }else {
+    } else {
       item = _getScrollItem(model);
     }
-      return item;
+    return item;
   }
 
   @override
@@ -92,11 +93,11 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
     DanmuItem<T>? item;
     final SpanInfo textSpanInfo =
         transformText(model.text, model.textStyle, imageMap: imageMap);
-    Size size = spanSize(textSpanInfo, padding);
+    Size size = _spanSize(textSpanInfo, padding);
     for (int i = 0; i < centerRows.length; i++) {
       var centerRow = centerRows[i];
       if (centerRow == null) {
-        double paddingTop = getPaddingTop(i, size.height);
+        double paddingTop = _getPaddingTop(i, size.height);
         Offset offset = Offset(rect.center.dx - size.width / 2, paddingTop);
         item = DanmuItem(
             model: model,
@@ -116,11 +117,11 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
     DanmuItem<T>? item;
     final SpanInfo textSpanInfo =
         transformText(model.text, model.textStyle, imageMap: imageMap);
-    Size size = spanSize(textSpanInfo, padding);
+    Size size = _spanSize(textSpanInfo, padding);
     for (int i = centerRows.length - 1; i >= 0; i--) {
       var centerRow = centerRows[i];
       if (centerRow == null) {
-        double paddingTop = getPaddingTop(i, size.height);
+        double paddingTop = _getPaddingTop(i, size.height);
         Offset offset = Offset(rect.center.dx - size.width / 2, paddingTop);
         item = DanmuItem(
             model: model,
@@ -142,13 +143,13 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
     DanmuItem<T>? item;
     final SpanInfo textSpanInfo =
         transformText(model.text, model.textStyle, imageMap: imageMap);
-    Size size = spanSize(textSpanInfo, padding);
+    Size size = _spanSize(textSpanInfo, padding);
     for (int i = 0; i < math.min(scrollRows.length / 2, 3); i++) {
       Queue<DanmuItem<T>> row = scrollRows[i];
       HorizontalScrollSimulation simulation =
           HorizontalScrollSimulation(start: rect.width, end: -size.width);
       if (row.isEmpty || row.last.isSelected) {
-        simulation.paddingTop = getPaddingTop(i, size.height);
+        simulation.paddingTop = _getPaddingTop(i, size.height);
         item = DanmuItem(
             model: model,
             padding: padding,
@@ -174,7 +175,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
           }
           if (lx > rect.center.dx) {
             ///如果弹幕放到当前行，则在当前行上一条弹幕消失时，当前添加的弹幕所在位置是否没有超过了中线
-            simulation.paddingTop = getPaddingTop(i, size.height);
+            simulation.paddingTop = _getPaddingTop(i, size.height);
             item = DanmuItem(
                 model: model,
                 padding: padding,
@@ -195,7 +196,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
         HorizontalScrollSimulation simulation =
             HorizontalScrollSimulation(start: rect.width, end: -size.width);
         if (row.isEmpty || row.last.isSelected) {
-          simulation.paddingTop = getPaddingTop(i, size.height);
+          simulation.paddingTop = _getPaddingTop(i, size.height);
           item = DanmuItem(
               model: model,
               padding: padding,
@@ -222,7 +223,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
             }
             if (dx > rect.left) {
               ///如果弹幕放到当前行，则在当前行上一条弹幕消失时，当前添加的弹幕所在位置是否没有超过左边界
-              simulation.paddingTop = getPaddingTop(i, size.height);
+              simulation.paddingTop = _getPaddingTop(i, size.height);
               item = DanmuItem(
                   model: model,
                   padding: padding,
@@ -247,7 +248,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
           size: size);
       var index = scrollRows.length >> 1;
       scrollRows[index].add(item);
-      simulation.paddingTop = getPaddingTop(index, size.height);
+      simulation.paddingTop = _getPaddingTop(index, size.height);
     }
     return item;
   }
@@ -255,7 +256,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
   final TextPainter _textPainter =
       TextPainter(textDirection: TextDirection.ltr);
 
-  Size spanSize(SpanInfo spanInfo, EdgeInsets padding) {
+  Size _spanSize(SpanInfo spanInfo, EdgeInsets padding) {
     if (spanInfo.isTextSpan) {
       _textPainter.text = spanInfo.span;
       _textPainter.layout();
@@ -281,6 +282,9 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
       textStrokeSpan: TextSpan(
         text: text,
         style: textStyle.copyWith(
+            fontWeight: FontWeight.values[math.min(
+                textStyle.fontWeight?.index ?? 0 + 1,
+                FontWeight.values.length - 1)],
             foreground: Paint()
               ..style = PaintingStyle.stroke
               ..strokeWidth = 1

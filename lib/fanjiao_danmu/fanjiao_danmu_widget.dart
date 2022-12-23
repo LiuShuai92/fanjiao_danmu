@@ -85,7 +85,7 @@ class _FanjiaoDanmuPainter extends CustomPainter {
   final double iconWidth;
   final double iconHeight;
   final Paint _painter;
-  final TextPainter _textPainter;
+  // final TextPainter _textPainter;
   double? height;
   double? width;
   DanmuStatus state = DanmuStatus.stop;
@@ -96,8 +96,7 @@ class _FanjiaoDanmuPainter extends CustomPainter {
     this.iconProvider,
     this.iconWidth = 14,
     this.iconHeight = 14,
-  })  : _textPainter = TextPainter(textDirection: TextDirection.ltr),
-        _painter = Paint();
+  })  : _painter = Paint();
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -168,13 +167,9 @@ class _FanjiaoDanmuPainter extends CustomPainter {
   ///绘制文字
   void drawText(DanmuItem entry, ui.Canvas canvas) {
     if (entry.spanInfo.textStrokeSpan != null) {
-      _textPainter.text = entry.spanInfo.textStrokeSpan;
-      _textPainter.layout();
-      _textPainter.paint(canvas, entry.position!);
+      entry.textStrokePainter?.paint(canvas, entry.position!);
     }
-    _textPainter.text = entry.spanInfo.span;
-    _textPainter.layout();
-    _textPainter.paint(canvas, entry.position!);
+    entry.textPainter.paint(canvas, entry.position!);
   }
 
   ///绘制单个弹幕边框
