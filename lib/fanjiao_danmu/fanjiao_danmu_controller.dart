@@ -32,24 +32,21 @@ class FanjiaoDanmuController<T extends DanmuModel>
   DanmuAdapter<T> adapter;
   int maxSize;
   int filter;
-
-  ///秒
-  late double _progress;
+  late double _progress; //秒
   DanmuItem<T>? selected;
   Ticker? _ticker;
   ImgInfo? _iconPraise;
   Duration? _lastElapsedDuration;
 
-  double get progress => _progress;
-
   DanmuStatus get state => _status;
 
   bool get isSelected => selected != null;
 
+  double get progress => _progress;
+
   ///秒
   set progress(double progress) {
     assert(progress != null);
-    _clearDanmu();
     _internalSetValue(progress);
     if (_lastReportedStatus != DanmuStatus.pause) {
       _status = DanmuStatus.playing;
@@ -77,7 +74,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
     _progress = startTime.inMicroseconds / Duration.microsecondsPerSecond;
   }
 
-  _clearDanmu() {
+  clearDanmu() {
     danmuItems.clear();
     adapter.clear();
     selected = null;
@@ -129,7 +126,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
     _internalSetValue(progress);
     if (state == DanmuStatus.completed) {
       _checkStatusChanged();
-      _clearDanmu();
+      clearDanmu();
       notifyListeners();
       return;
     }
@@ -346,7 +343,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
       }
       return true;
     }());
-    _clearDanmu();
+    clearDanmu();
     _ticker!.dispose();
     _ticker = null;
     _imagesPool.clear();
