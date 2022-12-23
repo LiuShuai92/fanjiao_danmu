@@ -12,22 +12,26 @@ import 'danmu_adapter.dart';
 
 class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
   final Size imageSize;
-  final EdgeInsets padding =
-      const EdgeInsets.symmetric(vertical: 2, horizontal: 8);
+  final EdgeInsets padding;
   final List<Queue<DanmuItem<T>>> scrollRows = [];
   final List<DanmuItem<T>?> centerRows = [];
   final Map<String, ImageProvider> imageMap;
   final double lineHeight;
-  int? maxLines;
+  int? _maxLines;
+
+  int? get maxLines => _maxLines;
 
   double _getPaddingTop(int lineIndex, double textHeight) =>
       lineIndex * lineHeight + (lineHeight - textHeight) / 2;
 
   FanjiaoDanmuAdapter({
     this.lineHeight = 30,
+    this.padding = const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
     this.imageSize = const Size(52, 20),
     this.imageMap = const <String, ImageProvider>{},
-  });
+    double preExtra = 4,
+    double iconExtra = 30,
+  }) : super(preExtra: preExtra, iconExtra: iconExtra);
 
   @override
   initData(Rect rect, {int? maxLines}) {
@@ -35,8 +39,8 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
     scrollRows.clear();
     centerRows.clear();
     var lines = rect.height ~/ lineHeight;
-    this.maxLines = math.min(maxLines ?? lines, lines);
-    for (int i = 0; i < this.maxLines!; i++) {
+    _maxLines = math.min(maxLines ?? lines, lines);
+    for (int i = 0; i < _maxLines!; i++) {
       scrollRows.add(Queue<DanmuItem<T>>());
       centerRows.add(null);
     }
@@ -89,7 +93,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
   }
 
   DanmuItem<T>? _getTopCenterItem(T model) {
-    assert(maxLines != null, "需要先调用 initData()");
+    assert(_maxLines != null, "需要先调用 initData()");
     DanmuItem<T>? item;
     final SpanInfo textSpanInfo =
         transformText(model.text, model.textStyle, imageMap: imageMap);
@@ -113,7 +117,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
   }
 
   DanmuItem<T>? _getBottomCenterItem(T model) {
-    assert(maxLines != null, "需要先调用 initData()");
+    assert(_maxLines != null, "需要先调用 initData()");
     DanmuItem<T>? item;
     final SpanInfo textSpanInfo =
         transformText(model.text, model.textStyle, imageMap: imageMap);
@@ -137,7 +141,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
   }
 
   DanmuItem<T>? _getScrollItem(T model) {
-    assert(maxLines != null, "需要先调用 initData()");
+    assert(_maxLines != null, "需要先调用 initData()");
 
     ///第一次循环只判断前一半的行数或前三行
     DanmuItem<T>? item;
@@ -159,18 +163,16 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
         row.add(item);
         break;
       } else {
-        var rx =
-            simulation.offset(model.insertTime - model.startTime).dx - preExtra;
-        if (model.isHighPraise) {
+        var rx = simulation.offset(model.insertTime - model.startTime).dx;
+        if (model.isPraise) {
           rx -= iconExtra;
         }
         var last = row.lastWhere((element) => !element.isSelected);
         var lx = last.simulation.offset(model.insertTime - last.startTime).dx +
             last.size.width;
-        if (lx < rx) {
-          var lx =
-              simulation.offset(last.endTime - model.startTime).dx - preExtra;
-          if (model.isHighPraise) {
+        if (rx - lx > preExtra) {
+          var lx = simulation.offset(last.endTime - model.startTime).dx;
+          if (model.isPraise) {
             lx -= iconExtra;
           }
           if (lx > rect.center.dx) {
@@ -206,19 +208,17 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
           row.add(item);
           break;
         } else {
-          var rx = simulation.offset(model.insertTime - model.startTime).dx -
-              preExtra;
-          if (model.isHighPraise) {
+          var rx = simulation.offset(model.insertTime - model.startTime).dx;
+          if (model.isPraise) {
             rx -= iconExtra;
           }
           var last = row.lastWhere((element) => !element.isSelected);
           var lx =
               last.simulation.offset(model.insertTime - last.startTime).dx +
-                  last.size.width;
-          if (lx < rx) {
-            var dx =
-                simulation.offset(last.endTime - model.startTime).dx - preExtra;
-            if (model.isHighPraise) {
+                  last.rect.width;
+          if (rx - lx > preExtra) {
+            var dx = simulation.offset(last.endTime - model.startTime).dx;
+            if (model.isPraise) {
               dx -= iconExtra;
             }
             if (dx > rect.left) {

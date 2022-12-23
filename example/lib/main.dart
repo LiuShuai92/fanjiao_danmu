@@ -232,7 +232,7 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
               danmuController.addDanmu(DanmuModel(
                 id: ++id,
                 text: rngText,
-                isHighPraise: true,
+                isPraise: true,
                 startTime: danmuController.progress,
               ));
             },

@@ -44,7 +44,7 @@ class DanmuItem<T extends DanmuModel> {
 
   TextStyle get textStyle => model.textStyle;
 
-  bool get isHighPraise => model.isHighPraise;
+  bool get isHighPraise => model.isPraise;
 
   bool get isMine => model.isMine;
 
@@ -111,7 +111,7 @@ class DanmuModel {
   final TextStyle textStyle;
   final double insertTime;
   final double startTime;
-  final bool isHighPraise;
+  final bool isPraise;
   final ImageProvider? imageProvider;
   final String? package;
 
@@ -124,7 +124,7 @@ class DanmuModel {
     required this.startTime,
     this.isMine = false,
     this.imageProvider,
-    this.isHighPraise = false,
+    this.isPraise = false,
     this.package,
     this.flag = DanmuFlag.scroll,
     double? insertTime,
