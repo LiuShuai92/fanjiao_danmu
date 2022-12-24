@@ -13,6 +13,8 @@ class DanmuItem<T extends DanmuModel> {
   final ImageConfiguration configuration;
   late final TextPainter? textStrokePainter;
   late final TextPainter textPainter;
+  Size size;
+  SpanInfo spanInfo;
 
   ///[DanmuFlag] 可能会发生改变 比如[DanmuFlag.repeated]是否是重复内容
   int flag;
@@ -49,10 +51,6 @@ class DanmuItem<T extends DanmuModel> {
   bool get isMine => model.isMine;
 
   BoxDecoration get mineDecoration => model.mineDecoration;
-
-  Size size;
-
-  SpanInfo spanInfo;
 
   DanmuItem({
     required this.model,

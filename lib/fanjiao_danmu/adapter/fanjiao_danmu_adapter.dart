@@ -215,7 +215,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
           var last = row.lastWhere((element) => !element.isSelected);
           var lx =
               last.simulation.offset(model.insertTime - last.startTime).dx +
-                  last.rect.width;
+                  last.size.width;
           if (rx - lx > preExtra) {
             var dx = simulation.offset(last.endTime - model.startTime).dx;
             if (model.isPraise) {
