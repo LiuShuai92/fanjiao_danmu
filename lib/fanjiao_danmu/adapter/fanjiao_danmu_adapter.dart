@@ -163,19 +163,19 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
         row.add(item);
         break;
       } else {
-        var rx = simulation.offset(model.insertTime - model.startTime).dx;
+        var startX = simulation.offset(model.insertTime - model.startTime).dx;
         if (model.isPraise) {
-          rx -= iconExtra;
+          startX -= iconExtra;
         }
         var last = row.lastWhere((element) => !element.isSelected);
-        var lx = last.simulation.offset(model.insertTime - last.startTime).dx +
+        var startPreXr = last.simulation.offset(model.insertTime - last.startTime).dx +
             last.size.width;
-        if (rx - lx > preExtra) {
-          var lx = simulation.offset(last.endTime - model.startTime).dx;
+        if (startX - startPreXr > preExtra) {
+          var preEndX = simulation.offset(last.endTime - model.startTime).dx;
           if (model.isPraise) {
-            lx -= iconExtra;
+            preEndX -= iconExtra;
           }
-          if (lx > rect.center.dx) {
+          if (preEndX - rect.center.dx > preExtra) {
             ///如果弹幕放到当前行，则在当前行上一条弹幕消失时，当前添加的弹幕所在位置是否没有超过了中线
             simulation.paddingTop = _getPaddingTop(i, size.height);
             item = DanmuItem(
@@ -208,20 +208,20 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
           row.add(item);
           break;
         } else {
-          var rx = simulation.offset(model.insertTime - model.startTime).dx;
+          var startX = simulation.offset(model.insertTime - model.startTime).dx;
           if (model.isPraise) {
-            rx -= iconExtra;
+            startX -= iconExtra;
           }
           var last = row.lastWhere((element) => !element.isSelected);
-          var lx =
+          var startPreXr =
               last.simulation.offset(model.insertTime - last.startTime).dx +
                   last.size.width;
-          if (rx - lx > preExtra) {
-            var dx = simulation.offset(last.endTime - model.startTime).dx;
+          if (startX - startPreXr > preExtra) {
+            var preEndX = simulation.offset(last.endTime - model.startTime).dx;
             if (model.isPraise) {
-              dx -= iconExtra;
+              preEndX -= iconExtra;
             }
-            if (dx > rect.left) {
+            if (preEndX - rect.left > preExtra) {
               ///如果弹幕放到当前行，则在当前行上一条弹幕消失时，当前添加的弹幕所在位置是否没有超过左边界
               simulation.paddingTop = _getPaddingTop(i, size.height);
               item = DanmuItem(
