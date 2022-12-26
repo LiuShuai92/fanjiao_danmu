@@ -28,6 +28,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
   Duration endTime = const Duration(hours: 24);
   Queue<DanmuItem<T>> danmuItems = Queue<DanmuItem<T>>();
   DanmuStatus _status = DanmuStatus.stop;
+  DanmuStatus _idleBeforeStatus = DanmuStatus.playing;
   DanmuStatus _lastReportedStatus = DanmuStatus.dismissed;
   DanmuAdapter<T> adapter;
   int maxSize;
@@ -67,6 +68,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
     }
     _tempList.clear();
     if (danmuItems.isEmpty) {
+      _idleBeforeStatus = _status;
       _status = DanmuStatus.idle;
     }
     _checkStatusChanged();
@@ -264,7 +266,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
     }
     _addEntry(model);
     if (danmuItems.isNotEmpty && isAnimating && _status == DanmuStatus.idle) {
-      _status = DanmuStatus.playing;
+      _status = _idleBeforeStatus;
       _checkStatusChanged();
     }
   }
@@ -279,7 +281,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
       _addEntry(model);
     }
     if (danmuItems.isNotEmpty && isAnimating && _status == DanmuStatus.idle) {
-      _status = DanmuStatus.playing;
+      _status = _idleBeforeStatus;
       _checkStatusChanged();
     }
   }
