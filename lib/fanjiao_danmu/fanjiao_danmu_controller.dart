@@ -51,6 +51,24 @@ class FanjiaoDanmuController<T extends DanmuModel>
     if (_lastReportedStatus != DanmuStatus.pause) {
       _status = DanmuStatus.playing;
     }
+    for (var entry in danmuItems) {
+      entry.dTime = _progress - entry.startTime;
+      entry.position = entry.simulation.offset(_progress - entry.startTime);
+      Offset? position = entry.simulation.isDone(entry.position!, 0);
+      if (position == null) {
+        _tempList.add(entry);
+      } else if (!entry.isSelected) {
+        entry.position = position;
+      }
+    }
+    for (var element in _tempList) {
+      danmuItems.remove(element);
+      adapter.removeItem(element);
+    }
+    _tempList.clear();
+    if (danmuItems.isEmpty) {
+      _status = DanmuStatus.idle;
+    }
     _checkStatusChanged();
     notifyListeners();
   }
