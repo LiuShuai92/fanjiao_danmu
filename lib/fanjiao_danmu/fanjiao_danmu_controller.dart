@@ -176,7 +176,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
     }
     _tempList.clear();
     if (danmuItems.isEmpty) {
-      _lastReportedStatus = _status;
+      _idleBeforeStatus = _status;
       _status = DanmuStatus.idle;
     }
     _checkStatusChanged();
