@@ -135,8 +135,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
   _tick(Duration elapsed) {
     Duration dElapsed = elapsed - (_lastElapsedDuration ?? startTime);
     _lastElapsedDuration = elapsed;
-    if ((_status == DanmuStatus.pause && dElapsed > Duration.zero) ||
-        dElapsed == Duration.zero) {
+    if (_status == DanmuStatus.pause || dElapsed == Duration.zero) {
       return;
     }
     final double dTime =
@@ -177,6 +176,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
     }
     _tempList.clear();
     if (danmuItems.isEmpty) {
+      _lastReportedStatus = _status;
       _status = DanmuStatus.idle;
     }
     _checkStatusChanged();
