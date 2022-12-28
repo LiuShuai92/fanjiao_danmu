@@ -9,7 +9,9 @@ class ClampSimulation extends DanmuSimulation {
   ClampSimulation({
     required this.clampOffset,
     double duration = 7,
-  }) : super(Rect.zero, duration: duration);
+  }) : super(Rect.zero, duration: duration){
+    isFullShown = false;
+  }
 
   @override
   Offset dOffset(double time) => Offset.zero;
