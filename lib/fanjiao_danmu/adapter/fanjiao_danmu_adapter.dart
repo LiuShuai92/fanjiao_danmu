@@ -151,7 +151,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
     for (int i = 0; i < math.min(scrollRows.length / 2, 3); i++) {
       Queue<DanmuItem<T>> row = scrollRows[i];
       HorizontalScrollSimulation simulation =
-          HorizontalScrollSimulation(start: rect.width, end: -size.width);
+          HorizontalScrollSimulation(right: rect.width, left: 0, size: size);
       if (row.isEmpty || row.last.isSelected) {
         simulation.paddingTop = _getPaddingTop(i, size.height);
         item = DanmuItem(
@@ -196,7 +196,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
       for (int i = 0; i < scrollRows.length; i++) {
         Queue<DanmuItem<T>> row = scrollRows[i];
         HorizontalScrollSimulation simulation =
-            HorizontalScrollSimulation(start: rect.width, end: -size.width);
+            HorizontalScrollSimulation(right: rect.width, left: 0, size: size);
         if (row.isEmpty || row.last.isSelected) {
           simulation.paddingTop = _getPaddingTop(i, size.height);
           item = DanmuItem(
@@ -239,7 +239,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
     }
     if (item == null && model.isMine) {
       HorizontalScrollSimulation simulation =
-          HorizontalScrollSimulation(start: rect.width, end: -size.width);
+          HorizontalScrollSimulation(right: rect.width, left: 0, size: size);
       item = DanmuItem(
           model: model,
           padding: padding,

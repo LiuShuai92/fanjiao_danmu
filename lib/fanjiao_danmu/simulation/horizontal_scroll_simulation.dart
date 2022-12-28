@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
@@ -7,21 +6,21 @@ import 'danmu_simulation.dart';
 
 class HorizontalScrollSimulation extends DanmuSimulation {
   HorizontalScrollSimulation({
-    required this.start,
-    required this.end,
+    required this.right,
+    required this.left,
+    required this.size,
     this.paddingTop = 0,
-    this.reverse = false,
     Tolerance tolerance = Tolerance.defaultTolerance,
     double duration = 7,
-  })  : v = (end - start) / duration,
-        super(Rect.fromLTRB(end, 0, start, double.infinity),
+  })  : v = (left - size.width - right) / duration,
+        super(Rect.fromLTRB(left - size.width, 0, right, double.infinity),
             tolerance: tolerance, duration: duration);
 
-  final double start;
-  final double end;
+  final double right;
+  final double left;
   final double v;
+  final Size size;
   double paddingTop;
-  bool reverse;
 
   @override
   Offset dOffset(double time) {
@@ -29,32 +28,17 @@ class HorizontalScrollSimulation extends DanmuSimulation {
   }
 
   @override
-  Offset offset(double time) => Offset(start + v * time, paddingTop);
+  Offset offset(double time) => Offset(right + v * time, paddingTop);
 
   @override
   Offset? isDone(Offset o, double dt) {
     Offset result = o + dOffset(dt);
     var dx = result.dx;
-    if (reverse) {
-      if (dx > rect.right) {
-        return null;
-      }
-    } else {
-      if (dx < rect.left) {
-        return null;
-      }
+    if (dx < rect.left) {
+      return null;
+    } else if (!isFullShown && dx > rect.right - size.width) {
+      isFullShown = true;
     }
     return result;
-  }
-
-  double predictedTime({double? x}) {
-    if (x == null) {
-      x = end;
-    } else {
-      final double d = end - start;
-      x = end > start ? math.min(d, end) : math.max(d, end);
-    }
-    final double t = (x - start) / v;
-    return t;
   }
 }
