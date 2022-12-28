@@ -39,7 +39,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
   ImgInfo? _iconPraise;
   Duration? _lastElapsedDuration;
   bool _onceForceRefresh = false;
-  bool _isFullShown = false;
+  bool _isFullShown = true;
 
   ///下一桢动画会执行一次强制刷新
   set onceForceRefresh(bool onceForceRefresh) =>
@@ -170,7 +170,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
     if (danmuItems.isEmpty) {
       return;
     }
-    _isFullShown = false;
+    bool isFullShown = true;
     for (var entry in danmuItems) {
       if (entry.position == null) {
         entry.dTime = _progress - entry.startTime;
@@ -186,12 +186,13 @@ class FanjiaoDanmuController<T extends DanmuModel>
           _tempList.add(entry);
         } else if (!entry.isSelected) {
           entry.position = position;
-          if(entry.simulation.isFullShown){
-            _isFullShown = true;
+          if(!entry.simulation.isFullShown){
+            isFullShown = false;
           }
         }
       }
     }
+    _isFullShown = isFullShown;
     for (var element in _tempList) {
       danmuItems.remove(element);
       adapter.removeItem(element);
