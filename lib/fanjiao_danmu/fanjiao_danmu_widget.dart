@@ -46,20 +46,22 @@ class _FanjiaoDanmuWidgetState extends State<FanjiaoDanmuWidget>
   @override
   Widget build(BuildContext context) {
     List<Widget> children = [
-      RepaintBoundary(
-        child: CustomPaint(
-          size: widget.size,
-          isComplex: true,
-          painter: _FanjiaoDanmuPainter(
-            context,
-            controller: widget.danmuController,
+      ClipRect(
+        child: RepaintBoundary(
+          child: CustomPaint(
+            size: widget.size,
+            isComplex: true,
+            painter: _FanjiaoDanmuPainter(
+              context,
+              controller: widget.danmuController,
+            ),
           ),
         ),
       ),
     ];
     if (widget.danmuController.isSelected) {
       var tooltip = widget.tooltip?.call();
-      if(tooltip != null){
+      if (tooltip != null) {
         children.add(tooltip);
       }
     }
@@ -85,6 +87,7 @@ class _FanjiaoDanmuPainter extends CustomPainter {
   final double iconWidth;
   final double iconHeight;
   final Paint _painter;
+
   // final TextPainter _textPainter;
   double? height;
   double? width;
@@ -96,7 +99,7 @@ class _FanjiaoDanmuPainter extends CustomPainter {
     this.iconProvider,
     this.iconWidth = 14,
     this.iconHeight = 14,
-  })  : _painter = Paint();
+  }) : _painter = Paint();
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -182,7 +185,8 @@ class _FanjiaoDanmuPainter extends CustomPainter {
   ///shouldRepaint则决定当条件变化时是否需要重画。
   @override
   bool shouldRepaint(_FanjiaoDanmuPainter oldDelegate) {
-    bool shouldRepaint = controller.state == DanmuStatus.playing ||
+    bool shouldRepaint = controller.onceForceRefresh ||
+        controller.state == DanmuStatus.playing ||
         oldDelegate.state != controller.state;
     state = controller.state;
     return shouldRepaint;

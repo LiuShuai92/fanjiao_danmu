@@ -28,6 +28,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
   Duration endTime = const Duration(hours: 24);
   Queue<DanmuItem<T>> danmuItems = Queue<DanmuItem<T>>();
   DanmuStatus _status = DanmuStatus.stop;
+  DanmuStatus _idleBeforeStatus = DanmuStatus.playing;
   DanmuStatus _lastReportedStatus = DanmuStatus.dismissed;
   DanmuAdapter<T> adapter;
   int maxSize;
@@ -37,8 +38,25 @@ class FanjiaoDanmuController<T extends DanmuModel>
   Ticker? _ticker;
   ImgInfo? _iconPraise;
   Duration? _lastElapsedDuration;
+  bool _onceForceRefresh = false;
+  bool _isFullShown = true;
+  bool _isAllFullShown = true;
+
+  ///下一桢动画会执行一次强制刷新
+  set onceForceRefresh(bool onceForceRefresh) =>
+      _onceForceRefresh = onceForceRefresh;
+
+  bool get onceForceRefresh {
+    bool result = _onceForceRefresh;
+    _onceForceRefresh = false;
+    return result;
+  }
 
   DanmuStatus get state => _status;
+
+  bool get isFullShown => _isFullShown;
+
+  bool get isAllFullShown => _isAllFullShown;
 
   bool get isSelected => selected != null;
 
@@ -47,9 +65,39 @@ class FanjiaoDanmuController<T extends DanmuModel>
   ///秒
   set progress(double progress) {
     assert(progress != null);
+    double oldProgress = _progress;
     _internalSetValue(progress);
-    if (_lastReportedStatus != DanmuStatus.pause) {
-      _status = DanmuStatus.playing;
+    if (_progress == oldProgress) {
+      return;
+    }
+    _onceForceRefresh = true;
+    if (_status == DanmuStatus.idle) {
+      _status = _idleBeforeStatus;
+    }
+    bool isFullShown = true;
+    for (var entry in danmuItems) {
+      entry.dTime = _progress - entry.startTime;
+      entry.position = entry.simulation.offset(_progress - entry.startTime);
+      Offset? position = entry.simulation.isDone(entry.position!, 0);
+      if (position == null) {
+        _tempList.add(entry);
+      } else if (!entry.isSelected) {
+        entry.position = position;
+        if (!entry.simulation.isFullShown) {
+          isFullShown = false;
+        }
+      }
+    }
+    _isFullShown = isFullShown;
+    for (var element in _tempList) {
+      danmuItems.remove(element);
+      adapter.removeItem(element);
+    }
+    _tempList.clear();
+    if (danmuItems.isEmpty) {
+      _idleBeforeStatus = _status;
+      _status = DanmuStatus.idle;
+      _isFullShown = true;
     }
     _checkStatusChanged();
     notifyListeners();
@@ -115,17 +163,16 @@ class FanjiaoDanmuController<T extends DanmuModel>
   _tick(Duration elapsed) {
     Duration dElapsed = elapsed - (_lastElapsedDuration ?? startTime);
     _lastElapsedDuration = elapsed;
-    if ((_status == DanmuStatus.pause && dElapsed > Duration.zero) ||
-        dElapsed == Duration.zero) {
+    if (_status == DanmuStatus.pause || dElapsed == Duration.zero) {
       return;
     }
     final double dTime =
         dElapsed.inMicroseconds / Duration.microsecondsPerSecond;
-    _progress += dTime;
+    double progress = _progress;
+    progress += dTime;
     assert(progress >= 0.0);
     _internalSetValue(progress);
     if (state == DanmuStatus.completed) {
-      _checkStatusChanged();
       clearDanmu();
       notifyListeners();
       return;
@@ -133,6 +180,8 @@ class FanjiaoDanmuController<T extends DanmuModel>
     if (danmuItems.isEmpty) {
       return;
     }
+    bool isFullShown = false;
+    bool isAllFullShown = true;
     for (var entry in danmuItems) {
       if (entry.position == null) {
         entry.dTime = _progress - entry.startTime;
@@ -148,16 +197,25 @@ class FanjiaoDanmuController<T extends DanmuModel>
           _tempList.add(entry);
         } else if (!entry.isSelected) {
           entry.position = position;
+          if (entry.simulation.isFullShown) {
+            isFullShown = true;
+          } else {
+            isAllFullShown = false;
+          }
         }
       }
     }
+    _isFullShown = isFullShown;
+    _isAllFullShown = isAllFullShown;
     for (var element in _tempList) {
       danmuItems.remove(element);
       adapter.removeItem(element);
     }
     _tempList.clear();
     if (danmuItems.isEmpty) {
+      _idleBeforeStatus = _status;
       _status = DanmuStatus.idle;
+      _isFullShown = true;
     }
     _checkStatusChanged();
     notifyListeners();
@@ -246,7 +304,8 @@ class FanjiaoDanmuController<T extends DanmuModel>
     }
     _addEntry(model);
     if (danmuItems.isNotEmpty && isAnimating && _status == DanmuStatus.idle) {
-      _status = DanmuStatus.playing;
+      _status = _idleBeforeStatus;
+      _onceForceRefresh = true;
       _checkStatusChanged();
     }
   }
@@ -261,18 +320,20 @@ class FanjiaoDanmuController<T extends DanmuModel>
       _addEntry(model);
     }
     if (danmuItems.isNotEmpty && isAnimating && _status == DanmuStatus.idle) {
-      _status = DanmuStatus.playing;
+      _status = _idleBeforeStatus;
+      _onceForceRefresh = true;
       _checkStatusChanged();
     }
   }
 
   ///秒
-  void _internalSetValue(double progress) {
+  _internalSetValue(double progress) {
     var newProgress = progress * Duration.microsecondsPerSecond;
     if (newProgress > endTime.inMicroseconds) {
       _progress =
           endTime.inMicroseconds.toDouble() / Duration.microsecondsPerSecond;
       _status = DanmuStatus.completed;
+      _checkStatusChanged();
     } else if (newProgress < startTime.inMicroseconds) {
       _progress =
           startTime.inMilliseconds.toDouble() / Duration.microsecondsPerSecond;

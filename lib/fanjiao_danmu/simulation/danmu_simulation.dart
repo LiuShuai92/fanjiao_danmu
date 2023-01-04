@@ -6,6 +6,7 @@ export 'uniform_linear_simulation.dart';
 
 abstract class DanmuSimulation {
   double time = 0;
+  bool isFullShown = false;
 
   DanmuSimulation(
     this.rect, {
