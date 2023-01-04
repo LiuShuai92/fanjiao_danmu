@@ -46,13 +46,15 @@ class _FanjiaoDanmuWidgetState extends State<FanjiaoDanmuWidget>
   @override
   Widget build(BuildContext context) {
     List<Widget> children = [
-      RepaintBoundary(
-        child: CustomPaint(
-          size: widget.size,
-          isComplex: true,
-          painter: _FanjiaoDanmuPainter(
-            context,
-            controller: widget.danmuController,
+      ClipRect(
+        child: RepaintBoundary(
+          child: CustomPaint(
+            size: widget.size,
+            isComplex: true,
+            painter: _FanjiaoDanmuPainter(
+              context,
+              controller: widget.danmuController,
+            ),
           ),
         ),
       ),

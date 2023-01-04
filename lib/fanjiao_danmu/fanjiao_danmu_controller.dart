@@ -40,6 +40,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
   Duration? _lastElapsedDuration;
   bool _onceForceRefresh = false;
   bool _isFullShown = true;
+  bool _isAllFullShown = true;
 
   ///下一桢动画会执行一次强制刷新
   set onceForceRefresh(bool onceForceRefresh) =>
@@ -54,6 +55,8 @@ class FanjiaoDanmuController<T extends DanmuModel>
   DanmuStatus get state => _status;
 
   bool get isFullShown => _isFullShown;
+
+  bool get isAllFullShown => _isAllFullShown;
 
   bool get isSelected => selected != null;
 
@@ -177,7 +180,8 @@ class FanjiaoDanmuController<T extends DanmuModel>
     if (danmuItems.isEmpty) {
       return;
     }
-    bool isFullShown = true;
+    bool isFullShown = false;
+    bool isAllFullShown = true;
     for (var entry in danmuItems) {
       if (entry.position == null) {
         entry.dTime = _progress - entry.startTime;
@@ -193,13 +197,16 @@ class FanjiaoDanmuController<T extends DanmuModel>
           _tempList.add(entry);
         } else if (!entry.isSelected) {
           entry.position = position;
-          if (!entry.simulation.isFullShown) {
-            isFullShown = false;
+          if (entry.simulation.isFullShown) {
+            isFullShown = true;
+          } else {
+            isAllFullShown = false;
           }
         }
       }
     }
     _isFullShown = isFullShown;
+    _isAllFullShown = isAllFullShown;
     for (var element in _tempList) {
       danmuItems.remove(element);
       adapter.removeItem(element);
