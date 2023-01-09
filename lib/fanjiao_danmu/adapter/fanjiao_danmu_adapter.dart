@@ -21,6 +21,9 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
 
   int? get maxLines => _maxLines;
 
+  math.Random _random = math.Random();
+  int get _randomScrollLine => _random.nextInt(scrollRows.length - 1);
+
   double _getPaddingTop(int lineIndex, double textHeight) =>
       lineIndex * lineHeight + (lineHeight - textHeight) / 2;
 
@@ -246,7 +249,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
           simulation: simulation,
           spanInfo: textSpanInfo,
           size: size);
-      var index = scrollRows.length >> 1;
+      var index = _randomScrollLine;
       scrollRows[index].add(item);
       simulation.paddingTop = _getPaddingTop(index, size.height);
     }
