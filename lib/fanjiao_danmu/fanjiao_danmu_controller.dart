@@ -241,7 +241,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
         break;
       }
     }
-    if (selectedTemp != null) {
+    if (selectedTemp != null && filter.check(selectedTemp.flag)) {
       if (onTap?.call(selectedTemp, position) ?? false) {
         selectedTemp.isSelected = true;
         selected = selectedTemp;
