@@ -46,15 +46,13 @@ class _FanjiaoDanmuWidgetState extends State<FanjiaoDanmuWidget>
   @override
   Widget build(BuildContext context) {
     List<Widget> children = [
-      ClipRect(
-        child: RepaintBoundary(
-          child: CustomPaint(
-            size: widget.size,
-            isComplex: true,
-            painter: _FanjiaoDanmuPainter(
-              context,
-              controller: widget.danmuController,
-            ),
+      RepaintBoundary(
+        child: CustomPaint(
+          size: widget.size,
+          isComplex: true,
+          painter: _FanjiaoDanmuPainter(
+            context,
+            controller: widget.danmuController,
           ),
         ),
       ),
@@ -108,6 +106,7 @@ class _FanjiaoDanmuPainter extends CustomPainter {
     }
     height ??= size.height;
     width ??= size.width;
+    canvas.saveLayer(Rect.fromLTRB(0, 0, size.width, size.height), _painter);
     for (var entry in controller.danmuItems) {
       if (entry.startTime <= controller.progress &&
           controller.filter.check(entry.flag)) {
@@ -117,6 +116,7 @@ class _FanjiaoDanmuPainter extends CustomPainter {
         drawItem(entry, canvas);
       }
     }
+    canvas.restore();
   }
 
   void drawItem(DanmuItem<DanmuModel> entry, ui.Canvas canvas) {
