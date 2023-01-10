@@ -111,14 +111,11 @@ class _FanjiaoDanmuPainter extends CustomPainter {
     for (var entry in controller.danmuItems) {
       if (entry.startTime <= controller.progress &&
           controller.filter.check(entry.flag)) {
-        if (entry.position == null || entry.isSelected) {
+        if (entry.position == null) {
           continue;
         }
         drawItem(entry, canvas);
       }
-    }
-    if (controller.selected != null) {
-      drawItem(controller.selected!, canvas);
     }
   }
 
