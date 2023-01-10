@@ -34,12 +34,7 @@ class UniformLinearSimulation extends DanmuSimulation {
   @override
   Offset? isDone(Offset o, double dt) {
     Offset result = o + dOffset(dt);
-    var dx = result.dx;
-    var dy = result.dy;
-    if (dx < rect.left ||
-        dx > rect.right ||
-        dy < rect.top ||
-        dy > rect.bottom) {
+    if (rect.contains(result)) {
       return null;
     }
     return result;

@@ -109,7 +109,8 @@ class _FanjiaoDanmuPainter extends CustomPainter {
     height ??= size.height;
     width ??= size.width;
     for (var entry in controller.danmuItems) {
-      if (controller.filter.check(entry.flag)) {
+      if (entry.startTime <= controller.progress &&
+          controller.filter.check(entry.flag)) {
         if (entry.position == null || entry.isSelected) {
           continue;
         }
