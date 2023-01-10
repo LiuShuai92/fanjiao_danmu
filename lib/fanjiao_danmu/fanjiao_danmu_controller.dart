@@ -375,7 +375,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
     } else {
       filter = filter.remove(flag);
     }
-    onceForceRefresh = true;
+    _onceForceRefresh = true;
     notifyListeners();
   }
 

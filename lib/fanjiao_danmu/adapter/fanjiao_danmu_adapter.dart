@@ -181,7 +181,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
           }
 
           ///如果弹幕放到当前行，则在当前行上一条弹幕消失时，当前添加的弹幕所在位置是否没有超过了中线
-          if (dx > rect.center.dx) {
+          if (dx > rect.center.dx && i <= min) {
             simulation.paddingTop = _getPaddingTop(i, size.height);
             item = DanmuItem(
                 model: model,
@@ -193,15 +193,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
             break;
           } else if (tempIndex == null && dx > rect.left) {
             tempIndex = i;
-          } else if (i > min && tempIndex == null) {
-            simulation.paddingTop = _getPaddingTop(i, size.height);
-            item = DanmuItem(
-                model: model,
-                padding: padding,
-                simulation: simulation,
-                spanInfo: textSpanInfo,
-                size: size);
-            row.add(item);
+          } else if (i > min && tempIndex != null) {
             break;
           }
         }
