@@ -167,14 +167,19 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
         row.add(item);
         break;
       } else {
-        var insertTime =
-            (model.insertTime - model.startTime).inMicrosecondsPerSecond;
-        var rx = simulation.offset(insertTime).dx;
+        var rx = simulation
+            .offset(
+                (model.insertTime - model.startTime).inMicrosecondsPerSecond)
+            .dx;
         if (model.isPraise) {
           rx -= iconExtra;
         }
         var last = row.lastWhere((element) => !element.isSelected);
-        var lx = last.simulation.offset(insertTime).dx + last.size.width;
+        var lx = last.simulation
+                .offset(
+                    (model.insertTime - last.startTime).inMicrosecondsPerSecond)
+                .dx +
+            last.size.width;
         if (rx - lx > preExtra) {
           var endTime =
               (last.endTime - model.startTime).inMicrosecondsPerSecond;
