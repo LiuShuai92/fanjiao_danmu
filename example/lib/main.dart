@@ -301,7 +301,8 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
               danmuController.addDanmu(DanmuModel(
                 id: ++id,
                 text: '3秒前',
-                startTime: danmuController.progress - 3,
+                startTime:
+                    danmuController.progress - const Duration(seconds: 3),
                 textStyle: rngTextStyle,
               ));
             },
@@ -369,7 +370,7 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
                 ),
               ),
               onTap: () {
-                if(danmuController.selected != null){
+                if (danmuController.selected != null) {
                   danmuController.addDanmu(DanmuModel(
                     id: ++id,
                     text: danmuController.selected!.text,

@@ -33,11 +33,12 @@ class FanjiaoDanmuController<T extends DanmuModel>
   DanmuAdapter<T> adapter;
   int maxSize;
   int filter;
-  late double _progress; //秒
+
+  // late double _progress; //秒
   DanmuItem<T>? selected;
   Ticker? _ticker;
   ImgInfo? _iconPraise;
-  Duration? _lastElapsedDuration;
+  Duration? _progress;
   bool _onceForceRefresh = false;
   bool _isFullShown = true;
   bool _isAllFullShown = true;
@@ -60,14 +61,14 @@ class FanjiaoDanmuController<T extends DanmuModel>
 
   bool get isSelected => selected != null;
 
-  double get progress => _progress;
+  Duration get progress => _progress ?? startTime;
 
   ///秒
-  set progress(double progress) {
-    assert(progress != null);
-    double oldProgress = _progress;
-    _internalSetValue(progress);
-    if (_progress == oldProgress) {
+  set progress(Duration newProgress) {
+    assert(newProgress != null);
+    Duration oldProgress = _progress ?? startTime;
+    _internalSetValue(newProgress);
+    if (progress == oldProgress) {
       return;
     }
     _onceForceRefresh = true;
@@ -76,8 +77,9 @@ class FanjiaoDanmuController<T extends DanmuModel>
     }
     bool isFullShown = true;
     for (var entry in danmuItems) {
-      entry.dTime = _progress - entry.startTime;
-      entry.position = entry.simulation.offset(_progress - entry.startTime);
+      entry.dTime = progress - entry.startTime;
+      entry.position = entry.simulation
+          .offset((progress - entry.startTime).inMicrosecondsPerSecond);
       Offset? position = entry.simulation.isDone(entry.position!, 0);
       if (position == null) {
         _tempList.add(entry);
@@ -119,7 +121,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
   }) {
     this.startTime = startTime;
     endTime = startTime + duration;
-    _progress = startTime.inMicroseconds / Duration.microsecondsPerSecond;
+    _progress = startTime;
   }
 
   clearDanmu() {
@@ -161,17 +163,14 @@ class FanjiaoDanmuController<T extends DanmuModel>
   }
 
   _tick(Duration elapsed) {
-    Duration dElapsed = elapsed - (_lastElapsedDuration ?? startTime);
-    _lastElapsedDuration = elapsed;
+    Duration dElapsed = elapsed - progress;
     if (_status == DanmuStatus.pause || dElapsed == Duration.zero) {
       return;
     }
-    final double dTime =
-        dElapsed.inMicroseconds / Duration.microsecondsPerSecond;
-    double progress = _progress;
-    progress += dTime;
-    assert(progress >= 0.0);
-    _internalSetValue(progress);
+    Duration newProgress = progress;
+    newProgress += dElapsed;
+    assert(newProgress >= Duration.zero);
+    _internalSetValue(newProgress);
     if (state == DanmuStatus.completed) {
       clearDanmu();
       notifyListeners();
@@ -184,14 +183,16 @@ class FanjiaoDanmuController<T extends DanmuModel>
     bool isAllFullShown = true;
     for (var entry in danmuItems) {
       if (entry.position == null) {
-        entry.dTime = _progress - entry.startTime;
-        entry.position = entry.simulation.offset(_progress - entry.startTime);
+        entry.dTime = progress - entry.startTime;
+        entry.position = entry.simulation
+            .offset((progress - entry.startTime).inMicrosecondsPerSecond);
       } else {
         Offset? position;
         if (entry.isSelected) {
           position = entry.simulation.isDone(entry.position!, 0);
         } else {
-          position = entry.simulation.isDone(entry.position!, dTime);
+          position = entry.simulation
+              .isDone(entry.position!, dElapsed.inMicrosecondsPerSecond);
         }
         if (position == null) {
           _tempList.add(entry);
@@ -271,8 +272,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
     if (model.text.isEmpty) {
       return;
     }
-    if (model.startTime >
-        endTime.inMilliseconds / Duration.millisecondsPerSecond) {
+    if (model.startTime > endTime) {
       return;
     }
     if (danmuItems.length > maxSize) {
@@ -327,16 +327,13 @@ class FanjiaoDanmuController<T extends DanmuModel>
   }
 
   ///秒
-  _internalSetValue(double progress) {
-    var newProgress = progress * Duration.microsecondsPerSecond;
-    if (newProgress > endTime.inMicroseconds) {
-      _progress =
-          endTime.inMicroseconds.toDouble() / Duration.microsecondsPerSecond;
+  _internalSetValue(Duration progress) {
+    if (progress > endTime) {
+      _progress = endTime;
       _status = DanmuStatus.completed;
       _checkStatusChanged();
-    } else if (newProgress < startTime.inMicroseconds) {
-      _progress =
-          startTime.inMilliseconds.toDouble() / Duration.microsecondsPerSecond;
+    } else if (progress < startTime) {
+      _progress = startTime;
     } else {
       _progress = progress;
     }
@@ -360,7 +357,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
   stop({bool canceled = true}) {
     assert(_ticker != null);
     danmuItems.clear();
-    _lastElapsedDuration = null;
+    progress = startTime;
     _status = DanmuStatus.stop;
     _checkStatusChanged();
     _ticker!.stop(canceled: canceled);
@@ -538,6 +535,19 @@ class ImgInfo {
   bool get isEmpty => image == null;
 
   const ImgInfo(this.image, this.rect);
+}
+
+extension DurationExtension on Duration {
+  double get inMicrosecondsPerSecond =>
+      inMicroseconds / Duration.microsecondsPerSecond;
+
+  double get inMillisecondsPerSecond =>
+      inMilliseconds / Duration.millisecondsPerSecond;
+}
+
+extension SecondDoubleToDuration on double {
+  Duration get inSecondToDuration =>
+      Duration(microseconds: (this * Duration.microsecondsPerSecond).toInt());
 }
 
 extension DanmuFlag on int {

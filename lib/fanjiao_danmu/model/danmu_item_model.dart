@@ -19,7 +19,7 @@ class DanmuItem<T extends DanmuModel> {
   ///[DanmuFlag] 可能会发生改变 比如[DanmuFlag.repeated]是否是重复内容
   int flag;
   bool isSelected;
-  double? dTime;
+  Duration? dTime;
   Offset? position;
   ui.Image? icon;
 
@@ -30,11 +30,15 @@ class DanmuItem<T extends DanmuModel> {
       ? Rect.zero
       : position! & size + padding.bottomRight + padding.bottomRight;
 
-  double get insertTime => model.insertTime;
+  Duration get insertTime => model.insertTime;
 
-  double get startTime => model.startTime;
+  Duration get startTime => model.startTime;
 
-  double get endTime => startTime + simulation.duration;
+  Duration get endTime =>
+      startTime +
+      Duration(
+          microseconds:
+              (simulation.duration * Duration.microsecondsPerSecond).toInt());
 
   Offset get startPosition => simulation.offset(0);
 
@@ -107,8 +111,8 @@ class DanmuModel {
   ///[DanmuFlag] 一个弹幕创建时确定，不会发生改变
   final int flag;
   final TextStyle textStyle;
-  final double insertTime;
-  final double startTime;
+  final Duration insertTime;
+  final Duration startTime;
   final bool isPraise;
   final ImageProvider? imageProvider;
   final String? package;
@@ -125,7 +129,7 @@ class DanmuModel {
     this.isPraise = false,
     this.package,
     this.flag = DanmuFlag.scroll,
-    double? insertTime,
+    Duration? insertTime,
     Map<String, ImageProvider>? imageMap,
     this.textStyle = const TextStyle(
       color: Colors.white,
