@@ -101,7 +101,7 @@ class _FanjiaoDanmuPainter extends CustomPainter {
 
   @override
   bool? hitTest(ui.Offset position) {
-    return controller.isSelected;
+    return !controller.isSelected;
   }
 
   @override
