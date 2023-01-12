@@ -96,7 +96,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
       adapter.removeItem(element);
     }
     _tempList.clear();
-    if (danmuItems.isEmpty) {
+    if (danmuItems.isEmpty && _status == DanmuStatus.playing) {
       _idleBeforeStatus = _status;
       _status = DanmuStatus.idle;
       _isFullShown = true;
