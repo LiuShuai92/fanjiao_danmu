@@ -100,6 +100,11 @@ class _FanjiaoDanmuPainter extends CustomPainter {
   }) : _painter = Paint();
 
   @override
+  bool? hitTest(ui.Offset position) {
+    return controller.isSelected;
+  }
+
+  @override
   void paint(Canvas canvas, Size size) {
     if (controller.danmuItems.isEmpty) {
       return;
