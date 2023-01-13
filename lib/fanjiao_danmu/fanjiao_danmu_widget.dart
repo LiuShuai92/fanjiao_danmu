@@ -112,7 +112,12 @@ class _FanjiaoDanmuPainter extends CustomPainter {
     height ??= size.height;
     width ??= size.width;
     canvas.saveLayer(Rect.fromLTRB(0, 0, size.width, size.height), _painter);
+    DanmuItem? selectedEntry;
     for (var entry in controller.danmuItems) {
+      if (entry.isSelected) {
+        selectedEntry = entry;
+        continue;
+      }
       if (entry.startTime <= controller.progress &&
           controller.filter.check(entry.flag)) {
         if (entry.position == null) {
@@ -120,6 +125,9 @@ class _FanjiaoDanmuPainter extends CustomPainter {
         }
         drawItem(entry, canvas);
       }
+    }
+    if (selectedEntry != null) {
+      drawItem(selectedEntry, canvas);
     }
     canvas.restore();
   }
