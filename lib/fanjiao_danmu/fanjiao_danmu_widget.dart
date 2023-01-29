@@ -68,6 +68,9 @@ class _FanjiaoDanmuWidgetState extends State<FanjiaoDanmuWidget>
       height: widget.size.height,
       child: GestureDetector(
         onTapDown: (details) {
+          if (widget.danmuController.isSelected && widget.tooltip == null) {
+            widget.danmuController.clearSelection();
+          }
           widget.danmuController.tapPosition(details.localPosition);
         },
         child: Stack(

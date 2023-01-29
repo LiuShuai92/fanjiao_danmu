@@ -194,7 +194,7 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
                 danmuController.pause();
               }
             },
-            isTurnOn: danmuController.filter.isRepeated,
+            isTurnOn: isPlaying,
           ),
         ],
       );
@@ -370,7 +370,7 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
                 ),
               ),
               onTap: () {
-                if (danmuController.selected != null) {
+                if (danmuController.isSelected) {
                   danmuController.addDanmu(DanmuModel(
                     id: ++id,
                     text: danmuController.selected!.text,

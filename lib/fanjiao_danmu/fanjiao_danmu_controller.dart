@@ -231,7 +231,6 @@ class FanjiaoDanmuController<T extends DanmuModel>
 
   tapPosition(Offset position) {
     if (isSelected) {
-      clearSelection();
       return;
     }
     DanmuItem<T>? selectedTemp;
@@ -424,7 +423,7 @@ mixin DanmuTooltipMixin {
 
   bool? _menuIsAbove;
 
-  bool get menuIsAbove => _menuIsAbove ?? false;
+  bool get  menuIsAbove => _menuIsAbove ?? false;
 
   Size get menuSize => const Size(96, 35);
 
