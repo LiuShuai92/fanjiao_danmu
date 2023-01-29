@@ -46,15 +46,13 @@ class _FanjiaoDanmuWidgetState extends State<FanjiaoDanmuWidget>
   @override
   Widget build(BuildContext context) {
     List<Widget> children = [
-      ClipRect(
-        child: RepaintBoundary(
-          child: CustomPaint(
-            size: widget.size,
-            isComplex: true,
-            painter: _FanjiaoDanmuPainter(
-              context,
-              controller: widget.danmuController,
-            ),
+      RepaintBoundary(
+        child: CustomPaint(
+          size: widget.size,
+          isComplex: true,
+          painter: _FanjiaoDanmuPainter(
+            context,
+            controller: widget.danmuController,
           ),
         ),
       ),
@@ -70,6 +68,9 @@ class _FanjiaoDanmuWidgetState extends State<FanjiaoDanmuWidget>
       height: widget.size.height,
       child: GestureDetector(
         onTapDown: (details) {
+          if (widget.danmuController.isSelected && widget.tooltip == null) {
+            widget.danmuController.clearSelection();
+          }
           widget.danmuController.tapPosition(details.localPosition);
         },
         child: Stack(
@@ -102,23 +103,36 @@ class _FanjiaoDanmuPainter extends CustomPainter {
   }) : _painter = Paint();
 
   @override
+  bool? hitTest(ui.Offset position) {
+    return true;
+  }
+
+  @override
   void paint(Canvas canvas, Size size) {
     if (controller.danmuItems.isEmpty) {
       return;
     }
     height ??= size.height;
     width ??= size.width;
+    canvas.saveLayer(Rect.fromLTRB(0, 0, size.width, size.height), _painter);
+    DanmuItem? selectedEntry;
     for (var entry in controller.danmuItems) {
-      if (controller.filter.check(entry.flag)) {
-        if (entry.position == null || entry.isSelected) {
+      if (entry.isSelected) {
+        selectedEntry = entry;
+        continue;
+      }
+      if (entry.startTime <= controller.progress &&
+          controller.filter.check(entry.flag)) {
+        if (entry.position == null) {
           continue;
         }
         drawItem(entry, canvas);
       }
     }
-    if (controller.selected != null) {
-      drawItem(controller.selected!, canvas);
+    if (selectedEntry != null) {
+      drawItem(selectedEntry, canvas);
     }
+    canvas.restore();
   }
 
   void drawItem(DanmuItem<DanmuModel> entry, ui.Canvas canvas) {

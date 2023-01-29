@@ -5,6 +5,7 @@ export 'horizontal_scroll_simulation.dart';
 export 'uniform_linear_simulation.dart';
 
 abstract class DanmuSimulation {
+  /// 单位：秒
   double time = 0;
   bool isFullShown = false;
 

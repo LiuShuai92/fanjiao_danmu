@@ -11,6 +11,7 @@ import '../simulation/clamp_simulation.dart';
 import 'danmu_adapter.dart';
 
 class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
+  final math.Random _random = math.Random();
   final Size imageSize;
   final EdgeInsets padding;
   final List<Queue<DanmuItem<T>>> scrollRows = [];
@@ -20,6 +21,8 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
   int? _maxLines;
 
   int? get maxLines => _maxLines;
+
+  int get _randomScrollLine => _random.nextInt(scrollRows.length - 1);
 
   double _getPaddingTop(int lineIndex, double textHeight) =>
       lineIndex * lineHeight + (lineHeight - textHeight) / 2;
@@ -142,15 +145,16 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
 
   DanmuItem<T>? _getScrollItem(T model) {
     assert(_maxLines != null, "需要先调用 initData()");
-
-    ///第一次循环只判断前一半的行数或前三行
     DanmuItem<T>? item;
     final SpanInfo textSpanInfo =
         transformText(model.text, model.textStyle, imageMap: imageMap);
     Size size = _spanSize(textSpanInfo, padding);
-    for (int i = 0; i < math.min(scrollRows.length / 2, 3); i++) {
+    int? tempIndex;
+    int min = math.min(scrollRows.length ~/ 2, 3);
+    HorizontalScrollSimulation? simulation;
+    for (int i = 0; i < scrollRows.length; i++) {
       Queue<DanmuItem<T>> row = scrollRows[i];
-      HorizontalScrollSimulation simulation =
+      simulation =
           HorizontalScrollSimulation(right: rect.width, left: 0, size: size);
       if (row.isEmpty || row.last.isSelected) {
         simulation.paddingTop = _getPaddingTop(i, size.height);
@@ -163,20 +167,29 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
         row.add(item);
         break;
       } else {
-        var startX = simulation.offset(model.insertTime - model.startTime).dx;
+        var rx = simulation
+            .offset(
+                (model.insertTime - model.startTime).inMicrosecondsPerSecond)
+            .dx;
         if (model.isPraise) {
-          startX -= iconExtra;
+          rx -= iconExtra;
         }
         var last = row.lastWhere((element) => !element.isSelected);
-        var startPreXr = last.simulation.offset(model.insertTime - last.startTime).dx +
+        var lx = last.simulation
+                .offset(
+                    (model.insertTime - last.startTime).inMicrosecondsPerSecond)
+                .dx +
             last.size.width;
-        if (startX - startPreXr > preExtra) {
-          var preEndX = simulation.offset(last.endTime - model.startTime).dx;
+        if (rx - lx > preExtra) {
+          var endTime =
+              (last.endTime - model.startTime).inMicrosecondsPerSecond;
+          var dx = simulation.offset(endTime).dx;
           if (model.isPraise) {
-            preEndX -= iconExtra;
+            dx -= iconExtra;
           }
-          if (preEndX - rect.center.dx > preExtra) {
-            ///如果弹幕放到当前行，则在当前行上一条弹幕消失时，当前添加的弹幕所在位置是否没有超过了中线
+
+          ///如果弹幕放到当前行，则在当前行上一条弹幕消失时，当前添加的弹幕所在位置是否没有超过了中线
+          if (dx > rect.center.dx && i <= min) {
             simulation.paddingTop = _getPaddingTop(i, size.height);
             item = DanmuItem(
                 model: model,
@@ -186,56 +199,23 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
                 size: size);
             row.add(item);
             break;
+          } else if (tempIndex == null && dx > rect.left) {
+            tempIndex = i;
+          } else if (i > min && tempIndex != null) {
+            break;
           }
         }
       }
     }
-
-    ///如果第一次循环没有找到合适位置，就进行第二次循环
-    if (item == null) {
-      for (int i = 0; i < scrollRows.length; i++) {
-        Queue<DanmuItem<T>> row = scrollRows[i];
-        HorizontalScrollSimulation simulation =
-            HorizontalScrollSimulation(right: rect.width, left: 0, size: size);
-        if (row.isEmpty || row.last.isSelected) {
-          simulation.paddingTop = _getPaddingTop(i, size.height);
-          item = DanmuItem(
-              model: model,
-              padding: padding,
-              simulation: simulation,
-              spanInfo: textSpanInfo,
-              size: size);
-          row.add(item);
-          break;
-        } else {
-          var startX = simulation.offset(model.insertTime - model.startTime).dx;
-          if (model.isPraise) {
-            startX -= iconExtra;
-          }
-          var last = row.lastWhere((element) => !element.isSelected);
-          var startPreXr =
-              last.simulation.offset(model.insertTime - last.startTime).dx +
-                  last.size.width;
-          if (startX - startPreXr > preExtra) {
-            var preEndX = simulation.offset(last.endTime - model.startTime).dx;
-            if (model.isPraise) {
-              preEndX -= iconExtra;
-            }
-            if (preEndX - rect.left > preExtra) {
-              ///如果弹幕放到当前行，则在当前行上一条弹幕消失时，当前添加的弹幕所在位置是否没有超过左边界
-              simulation.paddingTop = _getPaddingTop(i, size.height);
-              item = DanmuItem(
-                  model: model,
-                  padding: padding,
-                  simulation: simulation,
-                  spanInfo: textSpanInfo,
-                  size: size);
-              row.add(item);
-              break;
-            }
-          }
-        }
-      }
+    if (item == null && simulation != null && tempIndex != null) {
+      simulation.paddingTop = _getPaddingTop(tempIndex, size.height);
+      item = DanmuItem(
+          model: model,
+          padding: padding,
+          simulation: simulation,
+          spanInfo: textSpanInfo,
+          size: size);
+      scrollRows[tempIndex].add(item);
     }
     if (item == null && model.isMine) {
       HorizontalScrollSimulation simulation =
@@ -246,7 +226,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
           simulation: simulation,
           spanInfo: textSpanInfo,
           size: size);
-      var index = scrollRows.length >> 1;
+      var index = _randomScrollLine;
       scrollRows[index].add(item);
       simulation.paddingTop = _getPaddingTop(index, size.height);
     }
