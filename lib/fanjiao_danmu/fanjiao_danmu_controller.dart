@@ -572,6 +572,9 @@ extension DanmuFlag on int {
   ///公告
   static const int announcement = 1 << 6;
 
+  ///无碰撞体积
+  static const int collisionFree = 1 << 7;
+
   ///全部不允许
   static const int none = 0;
 
@@ -582,7 +585,8 @@ extension DanmuFlag on int {
       DanmuFlag.advanced |
       DanmuFlag.repeated |
       DanmuFlag.colorful |
-      DanmuFlag.announcement;
+      DanmuFlag.announcement|
+      DanmuFlag.collisionFree;
 
   bool check(int flag) => this & flag == flag;
 
@@ -606,6 +610,8 @@ extension DanmuFlag on int {
 
   bool get isAnnouncement => check(announcement);
 
+  bool get isCollisionFree => check(collisionFree);
+
   int get addScroll => add(scroll);
 
   int get addTop => add(top);
@@ -619,6 +625,8 @@ extension DanmuFlag on int {
   int get addColorful => add(colorful);
 
   int get addAnnouncement => add(announcement);
+
+  int get addCollisionFree => add(collisionFree);
 
   int get removeScroll => remove(scroll);
 
@@ -634,6 +642,8 @@ extension DanmuFlag on int {
 
   int get removeAnnouncement => remove(announcement);
 
+  int get removeCollisionFree => remove(collisionFree);
+
   int get changeScroll => change(scroll);
 
   int get changeTop => change(top);
@@ -647,4 +657,6 @@ extension DanmuFlag on int {
   int get changeColorful => change(colorful);
 
   int get changeAnnouncement => change(announcement);
+
+  int get changeCollisionFree => change(collisionFree);
 }

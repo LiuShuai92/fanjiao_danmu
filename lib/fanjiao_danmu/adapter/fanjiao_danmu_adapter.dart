@@ -174,7 +174,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
         if (model.isPraise) {
           rx -= iconExtra;
         }
-        var last = row.lastWhere((element) => !element.isSelected);
+        var last = row.lastWhere((element) => !element.isSelected && !element.flag.isCollisionFree);
         var lx = last.simulation
                 .offset(
                     (model.insertTime - last.startTime).inMicrosecondsPerSecond)
@@ -217,7 +217,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
           size: size);
       scrollRows[tempIndex].add(item);
     }
-    if (item == null && model.isMine) {
+    if (item == null && model.flag.isCollisionFree) {
       HorizontalScrollSimulation simulation =
           HorizontalScrollSimulation(right: rect.width, left: 0, size: size);
       item = DanmuItem(
