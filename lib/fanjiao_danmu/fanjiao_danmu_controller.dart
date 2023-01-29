@@ -231,6 +231,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
 
   tapPosition(Offset position) {
     if (isSelected) {
+      widget.danmuController.clearSelection();
       return;
     }
     DanmuItem<T>? selectedTemp;
