@@ -196,7 +196,7 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
                 danmuController.pause();
               }
             },
-            isTurnOn: isPlaying,
+            isTurnOn: !isPlaying,
           ),
         ],
       );
