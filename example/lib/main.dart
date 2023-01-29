@@ -98,6 +98,8 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
                             isMine: true,
                             startTime: danmuController.progress,
                             textStyle: rngTextStyle,
+                            flag: DanmuFlag.announcement |
+                                DanmuFlag.collisionFree,
                           ));
                         },
                       ),
@@ -280,6 +282,7 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
                 isMine: true,
                 startTime: danmuController.progress,
                 textStyle: rngTextStyle,
+                flag: DanmuFlag.announcement | DanmuFlag.collisionFree,
               ));
             },
           ),
