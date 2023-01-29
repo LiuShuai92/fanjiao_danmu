@@ -372,7 +372,7 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
                       color: Colors.white),
                 ),
               ),
-              onTap: () {
+              onTapDown: (detail) {
                 if (danmuController.isSelected) {
                   danmuController.addDanmu(DanmuModel(
                     id: ++id,
@@ -411,7 +411,7 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
                       color: Colors.white),
                 ),
               ),
-              onTap: () {
+              onTapDown: (detail) {
                 danmuController.clearSelection();
               },
               behavior: HitTestBehavior.opaque,
