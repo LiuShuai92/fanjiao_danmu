@@ -74,7 +74,7 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
                 color: Colors.greenAccent,
                 child: LayoutBuilder(builder: (context, constraints) {
                   return FanjiaoDanmuWidget(
-                    size: Size(constraints.maxWidth, 300),
+                    size: Size(constraints.maxWidth, 350),
                     danmuController: danmuController,
                     tooltip: tooltip,
                   );
@@ -359,7 +359,6 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
           Expanded(
             child: GestureDetector(
               child: Container(
-                height: 30,
                 alignment: Alignment.center,
                 child: const Text(
                   '加一',
@@ -372,7 +371,8 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
                       color: Colors.white),
                 ),
               ),
-              onTapDown: (detail) {
+              onTap: () {
+                print('LiuShuai: onTap +1 isSelected = ${danmuController.isSelected}');
                 if (danmuController.isSelected) {
                   danmuController.addDanmu(DanmuModel(
                     id: ++id,
@@ -380,8 +380,8 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
                     isMine: true,
                     startTime: danmuController.progress,
                   ));
+                  danmuController.clearSelection();
                 }
-                danmuController.clearSelection();
               },
               behavior: HitTestBehavior.opaque,
             ),
@@ -398,7 +398,6 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
           Expanded(
             child: GestureDetector(
               child: Container(
-                height: 30,
                 alignment: Alignment.center,
                 child: const Text(
                   '举报',
@@ -411,7 +410,7 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
                       color: Colors.white),
                 ),
               ),
-              onTapDown: (detail) {
+              onTap: () {
                 danmuController.clearSelection();
               },
               behavior: HitTestBehavior.opaque,

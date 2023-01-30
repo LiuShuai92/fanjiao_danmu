@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_svg/svg.dart';
 
 import 'adapter/danmu_adapter.dart';
 import 'fanjiao_danmu.dart';
@@ -364,10 +365,10 @@ class FanjiaoDanmuController<T extends DanmuModel>
   }
 
   /// flag [DanmuFlag]
-  changeFilter(int flag, {bool? need}) {
-    if (need == null) {
+  changeFilter(int flag, {bool? isEnable}) {
+    if (isEnable == null) {
       filter = filter.change(flag);
-    } else if (need) {
+    } else if (isEnable) {
       filter = filter.add(flag);
     } else {
       filter = filter.remove(flag);
@@ -424,7 +425,7 @@ mixin DanmuTooltipMixin {
 
   bool? _menuIsAbove;
 
-  bool get  menuIsAbove => _menuIsAbove ?? false;
+  bool get menuIsAbove => _menuIsAbove ?? false;
 
   Size get menuSize => const Size(96, 35);
 
@@ -464,19 +465,18 @@ mixin DanmuTooltipMixin {
           width: menuSize.width,
           height: menuSize.height - 5,
           decoration: const BoxDecoration(
-              image: DecorationImage(
-                  image: AssetImage(
-            'assets/images/danmu_report.png',
-            package: package,
-          ))),
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+            color: Color(0xFF836BFF),
+          ),
           child: tooltipContent,
         ),
         Padding(
-          padding: EdgeInsets.only(left: menupeak - 5),
-          child: Image.asset(
-            'assets/images/danmu_report_arrow_down.png',
+          padding: EdgeInsets.only(left: menupeak - 5.5),
+          child: SvgPicture.asset(
+            "assets/svgs/arrow_down.svg",
             width: 11,
             height: 5,
+            color: const Color(0xFF836BFF),
             package: package,
           ),
         ),
@@ -484,11 +484,12 @@ mixin DanmuTooltipMixin {
     } else {
       children = [
         Padding(
-          padding: EdgeInsets.only(left: menupeak - 5),
-          child: Image.asset(
-            'assets/images/danmu_report_arrow_up.png',
+          padding: EdgeInsets.only(left: menupeak - 5.5),
+          child: SvgPicture.asset(
+            "assets/svgs/arrow_up.svg",
             width: 11,
             height: 5,
+            color: const Color(0xFF836BFF),
             package: package,
           ),
         ),
@@ -496,19 +497,20 @@ mixin DanmuTooltipMixin {
           width: menuSize.width,
           height: menuSize.height - 5,
           decoration: const BoxDecoration(
-              image: DecorationImage(
-                  image: AssetImage(
-            'assets/images/danmu_report.png',
-            package: package,
-          ))),
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+            color: Color(0xFF836BFF),
+          ),
           child: tooltipContent,
         ),
       ];
     }
+
     widget = Positioned(
       left: menuRect.left,
       top: menuRect.top,
+      height: menuSize.height,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: children,
       ),
@@ -586,7 +588,7 @@ extension DanmuFlag on int {
       DanmuFlag.advanced |
       DanmuFlag.repeated |
       DanmuFlag.colorful |
-      DanmuFlag.announcement|
+      DanmuFlag.announcement |
       DanmuFlag.collisionFree;
 
   bool check(int flag) => this & flag == flag;
