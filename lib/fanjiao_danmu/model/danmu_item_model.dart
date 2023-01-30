@@ -64,7 +64,8 @@ class DanmuItem<T extends DanmuModel> {
     this.padding = const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
     this.isSelected = false,
     this.lineNum = 0,
-  })  : flag = model.flag,
+    int? flag,
+  })  : flag = flag ?? model.flag,
         configuration = ImageConfiguration(size: size) {
     if (spanInfo.isTextSpan) {
       ///由于绘制时大量layout比较耗时，所以提前用空间换时间

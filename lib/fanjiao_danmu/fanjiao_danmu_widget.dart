@@ -68,11 +68,10 @@ class _FanjiaoDanmuWidgetState extends State<FanjiaoDanmuWidget>
       height: widget.size.height,
       child: GestureDetector(
         onTapDown: (details) {
-          if (widget.danmuController.isSelected && widget.tooltip == null) {
-            widget.danmuController.clearSelection();
-          }
+          print('LiuShuai: onTapDown');
           widget.danmuController.tapPosition(details.localPosition);
         },
+        behavior: HitTestBehavior.opaque,
         child: Stack(
           children: children,
         ),
@@ -101,11 +100,6 @@ class _FanjiaoDanmuPainter extends CustomPainter {
     this.iconWidth = 14,
     this.iconHeight = 14,
   }) : _painter = Paint();
-
-  @override
-  bool? hitTest(ui.Offset position) {
-    return true;
-  }
 
   @override
   void paint(Canvas canvas, Size size) {

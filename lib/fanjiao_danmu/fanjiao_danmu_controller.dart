@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_svg/svg.dart';
 
 import 'adapter/danmu_adapter.dart';
 import 'fanjiao_danmu.dart';
@@ -231,6 +232,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
 
   tapPosition(Offset position) {
     if (isSelected) {
+      clearSelection();
       return;
     }
     DanmuItem<T>? selectedTemp;
@@ -363,10 +365,10 @@ class FanjiaoDanmuController<T extends DanmuModel>
   }
 
   /// flag [DanmuFlag]
-  changeFilter(int flag, {bool? need}) {
-    if (need == null) {
+  changeFilter(int flag, {bool? isEnable}) {
+    if (isEnable == null) {
       filter = filter.change(flag);
-    } else if (need) {
+    } else if (isEnable) {
       filter = filter.add(flag);
     } else {
       filter = filter.remove(flag);
@@ -423,7 +425,7 @@ mixin DanmuTooltipMixin {
 
   bool? _menuIsAbove;
 
-  bool get  menuIsAbove => _menuIsAbove ?? false;
+  bool get menuIsAbove => _menuIsAbove ?? false;
 
   Size get menuSize => const Size(96, 35);
 
@@ -463,19 +465,18 @@ mixin DanmuTooltipMixin {
           width: menuSize.width,
           height: menuSize.height - 5,
           decoration: const BoxDecoration(
-              image: DecorationImage(
-                  image: AssetImage(
-            'assets/images/danmu_report.png',
-            package: package,
-          ))),
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+            color: Color(0xFF836BFF),
+          ),
           child: tooltipContent,
         ),
         Padding(
-          padding: EdgeInsets.only(left: menupeak - 5),
-          child: Image.asset(
-            'assets/images/danmu_report_arrow_down.png',
+          padding: EdgeInsets.only(left: menupeak - 5.5),
+          child: SvgPicture.asset(
+            "assets/svgs/arrow_down.svg",
             width: 11,
             height: 5,
+            color: const Color(0xFF836BFF),
             package: package,
           ),
         ),
@@ -483,11 +484,12 @@ mixin DanmuTooltipMixin {
     } else {
       children = [
         Padding(
-          padding: EdgeInsets.only(left: menupeak - 5),
-          child: Image.asset(
-            'assets/images/danmu_report_arrow_up.png',
+          padding: EdgeInsets.only(left: menupeak - 5.5),
+          child: SvgPicture.asset(
+            "assets/svgs/arrow_up.svg",
             width: 11,
             height: 5,
+            color: const Color(0xFF836BFF),
             package: package,
           ),
         ),
@@ -495,19 +497,20 @@ mixin DanmuTooltipMixin {
           width: menuSize.width,
           height: menuSize.height - 5,
           decoration: const BoxDecoration(
-              image: DecorationImage(
-                  image: AssetImage(
-            'assets/images/danmu_report.png',
-            package: package,
-          ))),
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+            color: Color(0xFF836BFF),
+          ),
           child: tooltipContent,
         ),
       ];
     }
+
     widget = Positioned(
       left: menuRect.left,
       top: menuRect.top,
+      height: menuSize.height,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: children,
       ),
@@ -572,6 +575,9 @@ extension DanmuFlag on int {
   ///公告
   static const int announcement = 1 << 6;
 
+  ///无碰撞体积
+  static const int collisionFree = 1 << 7;
+
   ///全部不允许
   static const int none = 0;
 
@@ -582,7 +588,8 @@ extension DanmuFlag on int {
       DanmuFlag.advanced |
       DanmuFlag.repeated |
       DanmuFlag.colorful |
-      DanmuFlag.announcement;
+      DanmuFlag.announcement |
+      DanmuFlag.collisionFree;
 
   bool check(int flag) => this & flag == flag;
 
@@ -606,6 +613,8 @@ extension DanmuFlag on int {
 
   bool get isAnnouncement => check(announcement);
 
+  bool get isCollisionFree => check(collisionFree);
+
   int get addScroll => add(scroll);
 
   int get addTop => add(top);
@@ -619,6 +628,8 @@ extension DanmuFlag on int {
   int get addColorful => add(colorful);
 
   int get addAnnouncement => add(announcement);
+
+  int get addCollisionFree => add(collisionFree);
 
   int get removeScroll => remove(scroll);
 
@@ -634,6 +645,8 @@ extension DanmuFlag on int {
 
   int get removeAnnouncement => remove(announcement);
 
+  int get removeCollisionFree => remove(collisionFree);
+
   int get changeScroll => change(scroll);
 
   int get changeTop => change(top);
@@ -647,4 +660,6 @@ extension DanmuFlag on int {
   int get changeColorful => change(colorful);
 
   int get changeAnnouncement => change(announcement);
+
+  int get changeCollisionFree => change(collisionFree);
 }
