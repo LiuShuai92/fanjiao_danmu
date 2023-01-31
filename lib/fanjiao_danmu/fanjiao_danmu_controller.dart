@@ -1,13 +1,12 @@
 import 'dart:collection';
-import 'dart:ui' as ui;
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_svg/svg.dart';
 
 import 'adapter/danmu_adapter.dart';
 import 'fanjiao_danmu.dart';
@@ -472,8 +471,8 @@ mixin DanmuTooltipMixin {
         ),
         Padding(
           padding: EdgeInsets.only(left: menupeak - 5.5),
-          child: SvgPicture.asset(
-            "assets/svgs/arrow_down.svg",
+          child: Image.asset(
+            "assets/images/arrow_down.png",
             width: 11,
             height: 5,
             color: const Color(0xFF836BFF),
@@ -485,8 +484,8 @@ mixin DanmuTooltipMixin {
       children = [
         Padding(
           padding: EdgeInsets.only(left: menupeak - 5.5),
-          child: SvgPicture.asset(
-            "assets/svgs/arrow_up.svg",
+          child: Image.asset(
+            "assets/images/arrow_up.png",
             width: 11,
             height: 5,
             color: const Color(0xFF836BFF),
@@ -510,7 +509,6 @@ mixin DanmuTooltipMixin {
       top: menuRect.top,
       height: menuSize.height,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: children,
       ),
