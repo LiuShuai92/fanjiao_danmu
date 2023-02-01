@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:fanjiao_danmu/fanjiao_danmu/adapter/fanjiao_danmu_adapter.dart';
 import 'package:fanjiao_danmu/fanjiao_danmu/danmu_tooltip.dart';
 import 'package:fanjiao_danmu/fanjiao_danmu/fanjiao_danmu.dart';
 import 'package:flutter/material.dart';
@@ -76,7 +77,7 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
               Container(
                 color: Colors.greenAccent,
                 child: LayoutBuilder(builder: (context, constraints) {
-                  return FanjiaoDanmuWidget(
+                  return DanmuWidget(
                     size: Size(constraints.maxWidth, 300),
                     danmuController: danmuController,
                     tooltip: tooltip,

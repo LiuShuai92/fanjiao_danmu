@@ -7,13 +7,13 @@ import 'package:flutter/widgets.dart';
 import 'danmu_controller.dart';
 import 'model/danmu_item_model.dart';
 
-class FanjiaoDanmuWidget extends StatefulWidget {
+class DanmuWidget extends StatefulWidget {
   final DanmuController danmuController;
   final Size size;
 
   Positioned Function()? tooltip;
 
-  FanjiaoDanmuWidget({
+  DanmuWidget({
     Key? key,
     required this.size,
     required this.danmuController,
@@ -22,10 +22,10 @@ class FanjiaoDanmuWidget extends StatefulWidget {
         super(key: key);
 
   @override
-  State<FanjiaoDanmuWidget> createState() => _FanjiaoDanmuWidgetState();
+  State<DanmuWidget> createState() => _DanmuWidgetState();
 }
 
-class _FanjiaoDanmuWidgetState extends State<FanjiaoDanmuWidget>
+class _DanmuWidgetState extends State<DanmuWidget>
     with SingleTickerProviderStateMixin {
   TapUpDetails? _tapDownDetails;
   @override

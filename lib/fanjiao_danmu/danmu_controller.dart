@@ -1,17 +1,13 @@
 import 'dart:collection';
 import 'dart:ui' as ui;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
-import 'adapter/danmu_adapter.dart';
 import 'fanjiao_danmu.dart';
-import 'fanjiao_danmu_widget.dart';
 import 'listener_helpers.dart';
-import 'model/danmu_item_model.dart';
 
 class DanmuController<T extends DanmuModel>
     with

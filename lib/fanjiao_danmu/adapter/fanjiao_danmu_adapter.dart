@@ -1,14 +1,10 @@
 import 'dart:collection';
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import '../fanjiao_danmu.dart';
-import '../model/danmu_item_model.dart';
 import '../simulation/clamp_simulation.dart';
-import 'danmu_adapter.dart';
 
 class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
   final math.Random _random = math.Random();
