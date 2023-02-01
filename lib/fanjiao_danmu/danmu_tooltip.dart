@@ -98,9 +98,11 @@ mixin FanjiaoDanmuTooltipMixin {
     widget = Positioned(
       left: _menuRect.left,
       top: _menuRect.top,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: children,
+      child: RepaintBoundary(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: children,
+        ),
       ),
     );
     return widget;
