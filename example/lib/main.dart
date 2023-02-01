@@ -18,7 +18,7 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
+class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
   late DanmuController danmuController;
   late TextEditingController textController;
   Timer? timer;

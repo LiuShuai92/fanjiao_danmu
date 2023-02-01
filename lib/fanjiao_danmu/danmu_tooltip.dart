@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 
 import 'fanjiao_danmu.dart';
 
-mixin DanmuTooltipMixin {
+mixin FanjiaoDanmuTooltipMixin {
   Rect _menuRect = Rect.zero;
 
   Rect get menuRect => _menuRect;
