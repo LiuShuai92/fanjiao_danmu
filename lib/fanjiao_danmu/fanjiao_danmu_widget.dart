@@ -4,11 +4,11 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import 'fanjiao_danmu_controller.dart';
+import 'danmu_controller.dart';
 import 'model/danmu_item_model.dart';
 
 class FanjiaoDanmuWidget extends StatefulWidget {
-  final FanjiaoDanmuController danmuController;
+  final DanmuController danmuController;
   final Size size;
 
   Positioned Function()? tooltip;
@@ -27,6 +27,7 @@ class FanjiaoDanmuWidget extends StatefulWidget {
 
 class _FanjiaoDanmuWidgetState extends State<FanjiaoDanmuWidget>
     with SingleTickerProviderStateMixin {
+  TapUpDetails? _tapDownDetails;
   @override
   void initState() {
     super.initState();
@@ -46,14 +47,12 @@ class _FanjiaoDanmuWidgetState extends State<FanjiaoDanmuWidget>
   @override
   Widget build(BuildContext context) {
     List<Widget> children = [
-      RepaintBoundary(
-        child: CustomPaint(
-          size: widget.size,
-          isComplex: true,
-          painter: _FanjiaoDanmuPainter(
-            context,
-            controller: widget.danmuController,
-          ),
+      CustomPaint(
+        size: widget.size,
+        isComplex: true,
+        painter: _FanjiaoDanmuPainter(
+          context,
+          controller: widget.danmuController,
         ),
       ),
     ];
@@ -67,11 +66,14 @@ class _FanjiaoDanmuWidgetState extends State<FanjiaoDanmuWidget>
       width: widget.size.width,
       height: widget.size.height,
       child: GestureDetector(
-        onTapDown: (details) {
-          print('LiuShuai: onTapDown');
-          widget.danmuController.tapPosition(details.localPosition);
+        onTapUp: (details) {
+          _tapDownDetails = details;
         },
-        behavior: HitTestBehavior.opaque,
+        onTap: (){
+          if(_tapDownDetails != null){
+            widget.danmuController.tapPosition(_tapDownDetails!.localPosition);
+          }
+        },
         child: Stack(
           children: children,
         ),
@@ -82,7 +84,7 @@ class _FanjiaoDanmuWidgetState extends State<FanjiaoDanmuWidget>
 
 class _FanjiaoDanmuPainter extends CustomPainter {
   final BuildContext context;
-  final FanjiaoDanmuController controller;
+  final DanmuController controller;
   final ImageProvider? iconProvider;
   final double iconWidth;
   final double iconHeight;

@@ -2,7 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-import '../fanjiao_danmu_controller.dart';
+import '../danmu_controller.dart';
 import '../simulation/danmu_simulation.dart';
 
 class DanmuItem<T extends DanmuModel> {

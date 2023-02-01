@@ -1,5 +1,4 @@
 import 'dart:collection';
-import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -14,13 +13,13 @@ import 'fanjiao_danmu_widget.dart';
 import 'listener_helpers.dart';
 import 'model/danmu_item_model.dart';
 
-class FanjiaoDanmuController<T extends DanmuModel>
+class DanmuController<T extends DanmuModel>
     with
-        FanjiaoLocalListenersMixin,
-        FanjiaoLocalStatusListenersMixin,
-        FanjiaoEagerListenerMixin {
+        DanmuLocalListenersMixin,
+        DanmuLocalStatusListenersMixin,
+        DanmuEagerListenerMixin {
   /// return true 选中并暂停这条弹幕
-  final bool Function(DanmuItem<T>, Offset)? onTap;
+  final bool Function(DanmuItem<T>?, Offset)? onTap;
   final Map<ImageProvider, ImgInfo> _imagesPool = {};
   final List<DanmuItem<T>> _tempList = <DanmuItem<T>>[];
   final ImageProvider? praiseImageProvider;
@@ -107,7 +106,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
 
   bool get isAnimating => _ticker != null && _ticker!.isActive;
 
-  FanjiaoDanmuController({
+  DanmuController({
     required this.adapter,
     this.maxSize = 100,
     this.onTap,
@@ -230,10 +229,6 @@ class FanjiaoDanmuController<T extends DanmuModel>
   }
 
   tapPosition(Offset position) {
-    if (isSelected) {
-      clearSelection();
-      return;
-    }
     DanmuItem<T>? selectedTemp;
     for (var entry in danmuItems) {
       if (entry.rect.contains(position)) {
@@ -248,6 +243,8 @@ class FanjiaoDanmuController<T extends DanmuModel>
       } else {
         selected = null;
       }
+    } else {
+      onTap?.call(null, position);
     }
     notifyListeners();
   }
@@ -393,7 +390,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
               'FanjiaoDanmuController.dispose() called more than once.'),
           ErrorDescription(
               'A given $runtimeType cannot be disposed more than once.\n'),
-          DiagnosticsProperty<FanjiaoDanmuController>(
+          DiagnosticsProperty<DanmuController>(
             'The following $runtimeType object was disposed multiple times',
             this,
             style: DiagnosticsTreeStyle.errorProperty,
@@ -410,110 +407,6 @@ class FanjiaoDanmuController<T extends DanmuModel>
     clearStatusListeners();
     clearListeners();
     super.dispose();
-  }
-}
-
-mixin DanmuTooltipMixin {
-  Rect? _menuRect;
-
-  Rect get menuRect => _menuRect ?? Rect.zero;
-
-  double? _menupeak;
-
-  double get menupeak => _menupeak ?? 0;
-
-  bool? _menuIsAbove;
-
-  bool get menuIsAbove => _menuIsAbove ?? false;
-
-  Size get menuSize => const Size(96, 35);
-
-  Widget get tooltipContent;
-
-  bool isSelect(DanmuItem danmuItem, Offset position, Rect rect) {
-    double x, y;
-    if (danmuItem.rect.left > rect.right - danmuItem.size.height ||
-        danmuItem.rect.right < rect.left + danmuItem.size.height) {
-      return false;
-    }
-    x = (position.dx - menuSize.width / 2)
-        .clamp(0, rect.right - menuSize.width);
-    _menuIsAbove = danmuItem.rect.bottom > rect.bottom - menuSize.height;
-    if (menuIsAbove) {
-      y = danmuItem.rect.top - menuSize.height;
-    } else {
-      y = danmuItem.rect.bottom;
-    }
-    Offset offset = Offset(x, y);
-    _menuRect = offset & menuSize;
-    _menupeak = position.dx.clamp(
-            math.max(danmuItem.rect.left, rect.left) +
-                danmuItem.size.height / 2,
-            math.min(danmuItem.rect.right, rect.right) -
-                danmuItem.size.height / 2) -
-        menuRect.left;
-    return true;
-  }
-
-  Positioned tooltip() {
-    Positioned widget;
-    List<Widget>? children;
-    if (menuIsAbove) {
-      children = [
-        Container(
-          width: menuSize.width,
-          height: menuSize.height - 5,
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(8)),
-            color: Color(0xFF836BFF),
-          ),
-          child: tooltipContent,
-        ),
-        Padding(
-          padding: EdgeInsets.only(left: menupeak - 5.5),
-          child: Image.asset(
-            "assets/images/arrow_down.png",
-            width: 11,
-            height: 5,
-            color: const Color(0xFF836BFF),
-            package: package,
-          ),
-        ),
-      ];
-    } else {
-      children = [
-        Padding(
-          padding: EdgeInsets.only(left: menupeak - 5.5),
-          child: Image.asset(
-            "assets/images/arrow_up.png",
-            width: 11,
-            height: 5,
-            color: const Color(0xFF836BFF),
-            package: package,
-          ),
-        ),
-        Container(
-          width: menuSize.width,
-          height: menuSize.height - 5,
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(8)),
-            color: Color(0xFF836BFF),
-          ),
-          child: tooltipContent,
-        ),
-      ];
-    }
-
-    widget = Positioned(
-      left: menuRect.left,
-      top: menuRect.top,
-      height: menuSize.height,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: children,
-      ),
-    );
-    return widget;
   }
 }
 
