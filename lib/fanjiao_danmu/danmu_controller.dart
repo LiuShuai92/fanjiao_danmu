@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart' as foundation;
 
 import 'fanjiao_danmu.dart';
 import 'listener_helpers.dart';
@@ -57,7 +58,6 @@ class DanmuController<T extends DanmuModel>
 
   Duration get progress => _progress ?? startTime;
 
-  ///秒
   set progress(Duration newProgress) {
     assert(newProgress != null);
     Duration oldProgress = _progress ?? startTime;
@@ -318,7 +318,6 @@ class DanmuController<T extends DanmuModel>
     }
   }
 
-  ///秒
   _internalSetValue(Duration progress) {
     if (progress > endTime) {
       _progress = endTime;
@@ -386,10 +385,10 @@ class DanmuController<T extends DanmuModel>
               'FanjiaoDanmuController.dispose() called more than once.'),
           ErrorDescription(
               'A given $runtimeType cannot be disposed more than once.\n'),
-          DiagnosticsProperty<DanmuController>(
+          foundation.DiagnosticsProperty<DanmuController<T>>(
             'The following $runtimeType object was disposed multiple times',
             this,
-            style: DiagnosticsTreeStyle.errorProperty,
+            style: foundation.DiagnosticsTreeStyle.errorProperty,
           ),
         ]);
       }
