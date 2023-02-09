@@ -11,7 +11,7 @@ class DanmuWidget extends StatefulWidget {
   final DanmuController danmuController;
   final Size size;
 
-  Positioned Function()? tooltip;
+  Positioned? Function<T extends DanmuModel>(DanmuItem<T>?)? tooltip;
 
   DanmuWidget({
     Key? key,
@@ -28,6 +28,7 @@ class DanmuWidget extends StatefulWidget {
 class _DanmuWidgetState extends State<DanmuWidget>
     with SingleTickerProviderStateMixin {
   TapUpDetails? _tapDownDetails;
+
   @override
   void initState() {
     super.initState();
@@ -56,11 +57,9 @@ class _DanmuWidgetState extends State<DanmuWidget>
         ),
       ),
     ];
-    if (widget.danmuController.isSelected) {
-      var tooltip = widget.tooltip?.call();
-      if (tooltip != null) {
-        children.add(tooltip);
-      }
+    var tooltipWidget = widget.tooltip?.call(widget.danmuController.selected);
+    if (tooltipWidget != null) {
+      children.add(tooltipWidget);
     }
     return SizedBox(
       width: widget.size.width,
@@ -69,8 +68,8 @@ class _DanmuWidgetState extends State<DanmuWidget>
         onTapUp: (details) {
           _tapDownDetails = details;
         },
-        onTap: (){
-          if(_tapDownDetails != null){
+        onTap: () {
+          if (_tapDownDetails != null) {
             widget.danmuController.tapPosition(_tapDownDetails!.localPosition);
           }
         },

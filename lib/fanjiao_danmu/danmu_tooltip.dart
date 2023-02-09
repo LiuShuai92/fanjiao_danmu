@@ -46,8 +46,10 @@ mixin FanjiaoDanmuTooltipMixin {
     return true;
   }
 
-  Positioned tooltip() {
-    Positioned widget;
+  Positioned? tooltip<T extends DanmuModel>(DanmuItem<T>? selectedItem) {
+    if (selectedItem == null) {
+      return null;
+    }
     List<Widget>? children;
     if (menuIsAbove) {
       children = [
@@ -94,8 +96,7 @@ mixin FanjiaoDanmuTooltipMixin {
         ),
       ];
     }
-
-    widget = Positioned(
+    return Positioned(
       left: _menuRect.left,
       top: _menuRect.top,
       child: RepaintBoundary(
@@ -105,6 +106,5 @@ mixin FanjiaoDanmuTooltipMixin {
         ),
       ),
     );
-    return widget;
   }
 }
