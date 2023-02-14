@@ -54,7 +54,7 @@ class DanmuItem<T extends DanmuModel> {
 
   bool get isMine => model.isMine;
 
-  BoxDecoration get mineDecoration => model.mineDecoration;
+  BoxDecoration? get decoration => model.decoration;
 
   DanmuItem({
     required this.model,
@@ -117,9 +117,7 @@ class DanmuModel {
   final bool isPraise;
   final ImageProvider? imageProvider;
   final String? package;
-
-  ///用于"我的"弹幕
-  final BoxDecoration mineDecoration;
+  final BoxDecoration? decoration;
 
   DanmuModel({
     required this.id,
@@ -138,12 +136,18 @@ class DanmuModel {
       fontWeight: FontWeight.w500,
       decoration: TextDecoration.none,
     ),
-    this.mineDecoration = const BoxDecoration(
-      color: Color(0xCCFF9C6B),
-      borderRadius: BorderRadius.all(Radius.circular(12)),
-      border: Border.fromBorderSide(
-          BorderSide(color: Colors.white, width: 1, style: BorderStyle.solid)),
-    ),
+    BoxDecoration? decoration,
   })  : assert(textStyle != null),
-        insertTime = insertTime ?? startTime;
+        insertTime = insertTime ?? startTime,
+        decoration = decoration ??
+            (isMine
+                ? const BoxDecoration(
+                    color: Color(0xCCFF9C6B),
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                    border: Border.fromBorderSide(BorderSide(
+                        color: Colors.white,
+                        width: 1,
+                        style: BorderStyle.solid)),
+                  )
+                : null);
 }

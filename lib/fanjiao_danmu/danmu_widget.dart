@@ -131,7 +131,7 @@ class _FanjiaoDanmuPainter extends CustomPainter {
   }
 
   void drawItem(DanmuItem<DanmuModel> entry, ui.Canvas canvas) {
-    if (entry.isMine) {
+    if (entry.decoration != null) {
       drawBorder(entry, canvas);
     }
     if (entry.spanInfo.isTextSpan) {
@@ -186,9 +186,10 @@ class _FanjiaoDanmuPainter extends CustomPainter {
 
   ///绘制单个弹幕边框
   void drawBorder(DanmuItem entry, ui.Canvas canvas) {
-    var boxPainter = entry.mineDecoration.createBoxPainter();
+    assert(entry.decoration != null);
+    var boxPainter = entry.decoration!.createBoxPainter();
     boxPainter.paint(
-        canvas, entry.position! - entry.padding.topLeft, entry.configuration);
+         canvas, entry.position! - entry.padding.topLeft, entry.configuration);
   }
 
   ///shouldRepaint则决定当条件变化时是否需要重画。
