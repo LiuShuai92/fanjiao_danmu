@@ -137,17 +137,13 @@ class DanmuModel {
       decoration: TextDecoration.none,
     ),
     BoxDecoration? decoration,
+    BoxDecoration mineDecoration = const BoxDecoration(
+      color: Color(0xCCFF9C6B),
+      borderRadius: BorderRadius.all(Radius.circular(12)),
+      border: Border.fromBorderSide(
+          BorderSide(color: Colors.white, width: 1, style: BorderStyle.solid)),
+    ),
   })  : assert(textStyle != null),
         insertTime = insertTime ?? startTime,
-        decoration = decoration ??
-            (isMine
-                ? const BoxDecoration(
-                    color: Color(0xCCFF9C6B),
-                    borderRadius: BorderRadius.all(Radius.circular(12)),
-                    border: Border.fromBorderSide(BorderSide(
-                        color: Colors.white,
-                        width: 1,
-                        style: BorderStyle.solid)),
-                  )
-                : null);
+        decoration = decoration ?? (isMine ? mineDecoration : null);
 }
