@@ -47,19 +47,25 @@ class _DanmuWidgetState extends State<DanmuWidget>
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> children = [
-      CustomPaint(
-        size: widget.size,
-        isComplex: true,
-        painter: _FanjiaoDanmuPainter(
-          context,
-          controller: widget.danmuController,
-        ),
-      ),
-    ];
+    Widget child;
     var tooltipWidget = widget.tooltip?.call(widget.danmuController.selected);
+    var customPaint = CustomPaint(
+      size: widget.size,
+      isComplex: true,
+      painter: _FanjiaoDanmuPainter(
+        context,
+        controller: widget.danmuController,
+      ),
+    );
     if (tooltipWidget != null) {
-      children.add(tooltipWidget);
+      child = Stack(
+        children: [
+          customPaint,
+          tooltipWidget,
+        ],
+      );
+    }else {
+      child = customPaint;
     }
     return SizedBox(
       width: widget.size.width,
@@ -73,9 +79,7 @@ class _DanmuWidgetState extends State<DanmuWidget>
             widget.danmuController.tapPosition(_tapDownDetails!.localPosition);
           }
         },
-        child: Stack(
-          children: children,
-        ),
+        child: child,
       ),
     );
   }
