@@ -172,19 +172,22 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
           rx -= iconExtra;
         }
         DanmuItem<T> last;
-        try {
-          last = row.lastWhere((element) =>
-              !element.isSelected && !element.flag.isCollisionFree);
-        } on Error catch (e) {
-          simulation.paddingTop = _getPaddingTop(i, size.height);
-          item = DanmuItem(
+        bool isEmpty = false;
+        last = row.lastWhere(
+            (element) => !element.isSelected && !element.flag.isCollisionFree,
+            orElse: () {
+          simulation!.paddingTop = _getPaddingTop(i, size.height);
+          isEmpty = true;
+          return DanmuItem(
               model: model,
               flag: model.flag.removeCollisionFree,
               padding: padding,
               simulation: simulation,
               spanInfo: textSpanInfo,
               size: size);
-          row.add(item);
+        });
+        if (isEmpty) {
+          row.add(last);
           break;
         }
         var lx = last.simulation
