@@ -1,6 +1,6 @@
 # fanjiao_danmu
 
-仿bilibili弹幕
+仿bilibili弹幕 QQ:1067915021
 
 ## Getting Started
 
