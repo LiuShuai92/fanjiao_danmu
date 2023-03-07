@@ -25,7 +25,7 @@ class DanmuController<T extends DanmuModel>
   Queue<DanmuItem<T>> danmuItems = Queue<DanmuItem<T>>();
   DanmuStatus _status = DanmuStatus.stop;
   DanmuStatus _idleBeforeStatus = DanmuStatus.playing;
-  DanmuStatus _lastReportedStatus = DanmuStatus.dismissed;
+  DanmuStatus _lastReportedStatus = DanmuStatus.dispose;
   DanmuAdapter<T> adapter;
   int maxSize;
   int filter;
@@ -57,6 +57,10 @@ class DanmuController<T extends DanmuModel>
   bool get isSelected => selected != null;
 
   Duration get progress => _progress ?? startTime;
+
+  bool get isEnable => _ticker != null;
+
+  bool get isAnimating => isEnable && _ticker!.isActive;
 
   set progress(Duration newProgress) {
     assert(newProgress != null);
@@ -99,8 +103,6 @@ class DanmuController<T extends DanmuModel>
     _checkStatusChanged();
     notifyListeners();
   }
-
-  bool get isAnimating => _ticker != null && _ticker!.isActive;
 
   DanmuController({
     required this.adapter,
@@ -290,7 +292,7 @@ class DanmuController<T extends DanmuModel>
 
   ///最好按照时间顺序插入弹幕
   addDanmu(T model) {
-    assert(_ticker != null);
+    assert(isEnable);
     if (model.text.isEmpty) {
       return;
     }
@@ -304,7 +306,7 @@ class DanmuController<T extends DanmuModel>
 
   ///传入的列表最好按照时间顺序排序
   addAllDanmu(Iterable<T> models) {
-    assert(_ticker != null);
+    assert(isEnable);
     if (danmuItems.length > maxSize) {
       return;
     }
@@ -331,13 +333,13 @@ class DanmuController<T extends DanmuModel>
   }
 
   pause() {
-    assert(_ticker != null);
+    assert(isEnable);
     _status = DanmuStatus.pause;
     _checkStatusChanged();
   }
 
   start() {
-    assert(_ticker != null);
+    assert(isEnable);
     if (!_ticker!.isActive) {
       final TickerFuture result = _ticker!.start();
     }
@@ -346,13 +348,13 @@ class DanmuController<T extends DanmuModel>
   }
 
   stop({bool canceled = true}) {
-    assert(_ticker != null);
+    assert(isEnable);
     danmuItems.clear();
     progress = startTime;
-    _status = DanmuStatus.stop;
     _lastElapsedDuration = null;
     _checkStatusChanged();
     _ticker!.stop(canceled: canceled);
+    _status = DanmuStatus.stop;
   }
 
   /// flag [DanmuFlag]
@@ -398,6 +400,7 @@ class DanmuController<T extends DanmuModel>
     _ticker!.dispose();
     _ticker = null;
     _lastElapsedDuration = null;
+    _status = DanmuStatus.dispose;
     _imagesPool.clear();
     clearStatusListeners();
     clearListeners();
@@ -408,7 +411,7 @@ class DanmuController<T extends DanmuModel>
 typedef DanmuStatusListener = Function(DanmuStatus status);
 
 enum DanmuStatus {
-  dismissed,
+  dispose,
   playing,
   pause,
   idle,
