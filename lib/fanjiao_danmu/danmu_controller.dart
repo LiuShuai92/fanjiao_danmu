@@ -38,6 +38,9 @@ class DanmuController<T extends DanmuModel>
   bool _isFullShown = true;
   bool _isAllFullShown = true;
 
+  /// 弹幕倍速播放
+  double _rate = 1;
+
   ///下一桢动画会执行一次强制刷新
   set onceForceRefresh(bool onceForceRefresh) =>
       _onceForceRefresh = onceForceRefresh;
@@ -47,6 +50,10 @@ class DanmuController<T extends DanmuModel>
     _onceForceRefresh = false;
     return result;
   }
+
+  double get rate => _rate;
+
+  set rate(double rate) => _rate = rate;
 
   DanmuStatus get state => _status;
 
@@ -165,6 +172,7 @@ class DanmuController<T extends DanmuModel>
     if (_status == DanmuStatus.pause || dElapsed == Duration.zero) {
       return;
     }
+    dElapsed *= _rate;
     Duration newProgress = progress + dElapsed;
     _internalSetValue(newProgress);
     if (state == DanmuStatus.completed) {

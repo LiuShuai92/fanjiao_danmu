@@ -336,6 +336,30 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
               ));
             },
           ),
+          getButton(
+            "1倍速",
+            () {
+              danmuController.rate = 1;
+            },
+          ),
+          getButton(
+            "1.5倍速",
+            () {
+              danmuController.rate = 1.5;
+            },
+          ),
+          getButton(
+            "2倍速",
+            () {
+              danmuController.rate = 2;
+            },
+          ),
+          getButton(
+            "3倍速",
+            () {
+              danmuController.rate = 3;
+            },
+          ),
         ],
       );
 
