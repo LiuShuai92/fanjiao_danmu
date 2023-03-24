@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:fanjiao_danmu/fanjiao_danmu/adapter/fanjiao_danmu_adapter.dart';
+import 'package:fanjiao_danmu/fanjiao_danmu/danmu_tooltip.dart';
 import 'package:fanjiao_danmu/fanjiao_danmu/fanjiao_danmu.dart';
 import 'package:flutter/material.dart';
 
@@ -16,8 +18,8 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
-  late FanjiaoDanmuController danmuController;
+class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
+  late DanmuController danmuController;
   late TextEditingController textController;
   Timer? timer;
   Duration duration = const Duration(seconds: 3780);
@@ -27,24 +29,26 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
 
   GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
 
-  // int progress = 0;
-
   @override
   void initState() {
     super.initState();
-    danmuController = FanjiaoDanmuController(
+    danmuController = DanmuController(
         adapter: FanjiaoDanmuAdapter(imageMap: {
           '[bilibili]': const AssetImage("assets/images/bilibili.png"),
           '[饭角]': const NetworkImage(
               "https://www.fanjiao.co/h5/img/logo.12b2d5a6.png"),
         }),
         praiseImageProvider: const AssetImage("assets/images/icon_duck.png"),
-        onTap: (DanmuItem danmuItem, Offset position) {
-          if (danmuItem.flag.isAnnouncement) {
+        onTap: (DanmuItem? danmuItem, Offset position) {
+          if (danmuController.isSelected) {
+            danmuController.clearSelection();
+            return false;
+          }
+          if (danmuItem == null || danmuItem.flag.isAnnouncement) {
             return false;
           }
           var result =
-              isSelect(danmuItem, position, danmuController.adapter.rect);
+              checkSelect(position, danmuItem.rect, danmuController.adapter.rect);
           if (result) {
             setState(() {
               selectedText = danmuItem.text;
@@ -73,8 +77,8 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
               Container(
                 color: Colors.greenAccent,
                 child: LayoutBuilder(builder: (context, constraints) {
-                  return FanjiaoDanmuWidget(
-                    size: Size(constraints.maxWidth, 350),
+                  return DanmuWidget(
+                    size: Size(constraints.maxWidth, 300),
                     danmuController: danmuController,
                     tooltip: tooltip,
                   );
@@ -332,6 +336,30 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
               ));
             },
           ),
+          getButton(
+            "1倍速",
+            () {
+              danmuController.rate = 1;
+            },
+          ),
+          getButton(
+            "1.5倍速",
+            () {
+              danmuController.rate = 1.5;
+            },
+          ),
+          getButton(
+            "2倍速",
+            () {
+              danmuController.rate = 2;
+            },
+          ),
+          getButton(
+            "3倍速",
+            () {
+              danmuController.rate = 3;
+            },
+          ),
         ],
       );
 
@@ -354,7 +382,6 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
 
   @override
   Widget get tooltipContent => Row(
-        mainAxisSize: MainAxisSize.max,
         children: [
           Expanded(
             child: GestureDetector(
@@ -372,7 +399,6 @@ class _MyAppState extends State<MyApp> with DanmuTooltipMixin {
                 ),
               ),
               onTap: () {
-                print('LiuShuai: onTap +1 isSelected = ${danmuController.isSelected}');
                 if (danmuController.isSelected) {
                   danmuController.addDanmu(DanmuModel(
                     id: ++id,

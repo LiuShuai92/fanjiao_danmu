@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:flutter/physics.dart';
 import 'package:flutter/widgets.dart';
 
 import 'danmu_simulation.dart';

@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 
-import 'fanjiao_danmu_controller.dart';
+import 'danmu_controller.dart';
 
-mixin FanjiaoLazyListenerMixin {
+mixin DanmuLazyListenerMixin {
   int _listenerCounter = 0;
 
   @protected
@@ -30,7 +30,7 @@ mixin FanjiaoLazyListenerMixin {
   bool get isListening => _listenerCounter > 0;
 }
 
-mixin FanjiaoEagerListenerMixin {
+mixin DanmuEagerListenerMixin {
   @protected
   void didRegisterListener() { }
 
@@ -41,7 +41,7 @@ mixin FanjiaoEagerListenerMixin {
   void dispose() { }
 }
 
-mixin FanjiaoLocalListenersMixin {
+mixin DanmuLocalListenersMixin {
   final ObserverList<VoidCallback> _listeners = ObserverList<VoidCallback>();
 
   @protected
@@ -75,7 +75,7 @@ mixin FanjiaoLocalListenersMixin {
       InformationCollector? collector;
       assert(() {
         collector = () sync* {
-          yield DiagnosticsProperty<FanjiaoLocalListenersMixin>(
+          yield DiagnosticsProperty<DanmuLocalListenersMixin>(
             'The $runtimeType notifying listeners was',
             this,
             style: DiagnosticsTreeStyle.errorProperty,
@@ -100,7 +100,7 @@ mixin FanjiaoLocalListenersMixin {
   }
 }
 
-mixin FanjiaoLocalStatusListenersMixin {
+mixin DanmuLocalStatusListenersMixin {
   final ObserverList<DanmuStatusListener> _statusListeners = ObserverList<DanmuStatusListener>();
 
   @protected

@@ -1,14 +1,10 @@
 import 'dart:collection';
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import '../fanjiao_danmu.dart';
-import '../model/danmu_item_model.dart';
 import '../simulation/clamp_simulation.dart';
-import 'danmu_adapter.dart';
 
 class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
   final math.Random _random = math.Random();
@@ -176,19 +172,22 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
           rx -= iconExtra;
         }
         DanmuItem<T> last;
-        try {
-          last = row.lastWhere((element) =>
-              !element.isSelected && !element.flag.isCollisionFree);
-        } on Error catch (e) {
-          simulation.paddingTop = _getPaddingTop(i, size.height);
-          item = DanmuItem(
+        bool isEmpty = false;
+        last = row.lastWhere(
+            (element) => !element.isSelected && !element.flag.isCollisionFree,
+            orElse: () {
+          simulation!.paddingTop = _getPaddingTop(i, size.height);
+          isEmpty = true;
+          return DanmuItem(
               model: model,
               flag: model.flag.removeCollisionFree,
               padding: padding,
               simulation: simulation,
               spanInfo: textSpanInfo,
               size: size);
-          row.add(item);
+        });
+        if (isEmpty) {
+          row.add(last);
           break;
         }
         var lx = last.simulation

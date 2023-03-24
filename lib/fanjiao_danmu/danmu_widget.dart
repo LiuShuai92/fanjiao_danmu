@@ -4,16 +4,16 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import 'fanjiao_danmu_controller.dart';
+import 'danmu_controller.dart';
 import 'model/danmu_item_model.dart';
 
-class FanjiaoDanmuWidget extends StatefulWidget {
-  final FanjiaoDanmuController danmuController;
+class DanmuWidget extends StatefulWidget {
+  final DanmuController danmuController;
   final Size size;
 
-  Positioned Function()? tooltip;
+  Positioned? Function<T extends DanmuModel>(DanmuItem<T>?)? tooltip;
 
-  FanjiaoDanmuWidget({
+  DanmuWidget({
     Key? key,
     required this.size,
     required this.danmuController,
@@ -22,11 +22,13 @@ class FanjiaoDanmuWidget extends StatefulWidget {
         super(key: key);
 
   @override
-  State<FanjiaoDanmuWidget> createState() => _FanjiaoDanmuWidgetState();
+  State<DanmuWidget> createState() => _DanmuWidgetState();
 }
 
-class _FanjiaoDanmuWidgetState extends State<FanjiaoDanmuWidget>
+class _DanmuWidgetState extends State<DanmuWidget>
     with SingleTickerProviderStateMixin {
+  TapUpDetails? _tapDownDetails;
+
   @override
   void initState() {
     super.initState();
@@ -45,36 +47,39 @@ class _FanjiaoDanmuWidgetState extends State<FanjiaoDanmuWidget>
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> children = [
-      RepaintBoundary(
-        child: CustomPaint(
-          size: widget.size,
-          isComplex: true,
-          painter: _FanjiaoDanmuPainter(
-            context,
-            controller: widget.danmuController,
-          ),
-        ),
+    Widget child;
+    var tooltipWidget = widget.tooltip?.call(widget.danmuController.selected);
+    var customPaint = CustomPaint(
+      size: widget.size,
+      isComplex: true,
+      painter: _FanjiaoDanmuPainter(
+        context,
+        controller: widget.danmuController,
       ),
-    ];
-    if (widget.danmuController.isSelected) {
-      var tooltip = widget.tooltip?.call();
-      if (tooltip != null) {
-        children.add(tooltip);
-      }
+    );
+    if (tooltipWidget != null) {
+      child = Stack(
+        children: [
+          customPaint,
+          tooltipWidget,
+        ],
+      );
+    }else {
+      child = customPaint;
     }
     return SizedBox(
       width: widget.size.width,
       height: widget.size.height,
       child: GestureDetector(
-        onTapDown: (details) {
-          print('LiuShuai: onTapDown');
-          widget.danmuController.tapPosition(details.localPosition);
+        onTapUp: (details) {
+          _tapDownDetails = details;
         },
-        behavior: HitTestBehavior.opaque,
-        child: Stack(
-          children: children,
-        ),
+        onTap: () {
+          if (_tapDownDetails != null) {
+            widget.danmuController.tapPosition(_tapDownDetails!.localPosition);
+          }
+        },
+        child: child,
       ),
     );
   }
@@ -82,7 +87,7 @@ class _FanjiaoDanmuWidgetState extends State<FanjiaoDanmuWidget>
 
 class _FanjiaoDanmuPainter extends CustomPainter {
   final BuildContext context;
-  final FanjiaoDanmuController controller;
+  final DanmuController controller;
   final ImageProvider? iconProvider;
   final double iconWidth;
   final double iconHeight;
@@ -130,7 +135,7 @@ class _FanjiaoDanmuPainter extends CustomPainter {
   }
 
   void drawItem(DanmuItem<DanmuModel> entry, ui.Canvas canvas) {
-    if (entry.isMine) {
+    if (entry.decoration != null) {
       drawBorder(entry, canvas);
     }
     if (entry.spanInfo.isTextSpan) {
@@ -185,9 +190,10 @@ class _FanjiaoDanmuPainter extends CustomPainter {
 
   ///绘制单个弹幕边框
   void drawBorder(DanmuItem entry, ui.Canvas canvas) {
-    var boxPainter = entry.mineDecoration.createBoxPainter();
+    assert(entry.decoration != null);
+    var boxPainter = entry.decoration!.createBoxPainter();
     boxPainter.paint(
-        canvas, entry.position! - entry.padding.topLeft, entry.configuration);
+         canvas, entry.position! - entry.padding.topLeft, entry.configuration);
   }
 
   ///shouldRepaint则决定当条件变化时是否需要重画。

@@ -1,27 +1,22 @@
 import 'dart:collection';
 import 'dart:ui' as ui;
-import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter/foundation.dart' as foundation;
 
-import 'adapter/danmu_adapter.dart';
 import 'fanjiao_danmu.dart';
-import 'fanjiao_danmu_widget.dart';
 import 'listener_helpers.dart';
-import 'model/danmu_item_model.dart';
 
-class FanjiaoDanmuController<T extends DanmuModel>
+class DanmuController<T extends DanmuModel>
     with
-        FanjiaoLocalListenersMixin,
-        FanjiaoLocalStatusListenersMixin,
-        FanjiaoEagerListenerMixin {
+        DanmuLocalListenersMixin,
+        DanmuLocalStatusListenersMixin,
+        DanmuEagerListenerMixin {
   /// return true 选中并暂停这条弹幕
-  final bool Function(DanmuItem<T>, Offset)? onTap;
+  final bool Function(DanmuItem<T>?, Offset)? onTap;
   final Map<ImageProvider, ImgInfo> _imagesPool = {};
   final List<DanmuItem<T>> _tempList = <DanmuItem<T>>[];
   final ImageProvider? praiseImageProvider;
@@ -30,7 +25,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
   Queue<DanmuItem<T>> danmuItems = Queue<DanmuItem<T>>();
   DanmuStatus _status = DanmuStatus.stop;
   DanmuStatus _idleBeforeStatus = DanmuStatus.playing;
-  DanmuStatus _lastReportedStatus = DanmuStatus.dismissed;
+  DanmuStatus _lastReportedStatus = DanmuStatus.dispose;
   DanmuAdapter<T> adapter;
   int maxSize;
   int filter;
@@ -43,6 +38,9 @@ class FanjiaoDanmuController<T extends DanmuModel>
   bool _isFullShown = true;
   bool _isAllFullShown = true;
 
+  /// 弹幕倍速播放
+  double _rate = 1;
+
   ///下一桢动画会执行一次强制刷新
   set onceForceRefresh(bool onceForceRefresh) =>
       _onceForceRefresh = onceForceRefresh;
@@ -52,6 +50,10 @@ class FanjiaoDanmuController<T extends DanmuModel>
     _onceForceRefresh = false;
     return result;
   }
+
+  double get rate => _rate;
+
+  set rate(double rate) => _rate = rate;
 
   DanmuStatus get state => _status;
 
@@ -63,7 +65,10 @@ class FanjiaoDanmuController<T extends DanmuModel>
 
   Duration get progress => _progress ?? startTime;
 
-  ///秒
+  bool get isEnable => _ticker != null;
+
+  bool get isAnimating => isEnable && _ticker!.isActive;
+
   set progress(Duration newProgress) {
     assert(newProgress != null);
     Duration oldProgress = _progress ?? startTime;
@@ -106,9 +111,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
     notifyListeners();
   }
 
-  bool get isAnimating => _ticker != null && _ticker!.isActive;
-
-  FanjiaoDanmuController({
+  DanmuController({
     required this.adapter,
     this.maxSize = 100,
     this.onTap,
@@ -169,6 +172,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
     if (_status == DanmuStatus.pause || dElapsed == Duration.zero) {
       return;
     }
+    dElapsed *= _rate;
     Duration newProgress = progress + dElapsed;
     _internalSetValue(newProgress);
     if (state == DanmuStatus.completed) {
@@ -231,10 +235,6 @@ class FanjiaoDanmuController<T extends DanmuModel>
   }
 
   tapPosition(Offset position) {
-    if (isSelected) {
-      clearSelection();
-      return;
-    }
     DanmuItem<T>? selectedTemp;
     for (var entry in danmuItems) {
       if (entry.rect.contains(position)) {
@@ -249,6 +249,8 @@ class FanjiaoDanmuController<T extends DanmuModel>
       } else {
         selected = null;
       }
+    } else {
+      onTap?.call(null, position);
     }
     notifyListeners();
   }
@@ -298,7 +300,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
 
   ///最好按照时间顺序插入弹幕
   addDanmu(T model) {
-    assert(_ticker != null);
+    assert(isEnable);
     if (model.text.isEmpty) {
       return;
     }
@@ -312,7 +314,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
 
   ///传入的列表最好按照时间顺序排序
   addAllDanmu(Iterable<T> models) {
-    assert(_ticker != null);
+    assert(isEnable);
     if (danmuItems.length > maxSize) {
       return;
     }
@@ -326,7 +328,6 @@ class FanjiaoDanmuController<T extends DanmuModel>
     }
   }
 
-  ///秒
   _internalSetValue(Duration progress) {
     if (progress > endTime) {
       _progress = endTime;
@@ -340,13 +341,13 @@ class FanjiaoDanmuController<T extends DanmuModel>
   }
 
   pause() {
-    assert(_ticker != null);
+    assert(isEnable);
     _status = DanmuStatus.pause;
     _checkStatusChanged();
   }
 
   start() {
-    assert(_ticker != null);
+    assert(isEnable);
     if (!_ticker!.isActive) {
       final TickerFuture result = _ticker!.start();
     }
@@ -355,13 +356,13 @@ class FanjiaoDanmuController<T extends DanmuModel>
   }
 
   stop({bool canceled = true}) {
-    assert(_ticker != null);
+    assert(isEnable);
     danmuItems.clear();
     progress = startTime;
-    _status = DanmuStatus.stop;
     _lastElapsedDuration = null;
     _checkStatusChanged();
     _ticker!.stop(canceled: canceled);
+    _status = DanmuStatus.stop;
   }
 
   /// flag [DanmuFlag]
@@ -394,10 +395,10 @@ class FanjiaoDanmuController<T extends DanmuModel>
               'FanjiaoDanmuController.dispose() called more than once.'),
           ErrorDescription(
               'A given $runtimeType cannot be disposed more than once.\n'),
-          DiagnosticsProperty<FanjiaoDanmuController>(
+          foundation.DiagnosticsProperty<DanmuController<T>>(
             'The following $runtimeType object was disposed multiple times',
             this,
-            style: DiagnosticsTreeStyle.errorProperty,
+            style: foundation.DiagnosticsTreeStyle.errorProperty,
           ),
         ]);
       }
@@ -407,6 +408,7 @@ class FanjiaoDanmuController<T extends DanmuModel>
     _ticker!.dispose();
     _ticker = null;
     _lastElapsedDuration = null;
+    _status = DanmuStatus.dispose;
     _imagesPool.clear();
     clearStatusListeners();
     clearListeners();
@@ -414,115 +416,10 @@ class FanjiaoDanmuController<T extends DanmuModel>
   }
 }
 
-mixin DanmuTooltipMixin {
-  Rect? _menuRect;
-
-  Rect get menuRect => _menuRect ?? Rect.zero;
-
-  double? _menupeak;
-
-  double get menupeak => _menupeak ?? 0;
-
-  bool? _menuIsAbove;
-
-  bool get menuIsAbove => _menuIsAbove ?? false;
-
-  Size get menuSize => const Size(96, 35);
-
-  Widget get tooltipContent;
-
-  bool isSelect(DanmuItem danmuItem, Offset position, Rect rect) {
-    double x, y;
-    if (danmuItem.rect.left > rect.right - danmuItem.size.height ||
-        danmuItem.rect.right < rect.left + danmuItem.size.height) {
-      return false;
-    }
-    x = (position.dx - menuSize.width / 2)
-        .clamp(0, rect.right - menuSize.width);
-    _menuIsAbove = danmuItem.rect.bottom > rect.bottom - menuSize.height;
-    if (menuIsAbove) {
-      y = danmuItem.rect.top - menuSize.height;
-    } else {
-      y = danmuItem.rect.bottom;
-    }
-    Offset offset = Offset(x, y);
-    _menuRect = offset & menuSize;
-    _menupeak = position.dx.clamp(
-            math.max(danmuItem.rect.left, rect.left) +
-                danmuItem.size.height / 2,
-            math.min(danmuItem.rect.right, rect.right) -
-                danmuItem.size.height / 2) -
-        menuRect.left;
-    return true;
-  }
-
-  Positioned tooltip() {
-    Positioned widget;
-    List<Widget>? children;
-    if (menuIsAbove) {
-      children = [
-        Container(
-          width: menuSize.width,
-          height: menuSize.height - 5,
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(8)),
-            color: Color(0xFF836BFF),
-          ),
-          child: tooltipContent,
-        ),
-        Padding(
-          padding: EdgeInsets.only(left: menupeak - 5.5),
-          child: SvgPicture.asset(
-            "assets/svgs/arrow_down.svg",
-            width: 11,
-            height: 5,
-            color: const Color(0xFF836BFF),
-            package: package,
-          ),
-        ),
-      ];
-    } else {
-      children = [
-        Padding(
-          padding: EdgeInsets.only(left: menupeak - 5.5),
-          child: SvgPicture.asset(
-            "assets/svgs/arrow_up.svg",
-            width: 11,
-            height: 5,
-            color: const Color(0xFF836BFF),
-            package: package,
-          ),
-        ),
-        Container(
-          width: menuSize.width,
-          height: menuSize.height - 5,
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(8)),
-            color: Color(0xFF836BFF),
-          ),
-          child: tooltipContent,
-        ),
-      ];
-    }
-
-    widget = Positioned(
-      left: menuRect.left,
-      top: menuRect.top,
-      height: menuSize.height,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: children,
-      ),
-    );
-    return widget;
-  }
-}
-
 typedef DanmuStatusListener = Function(DanmuStatus status);
 
 enum DanmuStatus {
-  dismissed,
+  dispose,
   playing,
   pause,
   idle,
