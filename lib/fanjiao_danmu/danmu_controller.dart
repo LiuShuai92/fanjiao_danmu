@@ -39,7 +39,7 @@ class DanmuController<T extends DanmuModel>
   bool _isAllFullShown = true;
 
   /// 弹幕倍速播放
-  double _rate = 1;
+  double rate = 1;
 
   ///下一桢动画会执行一次强制刷新
   set onceForceRefresh(bool onceForceRefresh) =>
@@ -50,10 +50,6 @@ class DanmuController<T extends DanmuModel>
     _onceForceRefresh = false;
     return result;
   }
-
-  double get rate => _rate;
-
-  set rate(double rate) => _rate = rate;
 
   DanmuStatus get state => _status;
 
@@ -70,7 +66,6 @@ class DanmuController<T extends DanmuModel>
   bool get isAnimating => isEnable && _ticker!.isActive;
 
   set progress(Duration newProgress) {
-    assert(newProgress != null);
     Duration oldProgress = _progress ?? startTime;
     _internalSetValue(newProgress);
     _lastElapsedDuration = null;
@@ -83,9 +78,9 @@ class DanmuController<T extends DanmuModel>
     }
     bool isFullShown = true;
     for (var entry in danmuItems) {
-      entry.dTime = progress - entry.startTime;
+      entry.dTime = progress - entry.model.startTime;
       entry.position = entry.simulation
-          .offset((progress - entry.startTime).inMicrosecondsPerSecond);
+          .offset((progress - entry.model.startTime).inMicrosecondsPerSecond);
       Offset? position = entry.simulation.isDone(entry.position!, 0);
       if (position == null) {
         _tempList.add(entry);
@@ -172,7 +167,7 @@ class DanmuController<T extends DanmuModel>
     if (_status == DanmuStatus.pause || dElapsed == Duration.zero) {
       return;
     }
-    dElapsed *= _rate;
+    dElapsed *= rate;
     Duration newProgress = progress + dElapsed;
     _internalSetValue(newProgress);
     if (state == DanmuStatus.completed) {
@@ -187,9 +182,9 @@ class DanmuController<T extends DanmuModel>
     bool isAllFullShown = true;
     for (var entry in danmuItems) {
       if (entry.position == null) {
-        entry.dTime = progress - entry.startTime;
+        entry.dTime = progress - entry.model.startTime;
         entry.position = entry.simulation
-            .offset((progress - entry.startTime).inMicrosecondsPerSecond);
+            .offset((progress - entry.model.startTime).inMicrosecondsPerSecond);
       } else {
         Offset? position;
         if (entry.isSelected) {
@@ -258,20 +253,20 @@ class DanmuController<T extends DanmuModel>
   markRepeated() {
     List<String> temp = [];
     for (var entry in danmuItems) {
-      if (!entry.flag.isAnnouncement && temp.contains(entry.text)) {
+      if (!entry.flag.isAnnouncement && temp.contains(entry.model.plainText)) {
         ///不去重 高级弹幕 自己发的弹幕 高点赞数的弹幕
-        if (!entry.flag.isAdvanced && !entry.isMine && !entry.isHighPraise) {
+        if (!entry.flag.isAdvanced && !entry.model.isMine && !entry.model.isPraise) {
           entry.flag = entry.flag.addRepeated;
         }
       } else {
         entry.flag = entry.flag.removeRepeated;
-        temp.add(entry.text);
+        temp.add(entry.model.plainText);
       }
     }
   }
 
   _addEntry(T model) {
-    if (model.text.isEmpty) {
+    if (model.spans.isEmpty && model.text.isEmpty && model.imageProvider == null) {
       return;
     }
     if (model.startTime > endTime) {
@@ -281,11 +276,11 @@ class DanmuController<T extends DanmuModel>
       return;
     }
     for (var element in danmuItems) {
-      if (element.id == model.id) {
+      if (element.model.id == model.id) {
         return;
       }
       if (!filter.isRepeated) {
-        if (element.text == model.text) {
+        if (element.model.plainText == model.plainText) {
           return;
         }
       }
@@ -301,9 +296,6 @@ class DanmuController<T extends DanmuModel>
   ///最好按照时间顺序插入弹幕
   addDanmu(T model) {
     assert(isEnable);
-    if (model.text.isEmpty) {
-      return;
-    }
     _addEntry(model);
     if (danmuItems.isNotEmpty && isAnimating && _status == DanmuStatus.idle) {
       _status = _idleBeforeStatus;

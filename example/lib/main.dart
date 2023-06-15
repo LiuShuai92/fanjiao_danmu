@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:fanjiao_danmu/fanjiao_danmu/adapter/fanjiao_danmu_adapter.dart';
 import 'package:fanjiao_danmu/fanjiao_danmu/danmu_tooltip.dart';
 import 'package:fanjiao_danmu/fanjiao_danmu/fanjiao_danmu.dart';
+import 'package:fanjiao_danmu/fanjiao_danmu/widget/stroke_text_widget.dart';
 import 'package:flutter/material.dart';
 
 import 'utils.dart';
@@ -33,29 +34,31 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
   void initState() {
     super.initState();
     danmuController = DanmuController(
-        adapter: FanjiaoDanmuAdapter(imageMap: {
-          '[bilibili]': const AssetImage("assets/images/bilibili.png"),
-          '[饭角]': const NetworkImage(
-              "https://www.fanjiao.co/h5/img/logo.12b2d5a6.png"),
-        }),
-        praiseImageProvider: const AssetImage("assets/images/icon_duck.png"),
-        onTap: (DanmuItem? danmuItem, Offset position) {
-          if (danmuController.isSelected) {
-            danmuController.clearSelection();
-            return false;
-          }
-          if (danmuItem == null || danmuItem.flag.isAnnouncement) {
-            return false;
-          }
-          var result =
-              checkSelect(position, danmuItem.rect, danmuController.adapter.rect);
-          if (result) {
-            setState(() {
-              selectedText = danmuItem.text;
-            });
-          }
-          return result;
-        });
+      adapter: FanjiaoDanmuAdapter(rowHeight: 40, imageMap: {
+        '[举手]': const AssetImage("assets/images/ic_jy.png"),
+        '[bilibili]': const AssetImage("assets/images/bilibili.png"),
+        '[饭角]': const NetworkImage(
+            "https://www.fanjiao.co/h5/img/logo.12b2d5a6.png"),
+      }),
+      praiseImageProvider: const AssetImage("assets/images/icon_duck.png"),
+      onTap: (DanmuItem? danmuItem, Offset position) {
+        if (danmuController.isSelected) {
+          danmuController.clearSelection();
+          return false;
+        }
+        if (danmuItem == null || danmuItem.flag.isAnnouncement) {
+          return false;
+        }
+        var result =
+            checkSelect(position, danmuItem.rect, danmuController.adapter.rect);
+        if (result) {
+          setState(() {
+            selectedText = danmuItem.model.text;
+          });
+        }
+        return result;
+      },
+    );
 
     danmuController.setDuration(duration);
 
@@ -211,8 +214,88 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
         alignment: WrapAlignment.start, //p between lines
         children: [
           getButton(
-            "普通",
+            "测试",
             () {
+              danmuController.addDanmu(DanmuModel(
+                id: ++id,
+                text: "晚安",
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Color(0xFF836BFF), Color(0xFFC09DF6)],
+                  ),
+                  border: Border(
+                    left: BorderSide(color: Color(0x66FFFFFF)),
+                    top: BorderSide(color: Color(0x66FFFFFF)),
+                    right: BorderSide(color: Color(0x66FFFFFF)),
+                    bottom: BorderSide(color: Color(0x66FFFFFF)),
+                  ),
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                ),
+                spans: [
+                  TextSpan(
+                      text: "晚安",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                      )),
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.bottom,
+                    child: Container(
+                      width: 30,
+                      height: 36,
+                      margin: const EdgeInsets.only(left: 4, right: 4),
+                      child: Image.asset("assets/images/ic_jy.png"),
+                    ),
+                  ),
+                  TextSpan(
+                      text: "+101",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                      )),
+                  WidgetSpan(
+                    child: StrokeTextWidget(
+                      "来啦来啦！！期待下一集！",
+                      textStyle: const TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w800,
+                        fontFamily: "AlimamaShuHeiTi",
+                      ),
+                      linearGradient: RawLinearGradient(
+                        LocalPosition.topCenter,
+                        LocalPosition.bottomCenter,
+                        [
+                          const Color(0xFFE1C6F8),
+                          const Color(0xFFFFFBEA),
+                          const Color(0xFFFFA8D9),
+                        ],
+                        [0, 0.5, 1],
+                      ),
+                      strokeWidth: 1.5,
+                      opacity: 0.2,
+                      strokeColor: const Color(0xFF41357F),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 2, horizontal: 8),
+                      decoration: const BoxDecoration(
+                        color: Color(0xCCFF9C6B),
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                        border: Border.fromBorderSide(BorderSide(
+                            color: Colors.white,
+                            width: 1,
+                            style: BorderStyle.solid)),
+                      ),
+                    ),
+                  ),
+                ],
+                startTime: danmuController.progress,
+              ));
+            },
+          ),
+          getButton(
+            "普通",
+                () {
               danmuController.addDanmu(DanmuModel(
                 id: ++id,
                 text: rngText,
@@ -402,7 +485,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                 if (danmuController.isSelected) {
                   danmuController.addDanmu(DanmuModel(
                     id: ++id,
-                    text: danmuController.selected!.text,
+                    text: danmuController.selected!.model.text,
                     isMine: true,
                     startTime: danmuController.progress,
                   ));

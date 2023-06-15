@@ -72,7 +72,15 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/svgs/
 
+  fonts:
+    - family: AlimamaShuHeiTi
+      fonts:
+        - asset: assets/fonts/AlimamaShuHeiTi-Bold.otf
+        - asset: assets/fonts/AlimamaShuHeiTi-Bold.ttf
+        - asset: assets/fonts/AlimamaShuHeiTi-Bold.woff
+        - asset: assets/fonts/AlimamaShuHeiTi-Bold.woff2
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
 

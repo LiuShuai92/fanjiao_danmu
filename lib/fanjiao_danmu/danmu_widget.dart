@@ -47,9 +47,43 @@ class _DanmuWidgetState extends State<DanmuWidget>
 
   @override
   Widget build(BuildContext context) {
-    Widget child;
+    // Widget child;
     var tooltipWidget = widget.tooltip?.call(widget.danmuController.selected);
-    var customPaint = CustomPaint(
+    List<Widget> children = [];
+    Positioned? selected;
+    for (var danmuItem in widget.danmuController.danmuItems) {
+      Widget itemWidget;
+      if (danmuItem.isImage) {
+        itemWidget = Image(
+          image: danmuItem.imageAsset!,
+          width: danmuItem.size.width,
+          height: danmuItem.size.height,
+        );
+      } else {
+        itemWidget = Text.rich(danmuItem.span!);
+      }
+      var positioned = Positioned(
+        left: danmuItem.position?.dx,
+        top: danmuItem.position?.dy,
+        child: Container(
+          child: itemWidget,
+          decoration: danmuItem.model.decoration,
+          padding: danmuItem.model.padding,
+        ),
+      );
+      if (danmuItem.isSelected) {
+        selected = positioned;
+        continue;
+      }
+      children.add(positioned);
+    }
+    if (selected != null) {
+      children.add(selected);
+    }
+    if (tooltipWidget != null) {
+      children.add(tooltipWidget);
+    }
+    /*var customPaint = CustomPaint(
       size: widget.size,
       isComplex: true,
       painter: _FanjiaoDanmuPainter(
@@ -59,18 +93,16 @@ class _DanmuWidgetState extends State<DanmuWidget>
     );
     if (tooltipWidget != null) {
       child = Stack(
-        children: [
-          customPaint,
-          tooltipWidget,
-        ],
+        children: children,
       );
     }else {
       child = customPaint;
-    }
+    }*/
     return SizedBox(
       width: widget.size.width,
       height: widget.size.height,
       child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
         onTapUp: (details) {
           _tapDownDetails = details;
         },
@@ -79,7 +111,10 @@ class _DanmuWidgetState extends State<DanmuWidget>
             widget.danmuController.tapPosition(_tapDownDetails!.localPosition);
           }
         },
-        child: child,
+        // child: child,
+        child: Stack(
+          children: children,
+        ),
       ),
     );
   }
@@ -88,7 +123,6 @@ class _DanmuWidgetState extends State<DanmuWidget>
 class _FanjiaoDanmuPainter extends CustomPainter {
   final BuildContext context;
   final DanmuController controller;
-  final ImageProvider? iconProvider;
   final double iconWidth;
   final double iconHeight;
   final Paint _painter;
@@ -101,7 +135,6 @@ class _FanjiaoDanmuPainter extends CustomPainter {
   _FanjiaoDanmuPainter(
     this.context, {
     required this.controller,
-    this.iconProvider,
     this.iconWidth = 14,
     this.iconHeight = 14,
   }) : _painter = Paint();
@@ -120,7 +153,7 @@ class _FanjiaoDanmuPainter extends CustomPainter {
         selectedEntry = entry;
         continue;
       }
-      if (entry.startTime <= controller.progress &&
+      if (entry.model.startTime <= controller.progress &&
           controller.filter.check(entry.flag)) {
         if (entry.position == null) {
           continue;
@@ -135,20 +168,20 @@ class _FanjiaoDanmuPainter extends CustomPainter {
   }
 
   void drawItem(DanmuItem<DanmuModel> entry, ui.Canvas canvas) {
-    if (entry.decoration != null) {
+    if (entry.model.decoration != null) {
       drawBorder(entry, canvas);
     }
-    if (entry.spanInfo.isTextSpan) {
-      drawText(entry, canvas);
-    } else if (entry.spanInfo.iconAsset != null) {
-      var imageInfo = controller.getImage(context, entry.spanInfo.iconAsset!);
+    if (entry.isImage) {
+      var imageInfo = controller.getImage(context, entry.imageAsset!);
       if (imageInfo != null &&
           imageInfo.image != null &&
           imageInfo.rect != null) {
         drawImage(imageInfo.image, canvas, imageInfo.rect!, entry.imageRect);
       }
+    } else {
+      drawText(entry, canvas);
     }
-    if (entry.isHighPraise) {
+    if (entry.model.isPraise) {
       drawPraise(entry, canvas);
     }
   }
@@ -182,18 +215,18 @@ class _FanjiaoDanmuPainter extends CustomPainter {
 
   ///绘制文字
   void drawText(DanmuItem entry, ui.Canvas canvas) {
-    if (entry.spanInfo.textStrokeSpan != null) {
+    if (entry.textStrokeSpan != null) {
       entry.textStrokePainter?.paint(canvas, entry.position!);
     }
-    entry.textPainter.paint(canvas, entry.position!);
+    entry.textPainter?.paint(canvas, entry.position!);
   }
 
   ///绘制单个弹幕边框
   void drawBorder(DanmuItem entry, ui.Canvas canvas) {
-    assert(entry.decoration != null);
-    var boxPainter = entry.decoration!.createBoxPainter();
-    boxPainter.paint(
-         canvas, entry.position! - entry.padding.topLeft, entry.configuration);
+    assert(entry.model.decoration != null);
+    var boxPainter = entry.model.decoration!.createBoxPainter();
+    boxPainter.paint(canvas, entry.position! - entry.model.padding.topLeft,
+        entry.configuration);
   }
 
   ///shouldRepaint则决定当条件变化时是否需要重画。
