@@ -274,7 +274,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                         [0, 0.5, 1],
                       ),
                       strokeWidth: 1.5,
-                      opacity: 0.2,
+                      opacity: 0.8,
                       strokeColor: const Color(0xFF41357F),
                       padding: const EdgeInsets.symmetric(
                           vertical: 2, horizontal: 8),
@@ -299,6 +299,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
               danmuController.addDanmu(DanmuModel(
                 id: ++id,
                 text: rngText,
+                opacity: 0.8,
                 startTime: danmuController.progress,
               ));
             },

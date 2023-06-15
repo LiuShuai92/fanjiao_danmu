@@ -86,6 +86,7 @@ class DanmuItem<T extends DanmuModel> {
               child: StrokeTextWidget(
               model.text,
               textStyle: model.textStyle,
+              opacity: model.opacity,
               textScaleFactor: textScaleFactor,
               strokeWidth: model.strokeWidth,
             ))
@@ -197,6 +198,7 @@ class DanmuModel {
   final BoxDecoration? decoration;
   final Size imageSize;
   final double strokeWidth;
+  final double opacity;
   final EdgeInsets padding;
 
   String get plainText {
@@ -217,6 +219,7 @@ class DanmuModel {
     this.imageProvider,
     this.isPraise = false,
     this.package,
+    this.opacity = 1,
     this.padding = const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
     this.strokeWidth = 1,
     this.imageSize = const Size(52, 20),
