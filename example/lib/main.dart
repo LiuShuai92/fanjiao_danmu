@@ -34,12 +34,15 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
   void initState() {
     super.initState();
     danmuController = DanmuController(
-      adapter: FanjiaoDanmuAdapter(rowHeight: 40, imageMap: {
-        '[举手]': const AssetImage("assets/images/ic_jy.png"),
-        '[bilibili]': const AssetImage("assets/images/bilibili.png"),
-        '[饭角]': const NetworkImage(
-            "https://www.fanjiao.co/h5/img/logo.12b2d5a6.png"),
-      }),
+      adapter: FanjiaoDanmuAdapter(
+        rowHeight: 50,
+        imageMap: {
+          '[举手]': const AssetImage("assets/images/ic_jy.png"),
+          '[bilibili]': const AssetImage("assets/images/bilibili.png"),
+          '[饭角]': const NetworkImage(
+              "https://www.fanjiao.co/h5/img/logo.12b2d5a6.png"),
+        },
+      ),
       praiseImageProvider: const AssetImage("assets/images/icon_duck.png"),
       onTap: (DanmuItem? danmuItem, Offset position) {
         if (danmuController.isSelected) {
@@ -102,7 +105,16 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                           danmuController.addDanmu(DanmuModel(
                             id: ++id,
                             text: text,
-                            isMine: true,
+                            isClickable: false,
+                            decoration: const BoxDecoration(
+                              color: Color(0xCCFF9C6B),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(12)),
+                              border: Border.fromBorderSide(BorderSide(
+                                  color: Colors.white,
+                                  width: 1,
+                                  style: BorderStyle.solid)),
+                            ),
                             startTime: danmuController.progress,
                             textStyle: rngTextStyle,
                             flag: DanmuFlag.announcement |
@@ -119,7 +131,16 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                               danmuController.addDanmu(DanmuModel(
                                 id: ++id,
                                 text: textController.text,
-                                isMine: true,
+                                isClickable: false,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xCCFF9C6B),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(12)),
+                                  border: Border.fromBorderSide(BorderSide(
+                                      color: Colors.white,
+                                      width: 1,
+                                      style: BorderStyle.solid)),
+                                ),
                                 startTime: danmuController.progress,
                                 textStyle: rngTextStyle,
                               ));
@@ -146,68 +167,6 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
     );
   }
 
-  Widget get filterButton => Wrap(
-        spacing: 8.0, // gap between adjacent chips
-        runSpacing: 4.0, // gap between lines
-        children: [
-          SwitchButton(
-            "滚动",
-            (isTurnOn) {
-              danmuController.changeFilter(DanmuFlag.scroll);
-            },
-            isTurnOn: danmuController.filter.isScroll,
-          ),
-          SwitchButton(
-            "顶部",
-            (isTurnOn) {
-              danmuController.changeFilter(DanmuFlag.top);
-            },
-            isTurnOn: danmuController.filter.isTop,
-          ),
-          SwitchButton(
-            "底部",
-            (isTurnOn) {
-              danmuController.changeFilter(DanmuFlag.bottom);
-            },
-            isTurnOn: danmuController.filter.isBottom,
-          ),
-          SwitchButton(
-            "彩色",
-            (isTurnOn) {
-              danmuController.changeFilter(DanmuFlag.colorful);
-            },
-            isTurnOn: danmuController.filter.isColorful,
-          ),
-          SwitchButton(
-            "高级",
-            (isTurnOn) {
-              danmuController.changeFilter(DanmuFlag.advanced);
-            },
-            isTurnOn: danmuController.filter.isAdvanced,
-          ),
-          SwitchButton(
-            "重复",
-            (isTurnOn) {
-              danmuController.markRepeated();
-              danmuController.changeFilter(DanmuFlag.repeated);
-            },
-            isTurnOn: danmuController.filter.isRepeated,
-          ),
-          SwitchButton(
-            "播放/暂停",
-            (isTurnOn) {
-              isPlaying = isTurnOn;
-              if (isTurnOn) {
-                danmuController.start();
-              } else {
-                danmuController.pause();
-              }
-            },
-            isTurnOn: !isPlaying,
-          ),
-        ],
-      );
-
   Widget get danmuButton => Wrap(
         spacing: 8.0, // gap between adjacent chips
         runSpacing: 4.0, //
@@ -219,73 +178,63 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
               danmuController.addDanmu(DanmuModel(
                 id: ++id,
                 text: "晚安",
+                alignment: Alignment.bottomCenter,
+                margin: const EdgeInsets.only(top: 6, right: 10),
+                padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
-                    colors: [Color(0xFF836BFF), Color(0xFFC09DF6)],
+                    colors: [Color(0xFFC09DF6), Color(0xFF836BFF)],
                   ),
                   border: Border(
-                    left: BorderSide(color: Color(0x66FFFFFF)),
-                    top: BorderSide(color: Color(0x66FFFFFF)),
-                    right: BorderSide(color: Color(0x66FFFFFF)),
-                    bottom: BorderSide(color: Color(0x66FFFFFF)),
+                    left: BorderSide(
+                        color: Color(0x66FFFFFF),
+                        strokeAlign: StrokeAlign.outside),
+                    top: BorderSide(
+                        color: Color(0x66FFFFFF),
+                        strokeAlign: StrokeAlign.outside),
+                    right: BorderSide(
+                        color: Color(0x66FFFFFF),
+                        strokeAlign: StrokeAlign.outside),
+                    bottom: BorderSide(
+                        color: Color(0x66FFFFFF),
+                        strokeAlign: StrokeAlign.outside),
                   ),
                   borderRadius: BorderRadius.all(Radius.circular(8)),
                 ),
                 spans: [
-                  TextSpan(
+                  const TextSpan(
                       text: "晚安",
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
                         fontSize: 14,
                       )),
                   WidgetSpan(
-                    alignment: PlaceholderAlignment.bottom,
+                    alignment: PlaceholderAlignment.middle,
                     child: Container(
                       width: 30,
-                      height: 36,
-                      margin: const EdgeInsets.only(left: 4, right: 4),
-                      child: Image.asset("assets/images/ic_jy.png"),
+                      height: 30,
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      alignment: Alignment.bottomCenter,
+                      child: OverflowBox(
+                        maxWidth: 30,
+                        maxHeight: 40,
+                        alignment: Alignment.bottomCenter,
+                        child: Image.asset(
+                          "assets/images/ic_jy.png",
+                          width: 30,
+                          height: 36,
+                          fit: BoxFit.fitWidth,
+                        ),
+                      ),
                     ),
                   ),
-                  TextSpan(
-                      text: "+101",
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                      )),
-                  WidgetSpan(
-                    child: StrokeTextWidget(
-                      "来啦来啦！！期待下一集！",
-                      textStyle: const TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w800,
-                        fontFamily: "AlimamaShuHeiTi",
-                      ),
-                      linearGradient: RawLinearGradient(
-                        LocalPosition.topCenter,
-                        LocalPosition.bottomCenter,
-                        [
-                          const Color(0xFFE1C6F8),
-                          const Color(0xFFFFFBEA),
-                          const Color(0xFFFFA8D9),
-                        ],
-                        [0, 0.5, 1],
-                      ),
-                      strokeWidth: 1.5,
-                      opacity: 0.8,
-                      strokeColor: const Color(0xFF41357F),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 2, horizontal: 8),
-                      decoration: const BoxDecoration(
-                        color: Color(0xCCFF9C6B),
-                        borderRadius: BorderRadius.all(Radius.circular(12)),
-                        border: Border.fromBorderSide(BorderSide(
-                            color: Colors.white,
-                            width: 1,
-                            style: BorderStyle.solid)),
-                      ),
+                  const TextSpan(
+                    text: "+101",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
                     ),
                   ),
                 ],
@@ -295,7 +244,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
           ),
           getButton(
             "普通",
-                () {
+            () {
               danmuController.addDanmu(DanmuModel(
                 id: ++id,
                 text: rngText,
@@ -317,12 +266,38 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
             },
           ),
           getButton(
-            "高赞",
+            "全屏弹幕",
             () {
               danmuController.addDanmu(DanmuModel(
                 id: ++id,
                 text: rngText,
-                isPraise: true,
+                spans: [
+                  WidgetSpan(
+                    child: StrokeTextWidget(
+                      "来啦来啦！！期待下一集！",
+                      textStyle: const TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.w800,
+                        fontFamily: "AlimamaShuHeiTi",
+                      ),
+                      linearGradient: RawLinearGradient(
+                        LocalPosition.topCenter,
+                        LocalPosition.bottomCenter,
+                        [
+                          const Color(0xFFE1C6F8),
+                          const Color(0xFFFFFBEA),
+                          const Color(0xFFFFA8D9),
+                        ],
+                        [0, 0.5, 1],
+                      ),
+                      strokeWidth: 1.5,
+                      // opacity: 1,
+                      strokeColor: const Color(0xFF41357F),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 2, horizontal: 8),
+                    ),
+                  ),
+                ],
                 startTime: danmuController.progress,
               ));
             },
@@ -367,7 +342,13 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
               danmuController.addDanmu(DanmuModel(
                 id: ++id,
                 text: rngText,
-                isMine: true,
+                isClickable: false,
+                decoration: const BoxDecoration(
+                  color: Color(0xCCFF9C6B),
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                  border: Border.fromBorderSide(BorderSide(
+                      color: Colors.white, width: 1, style: BorderStyle.solid)),
+                ),
                 startTime: danmuController.progress,
                 textStyle: rngTextStyle,
                 flag: DanmuFlag.announcement | DanmuFlag.collisionFree,
@@ -447,6 +428,68 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
         ],
       );
 
+  Widget get filterButton => Wrap(
+        spacing: 8.0, // gap between adjacent chips
+        runSpacing: 4.0, // gap between lines
+        children: [
+          SwitchButton(
+            "滚动",
+            (isTurnOn) {
+              danmuController.changeFilter(DanmuFlag.scroll);
+            },
+            isTurnOn: danmuController.filter.isScroll,
+          ),
+          SwitchButton(
+            "顶部",
+            (isTurnOn) {
+              danmuController.changeFilter(DanmuFlag.top);
+            },
+            isTurnOn: danmuController.filter.isTop,
+          ),
+          SwitchButton(
+            "底部",
+            (isTurnOn) {
+              danmuController.changeFilter(DanmuFlag.bottom);
+            },
+            isTurnOn: danmuController.filter.isBottom,
+          ),
+          SwitchButton(
+            "彩色",
+            (isTurnOn) {
+              danmuController.changeFilter(DanmuFlag.colorful);
+            },
+            isTurnOn: danmuController.filter.isColorful,
+          ),
+          SwitchButton(
+            "高级",
+            (isTurnOn) {
+              danmuController.changeFilter(DanmuFlag.advanced);
+            },
+            isTurnOn: danmuController.filter.isAdvanced,
+          ),
+          SwitchButton(
+            "重复",
+            (isTurnOn) {
+              danmuController.markRepeated();
+              danmuController.changeFilter(DanmuFlag.repeated);
+            },
+            isTurnOn: danmuController.filter.isRepeated,
+          ),
+          SwitchButton(
+            "播放/暂停",
+            (isTurnOn) {
+              isPlaying = isTurnOn;
+              if (isTurnOn) {
+                danmuController.start();
+              } else {
+                danmuController.pause();
+              }
+            },
+            isTurnOn: !isPlaying,
+          ),
+        ],
+      );
+
   Widget getButton(String name, Function() onTap,
       {Color color = Colors.redAccent}) {
     return GestureDetector(
@@ -487,7 +530,15 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                   danmuController.addDanmu(DanmuModel(
                     id: ++id,
                     text: danmuController.selected!.model.text,
-                    isMine: true,
+                    isClickable: false,
+                    decoration: const BoxDecoration(
+                      color: Color(0xCCFF9C6B),
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                      border: Border.fromBorderSide(BorderSide(
+                          color: Colors.white,
+                          width: 1,
+                          style: BorderStyle.solid)),
+                    ),
                     startTime: danmuController.progress,
                   ));
                   danmuController.clearSelection();

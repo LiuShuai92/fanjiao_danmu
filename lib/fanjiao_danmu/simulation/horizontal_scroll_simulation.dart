@@ -9,7 +9,7 @@ class HorizontalScrollSimulation extends DanmuSimulation {
     required this.right,
     required this.left,
     required this.size,
-    this.paddingTop = 0,
+    this.y = 0,
     Tolerance tolerance = Tolerance.defaultTolerance,
     double duration = 7,
   })  : v = (left - size.width - right) / duration,
@@ -22,7 +22,7 @@ class HorizontalScrollSimulation extends DanmuSimulation {
   final double left;
   final double v;
   final Size size;
-  double paddingTop;
+  double y;
 
   @override
   Offset dOffset(double time) {
@@ -30,7 +30,7 @@ class HorizontalScrollSimulation extends DanmuSimulation {
   }
 
   @override
-  Offset offset(double time) => Offset(right + v * time, paddingTop);
+  Offset offset(double time) => Offset(right + v * time, y);
 
   @override
   Offset? isDone(Offset o, double dt) {

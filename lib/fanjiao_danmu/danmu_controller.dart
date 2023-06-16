@@ -1,8 +1,6 @@
 import 'dart:collection';
-import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/foundation.dart' as foundation;
@@ -17,7 +15,6 @@ class DanmuController<T extends DanmuModel>
         DanmuEagerListenerMixin {
   /// return true 选中并暂停这条弹幕
   final bool Function(DanmuItem<T>?, Offset)? onTap;
-  final Map<ImageProvider, ImgInfo> _imagesPool = {};
   final List<DanmuItem<T>> _tempList = <DanmuItem<T>>[];
   final ImageProvider? praiseImageProvider;
   Duration startTime = Duration.zero;
@@ -31,7 +28,6 @@ class DanmuController<T extends DanmuModel>
   int filter;
   DanmuItem<T>? selected;
   Ticker? _ticker;
-  ImgInfo? _iconPraise;
   Duration? _progress;
   Duration? _lastElapsedDuration;
   bool _onceForceRefresh = false;
@@ -127,33 +123,6 @@ class DanmuController<T extends DanmuModel>
     danmuItems.clear();
     adapter.clear();
     selected = null;
-  }
-
-  addImage(BuildContext context, ImageProvider asset) async {
-    var image = await loadImage(context, asset);
-    if (image != null) {
-      _imagesPool[asset] = ImgInfo(image,
-          Rect.fromLTRB(0, 0, image.width.toDouble(), image.height.toDouble()));
-      notifyListeners();
-    }
-  }
-
-  ImgInfo? getImage(BuildContext context, ImageProvider? asset) {
-    if (asset == null) {
-      return null;
-    }
-    if (_imagesPool[asset] == null) {
-      _imagesPool[asset] = ImgInfo.empty;
-      addImage(context, asset);
-      return null;
-    } else {
-      return _imagesPool[asset];
-    }
-  }
-
-  ImgInfo? iconPraise(BuildContext context) {
-    _iconPraise = getImage(context, praiseImageProvider);
-    return _iconPraise;
   }
 
   setup(BuildContext context, TickerProvider vsync, Rect rect) {
@@ -254,8 +223,7 @@ class DanmuController<T extends DanmuModel>
     List<String> temp = [];
     for (var entry in danmuItems) {
       if (!entry.flag.isAnnouncement && temp.contains(entry.model.plainText)) {
-        ///不去重 高级弹幕 自己发的弹幕 高点赞数的弹幕
-        if (!entry.flag.isAdvanced && !entry.model.isMine && !entry.model.isPraise) {
+        if (!entry.model.isRepeatable) {
           entry.flag = entry.flag.addRepeated;
         }
       } else {
@@ -401,7 +369,6 @@ class DanmuController<T extends DanmuModel>
     _ticker = null;
     _lastElapsedDuration = null;
     _status = DanmuStatus.dispose;
-    _imagesPool.clear();
     clearStatusListeners();
     clearListeners();
     super.dispose();
@@ -417,16 +384,6 @@ enum DanmuStatus {
   idle,
   completed,
   stop,
-}
-
-class ImgInfo {
-  final ui.Image? image;
-  final Rect? rect;
-  static const ImgInfo empty = ImgInfo(null, null);
-
-  bool get isEmpty => image == null;
-
-  const ImgInfo(this.image, this.rect);
 }
 
 extension DurationExtension on Duration {

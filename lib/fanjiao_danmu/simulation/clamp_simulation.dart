@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'danmu_simulation.dart';
 
 class ClampSimulation extends DanmuSimulation {
-  double time = 0;
   Offset clampOffset;
 
   ClampSimulation({

@@ -8,7 +8,6 @@ import '../simulation/clamp_simulation.dart';
 
 class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
   final math.Random _random = math.Random();
-  // final EdgeInsets padding;
   final List<Queue<DanmuItem<T>>> scrollRows = [];
   final List<DanmuItem<T>?> centerRows = [];
   final Map<String, ImageProvider> imageMap;
@@ -19,15 +18,12 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
 
   int get _randomScrollLine => _random.nextInt(scrollRows.length - 1);
 
-  double _getPaddingTop(int lineIndex, double itemHeight) =>
-      lineIndex * rowHeight + (rowHeight - itemHeight) / 2;
+  double _getY(int lineIndex) => lineIndex * rowHeight;
 
   FanjiaoDanmuAdapter({
     this.rowHeight = 30,
     this.imageMap = const <String, ImageProvider>{},
-    double preExtra = 4,
-    double iconExtra = 30,
-  }) : super(preExtra: preExtra, iconExtra: iconExtra);
+  }) : super();
 
   @override
   initData(Rect rect, {int? maxLines}) {
@@ -95,9 +91,8 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
       var centerRow = centerRows[i];
       if (centerRow == null) {
         item = transformText(model);
-        double paddingTop = _getPaddingTop(i, item.size.height);
-        Offset offset =
-            Offset(rect.center.dx - item.size.width / 2, paddingTop);
+        double y = _getY(i);
+        Offset offset = Offset(rect.center.dx - item.size.width / 2, y);
         item.simulation = ClampSimulation(clampOffset: offset);
         centerRows[i] = item;
         break;
@@ -113,9 +108,9 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
       var centerRow = centerRows[i];
       if (centerRow == null) {
         item = transformText(model);
-        double paddingTop = _getPaddingTop(i, item.size.height);
+        double y = _getY(i);
         Offset offset =
-            Offset(rect.center.dx - item.size.width / 2, paddingTop);
+            Offset(rect.center.dx - item.size.width / 2, y);
         item.simulation = ClampSimulation(clampOffset: offset);
         centerRows[i] = item;
         break;
@@ -127,7 +122,8 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
   DanmuItem<T>? _getScrollItem(T model) {
     assert(_maxLines != null, "需要先调用 initData()");
     DanmuItem<T> item = transformText(model);
-    var size = item.size;
+    var marginSize = model.margin.collapsedSize;
+    var size = item.size + Offset(marginSize.width, marginSize.height);
     int? tempIndex;
     int min = math.min(scrollRows.length ~/ 2, 3);
     HorizontalScrollSimulation? simulation;
@@ -136,7 +132,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
       simulation =
           HorizontalScrollSimulation(right: rect.width, left: 0, size: size);
       if (row.isEmpty || (row.length == 1 && row.last.isSelected)) {
-        simulation.paddingTop = _getPaddingTop(i, size.height);
+        simulation.y = _getY(i);
         item.simulation = simulation;
         row.add(item);
         break;
@@ -145,15 +141,12 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
             .offset(
                 (model.insertTime - model.startTime).inMicrosecondsPerSecond)
             .dx;
-        if (model.isPraise) {
-          rx -= iconExtra;
-        }
         DanmuItem<T> last;
         bool isEmpty = false;
         last = row.lastWhere(
             (element) => !element.isSelected && !element.flag.isCollisionFree,
             orElse: () {
-          simulation!.paddingTop = _getPaddingTop(i, size.height);
+          simulation!.y = _getY(i);
           isEmpty = true;
           item.simulation = simulation;
           return item;
@@ -167,17 +160,14 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
                     .inMicrosecondsPerSecond)
                 .dx +
             last.size.width;
-        if (rx - lx > preExtra) {
+        if (rx > lx) {
           var endTime =
               (last.endTime - model.startTime).inMicrosecondsPerSecond;
           var dx = simulation.offset(endTime).dx;
-          if (model.isPraise) {
-            dx -= iconExtra;
-          }
 
           ///如果弹幕放到当前行，则在当前行上一条弹幕消失时，当前添加的弹幕所在位置是否没有超过了中线
           if (dx > rect.center.dx && i <= min) {
-            simulation.paddingTop = _getPaddingTop(i, size.height);
+            simulation.y = _getY(i);
             item.simulation = simulation;
             row.add(item);
             break;
@@ -190,7 +180,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
       }
     }
     if (!item.isValid && simulation != null && tempIndex != null) {
-      simulation.paddingTop = _getPaddingTop(tempIndex, size.height);
+      simulation.y = _getY(tempIndex);
       item.simulation = simulation;
       scrollRows[tempIndex].add(item);
     }
@@ -200,7 +190,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
       var index = _randomScrollLine;
       item.simulation = simulation;
       scrollRows[index].add(item);
-      simulation.paddingTop = _getPaddingTop(index, size.height);
+      simulation.y = _getY(index);
     }
     return item;
   }

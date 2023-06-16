@@ -24,12 +24,11 @@ class DanmuItem<T extends DanmuModel> {
 
   ///[DanmuFlag] 可能会发生改变 比如[DanmuFlag.repeated]是否是重复内容
   Rect get rect =>
-      position == null ? Rect.zero : position! - model.padding.topLeft & size;
+      position == null ? Rect.zero : (position! + model.margin.topLeft & size);
 
   Rect get imageRect => position == null
       ? Rect.zero
-      : position! &
-          size + model.padding.bottomRight + model.padding.bottomRight;
+      : position! & size + model.margin.bottomRight;
 
   Duration get endTime {
     assert(isValid);
@@ -74,6 +73,7 @@ class DanmuItem<T extends DanmuModel> {
     this.imageAsset,
     Size imageSize = const Size(52, 20),
     double textScaleFactor = 1,
+    Function(List<PlaceholderSpan>)? layoutChildren,
   })  : flag = flag ?? model.flag,
         _isImage = imageAsset != null {
     ///由于绘制时大量layout比较耗时，所以提前用空间换时间
@@ -91,10 +91,10 @@ class DanmuItem<T extends DanmuModel> {
               strokeWidth: model.strokeWidth,
             ))
           : TextSpan(children: model.spans, style: model.textStyle);
+      var placeholderDimensions = (layoutChildren??_layoutChildren).call(_extractPlaceholderSpans(span!));
       textPainter = TextPainter(textDirection: TextDirection.ltr)
         ..text = span
-        ..setPlaceholderDimensions(
-            _layoutChildren(_extractPlaceholderSpans(span!)))
+        ..setPlaceholderDimensions(placeholderDimensions)
         ..textScaleFactor = textScaleFactor;
       textPainter!.layout();
 
@@ -114,14 +114,13 @@ class DanmuItem<T extends DanmuModel> {
 
         textStrokePainter = TextPainter(textDirection: TextDirection.ltr)
           ..text = textStrokeSpan
-          ..setPlaceholderDimensions(
-              _layoutChildren(_extractPlaceholderSpans(textStrokeSpan!)))
+          ..setPlaceholderDimensions(placeholderDimensions)
           ..textScaleFactor = textScaleFactor;
         textStrokePainter!.layout();
       }
       final double width = textPainter!.width + padding.horizontal;
       final double height = textPainter!.height + padding.vertical;
-      size = Size(width, height) + Offset(padding.horizontal, padding.vertical);
+      size = Size(width, height);
     }
 
     configuration = ImageConfiguration(size: size);
@@ -167,10 +166,16 @@ class DanmuItem<T extends DanmuModel> {
             var child = (placeholderSpan.child as StrokeTextWidget);
             childSize = child.rect.size;
             break;
+          case Image:
+            var child = (placeholderSpan.child as Image);
+            childSize = Size(child.width ?? 0, child.height ?? 0);
+            break;
           default:
             break;
         }
       }
+      print(
+          'LiuShuai: type = ${placeholderSpan.runtimeType}, childSize = $childSize');
       return PlaceholderDimensions(
         size: childSize,
         alignment: placeholderSpan.alignment,
@@ -185,21 +190,24 @@ class DanmuModel {
   final int id;
   final List<InlineSpan> spans;
   final String text;
-  final bool isMine;
+  final bool isClickable;
+  final bool isRepeatable;
 
   ///[DanmuFlag] 一个弹幕创建时确定，不会发生改变
   final int flag;
   final TextStyle textStyle;
   final Duration insertTime;
   final Duration startTime;
-  final bool isPraise;
   final ImageProvider? imageProvider;
   final String? package;
   final BoxDecoration? decoration;
+  final BoxDecoration? foregroundDecoration;
+  final AlignmentGeometry? alignment;
   final Size imageSize;
   final double strokeWidth;
   final double opacity;
   final EdgeInsets padding;
+  final EdgeInsets margin;
 
   String get plainText {
     String plainText = "";
@@ -215,15 +223,19 @@ class DanmuModel {
     required this.text,
     required this.startTime,
     this.spans = const [],
-    this.isMine = false,
+    this.isClickable = true,
     this.imageProvider,
-    this.isPraise = false,
     this.package,
+    this.isRepeatable = false,
     this.opacity = 1,
     this.padding = const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+    this.margin = const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
     this.strokeWidth = 1,
     this.imageSize = const Size(52, 20),
     this.flag = DanmuFlag.scroll,
+    this.decoration,
+    this.foregroundDecoration,
+    this.alignment,
     Duration? insertTime,
     Map<String, ImageProvider>? imageMap,
     this.textStyle = const TextStyle(
@@ -232,18 +244,6 @@ class DanmuModel {
       fontWeight: FontWeight.w500,
       decoration: TextDecoration.none,
     ),
-    BoxDecoration? decoration,
   })  : assert(textStyle != null),
-        insertTime = insertTime ?? startTime,
-        decoration = decoration ??
-            (isMine
-                ? const BoxDecoration(
-                    color: Color(0xCCFF9C6B),
-                    borderRadius: BorderRadius.all(Radius.circular(12)),
-                    border: Border.fromBorderSide(BorderSide(
-                        color: Colors.white,
-                        width: 1,
-                        style: BorderStyle.solid)),
-                  )
-                : null);
+        insertTime = insertTime ?? startTime;
 }

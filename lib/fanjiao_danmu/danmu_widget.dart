@@ -48,10 +48,11 @@ class _DanmuWidgetState extends State<DanmuWidget>
   @override
   Widget build(BuildContext context) {
     // Widget child;
-    var tooltipWidget = widget.tooltip?.call(widget.danmuController.selected);
+    var danmuController = widget.danmuController;
+    var tooltipWidget = widget.tooltip?.call(danmuController.selected);
     List<Widget> children = [];
     Positioned? selected;
-    for (var danmuItem in widget.danmuController.danmuItems) {
+    for (var danmuItem in danmuController.danmuItems) {
       Widget itemWidget;
       if (danmuItem.isImage) {
         itemWidget = Image(
@@ -62,20 +63,27 @@ class _DanmuWidgetState extends State<DanmuWidget>
       } else {
         itemWidget = Text.rich(danmuItem.span!);
       }
-      var positioned = Positioned(
-        left: danmuItem.position?.dx,
-        top: danmuItem.position?.dy,
-        child: Container(
-          child: itemWidget,
-          decoration: danmuItem.model.decoration,
-          padding: danmuItem.model.padding,
-        ),
-      );
-      if (danmuItem.isSelected) {
-        selected = positioned;
-        continue;
+      var model = danmuItem.model;
+      if (model.startTime <= danmuController.progress &&
+          danmuController.filter.check(model.flag)) {
+        var positioned = Positioned(
+          left: danmuItem.position?.dx,
+          top: danmuItem.position?.dy,
+          child: Container(
+            child: itemWidget,
+            decoration: model.decoration,
+            foregroundDecoration: model.foregroundDecoration,
+            alignment: model.alignment,
+            padding: model.padding,
+            margin: model.margin,
+          ),
+        );
+        if (danmuItem.isSelected) {
+          selected = positioned;
+          continue;
+        }
+        children.add(positioned);
       }
-      children.add(positioned);
     }
     if (selected != null) {
       children.add(selected);
@@ -108,7 +116,7 @@ class _DanmuWidgetState extends State<DanmuWidget>
         },
         onTap: () {
           if (_tapDownDetails != null) {
-            widget.danmuController.tapPosition(_tapDownDetails!.localPosition);
+            danmuController.tapPosition(_tapDownDetails!.localPosition);
           }
         },
         // child: child,
@@ -120,7 +128,7 @@ class _DanmuWidgetState extends State<DanmuWidget>
   }
 }
 
-class _FanjiaoDanmuPainter extends CustomPainter {
+/*class _FanjiaoDanmuPainter extends CustomPainter {
   final BuildContext context;
   final DanmuController controller;
   final double iconWidth;
@@ -248,26 +256,4 @@ class _FanjiaoDanmuPainter extends CustomPainter {
       canvas.drawLine(Offset(x, y), Offset(x + dashWidth, y), paint);
     }
   }
-}
-
-Future<ui.Image?> loadImage(BuildContext? context, ImageProvider? imageProvider,
-    {double? width, double? height}) async {
-  assert(context != null);
-  if (imageProvider == null) return null;
-  ImageStream stream = imageProvider.resolve(createLocalImageConfiguration(
-    context!,
-    size: width != null && height != null ? Size(width, height) : null,
-  ));
-  assert(stream != null);
-  Completer<ui.Image> completer = Completer<ui.Image>();
-  ImageStreamListener? imageStreamListener;
-  listener(ImageInfo frame, bool synchronousCall) {
-    final ui.Image image = frame.image;
-    completer.complete(image);
-    stream.removeListener(imageStreamListener!);
-  }
-
-  imageStreamListener = ImageStreamListener(listener);
-  stream.addListener(imageStreamListener);
-  return completer.future;
-}
+}*/

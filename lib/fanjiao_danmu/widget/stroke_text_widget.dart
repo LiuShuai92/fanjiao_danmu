@@ -141,7 +141,10 @@ class _StrokeTextPainter extends CustomPainter {
   ///shouldRepaint则决定当条件变化时是否需要重画。
   @override
   bool shouldRepaint(_StrokeTextPainter oldDelegate) {
-    return oldDelegate.textStyle != textStyle || oldDelegate.text != text;
+    return oldDelegate.textStyle != textStyle ||
+        oldDelegate.text != text ||
+        oldDelegate.opacity != opacity ||
+        oldDelegate.padding != padding;
   }
 
   void drawDashedLine(
