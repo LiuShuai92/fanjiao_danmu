@@ -206,7 +206,7 @@ class DanmuController<T extends DanmuModel>
         break;
       }
     }
-    if (selectedTemp != null && filter.check(selectedTemp.flag)) {
+    if (selectedTemp != null && selectedTemp.flag.isClickable) {
       if (onTap?.call(selectedTemp, position) ?? false) {
         selectedTemp.isSelected = true;
         selected = selectedTemp;
@@ -234,7 +234,9 @@ class DanmuController<T extends DanmuModel>
   }
 
   _addEntry(T model) {
-    if (model.spans.isEmpty && model.text.isEmpty && model.imageProvider == null) {
+    if (model.spans.isEmpty &&
+        model.text.isEmpty &&
+        model.imageProvider == null) {
       return;
     }
     if (model.startTime > endTime) {
@@ -256,6 +258,8 @@ class DanmuController<T extends DanmuModel>
     if (filter.check(model.flag)) {
       var item = adapter.getItem(model);
       if (item != null) {
+        item.position = item.simulation
+            .offset((progress - item.model.startTime).inMicrosecondsPerSecond);
         danmuItems.add(item);
       }
     }
@@ -346,6 +350,19 @@ class DanmuController<T extends DanmuModel>
     }
   }
 
+  DanmuItem<T>? getItem(int id) {
+    for (var item in danmuItems) {
+      if (item.model.id == id) {
+        return item;
+      }
+    }
+    return null;
+  }
+
+  void updateView() {
+    notifyListeners();
+  }
+
   @override
   dispose() {
     assert(() {
@@ -424,6 +441,9 @@ extension DanmuFlag on int {
   ///无碰撞体积
   static const int collisionFree = 1 << 7;
 
+  ///可点击
+  static const int clickable = 1 << 8;
+
   ///全部不允许
   static const int none = 0;
 
@@ -435,7 +455,8 @@ extension DanmuFlag on int {
       DanmuFlag.repeated |
       DanmuFlag.colorful |
       DanmuFlag.announcement |
-      DanmuFlag.collisionFree;
+      DanmuFlag.collisionFree |
+      DanmuFlag.clickable;
 
   bool check(int flag) => this & flag == flag;
 
@@ -461,6 +482,8 @@ extension DanmuFlag on int {
 
   bool get isCollisionFree => check(collisionFree);
 
+  bool get isClickable => check(clickable);
+
   int get addScroll => add(scroll);
 
   int get addTop => add(top);
@@ -476,6 +499,8 @@ extension DanmuFlag on int {
   int get addAnnouncement => add(announcement);
 
   int get addCollisionFree => add(collisionFree);
+
+  int get addClickable => add(clickable);
 
   int get removeScroll => remove(scroll);
 
@@ -493,6 +518,8 @@ extension DanmuFlag on int {
 
   int get removeCollisionFree => remove(collisionFree);
 
+  int get removeClickable => remove(clickable);
+
   int get changeScroll => change(scroll);
 
   int get changeTop => change(top);
@@ -508,4 +535,6 @@ extension DanmuFlag on int {
   int get changeAnnouncement => change(announcement);
 
   int get changeCollisionFree => change(collisionFree);
+
+  int get changeClickable => change(clickable);
 }

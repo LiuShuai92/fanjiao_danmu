@@ -65,7 +65,7 @@ class _DanmuWidgetState extends State<DanmuWidget>
       }
       var model = danmuItem.model;
       if (model.startTime <= danmuController.progress &&
-          danmuController.filter.check(model.flag)) {
+          danmuController.filter.check(danmuItem.flag)) {
         var positioned = Positioned(
           left: danmuItem.position?.dx,
           top: danmuItem.position?.dy,

@@ -187,27 +187,3 @@ class _BubbleBoxPainter extends CustomPainter {
         oldDelegate.isUpward != isUpward;
   }
 }
-
-extension PathEx on Path {
-  lineTo2(double x, double y) {
-    print('lineTo($x, $y)');
-    lineTo(x, y);
-  }
-
-  relativeArcToPoint2(
-    Offset arcEndDelta, {
-    Radius radius = Radius.zero,
-    double rotation = 0.0,
-    bool largeArc = false,
-    bool clockwise = true,
-  }) {
-    print('relativeArcToPoint(arcEndDelta: $arcEndDelta, radius: $radius)');
-    relativeArcToPoint(
-      arcEndDelta,
-      radius: radius,
-      rotation: rotation,
-      largeArc: largeArc,
-      clockwise: clockwise,
-    );
-  }
-}

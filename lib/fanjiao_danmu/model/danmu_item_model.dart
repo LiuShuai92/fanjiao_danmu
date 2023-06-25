@@ -8,21 +8,27 @@ import '../simulation/danmu_simulation.dart';
 import '../widget/stroke_text_widget.dart';
 
 class DanmuItem<T extends DanmuModel> {
-  final T model;
+  late T _model;
+  late int flag;
+  bool isSelected;
+  Duration? dTime;
+  Offset? position;
   final ImageProvider? imageAsset;
-  final bool _isImage;
-
-  bool get isImage => _isImage;
-  late final ImageConfiguration configuration;
+  late ImageConfiguration configuration;
   late Size size;
   TextPainter? textPainter;
   TextPainter? textStrokePainter;
   InlineSpan? span;
   InlineSpan? textStrokeSpan;
+  DanmuSimulation? _simulation;
+
+  T get model => _model;
+  late bool _isImage;
+
+  bool get isImage => _isImage;
 
   bool get isTextSpan => span is TextSpan;
 
-  ///[DanmuFlag] 可能会发生改变 比如[DanmuFlag.repeated]是否是重复内容
   Rect get rect =>
       position == null ? Rect.zero : (position! + model.margin.topLeft & size);
 
@@ -49,12 +55,6 @@ class DanmuItem<T extends DanmuModel> {
     return _simulation!.offset(_simulation!.duration);
   }
 
-  int flag;
-  bool isSelected;
-  Duration? dTime;
-  Offset? position;
-  DanmuSimulation? _simulation;
-
   bool get isValid => _simulation != null;
 
   DanmuSimulation get simulation {
@@ -67,31 +67,51 @@ class DanmuItem<T extends DanmuModel> {
   }
 
   DanmuItem({
-    required this.model,
+    required T model,
     this.isSelected = false,
     int? flag,
     this.imageAsset,
     Size imageSize = const Size(52, 20),
     double textScaleFactor = 1,
     Function(List<PlaceholderSpan>)? layoutChildren,
-  })  : flag = flag ?? model.flag,
-        _isImage = imageAsset != null {
-    ///由于绘制时大量layout比较耗时，所以提前用空间换时间
-    var padding = model.padding;
+  }) {
+    updateModel(
+      model,
+      flag: flag ?? model.flag,
+      imageSize: imageSize,
+      textScaleFactor: textScaleFactor,
+      layoutChildren: layoutChildren,
+    );
+  }
+
+  void updateModel(
+    model, {
+    int? flag,
+    ui.Size imageSize = const Size(52, 20),
+    double textScaleFactor = 1,
+    Function(List<PlaceholderSpan>)? layoutChildren,
+  }) {
+    _model = model;
+    if (flag != null) {
+      this.flag = flag;
+    }
+    _isImage = imageAsset != null;
+    var padding = _model.padding;
     if (isImage) {
       size = imageSize + Offset(padding.horizontal, padding.vertical);
     } else {
-      span = model.spans.isEmpty
+      span = _model.spans.isEmpty
           ? WidgetSpan(
               child: StrokeTextWidget(
-              model.text,
-              textStyle: model.textStyle,
-              opacity: model.opacity,
+              _model.text,
+              textStyle: _model.textStyle,
+              opacity: _model.opacity,
               textScaleFactor: textScaleFactor,
-              strokeWidth: model.strokeWidth,
+              strokeWidth: _model.strokeWidth,
             ))
-          : TextSpan(children: model.spans, style: model.textStyle);
-      var placeholderDimensions = (layoutChildren??_layoutChildren).call(_extractPlaceholderSpans(span!));
+          : TextSpan(children: _model.spans, style: _model.textStyle);
+      var placeholderDimensions = (layoutChildren ?? _layoutChildren)
+          .call(_extractPlaceholderSpans(span!));
       textPainter = TextPainter(textDirection: TextDirection.ltr)
         ..text = span
         ..setPlaceholderDimensions(placeholderDimensions)
@@ -108,9 +128,9 @@ class DanmuItem<T extends DanmuModel> {
               ..style = PaintingStyle.stroke
               ..strokeWidth = 1
               ..color = Colors.black);
-        textStrokeSpan = model.spans.isEmpty
-            ? TextSpan(text: model.text, style: textStrokeSpanStyle)
-            : TextSpan(children: model.spans, style: textStrokeSpanStyle);
+        textStrokeSpan = _model.spans.isEmpty
+            ? TextSpan(text: _model.text, style: textStrokeSpanStyle)
+            : TextSpan(children: _model.spans, style: textStrokeSpanStyle);
 
         textStrokePainter = TextPainter(textDirection: TextDirection.ltr)
           ..text = textStrokeSpan
@@ -174,8 +194,6 @@ class DanmuItem<T extends DanmuModel> {
             break;
         }
       }
-      print(
-          'LiuShuai: type = ${placeholderSpan.runtimeType}, childSize = $childSize');
       return PlaceholderDimensions(
         size: childSize,
         alignment: placeholderSpan.alignment,
@@ -192,8 +210,6 @@ class DanmuModel {
   final String text;
   final bool isClickable;
   final bool isRepeatable;
-
-  ///[DanmuFlag] 一个弹幕创建时确定，不会发生改变
   final int flag;
   final TextStyle textStyle;
   final Duration insertTime;
@@ -232,12 +248,11 @@ class DanmuModel {
     this.margin = const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
     this.strokeWidth = 1,
     this.imageSize = const Size(52, 20),
-    this.flag = DanmuFlag.scroll,
+    this.flag = DanmuFlag.scroll | DanmuFlag.clickable,
     this.decoration,
     this.foregroundDecoration,
     this.alignment,
     Duration? insertTime,
-    Map<String, ImageProvider>? imageMap,
     this.textStyle = const TextStyle(
       color: Colors.white,
       fontSize: 18,
@@ -246,4 +261,48 @@ class DanmuModel {
     ),
   })  : assert(textStyle != null),
         insertTime = insertTime ?? startTime;
+
+  DanmuModel copyWith({
+    int? id,
+    String? text,
+    Duration? startTime,
+    List<InlineSpan>? spans,
+    bool? isClickable,
+    ImageProvider? imageProvider,
+    String? package,
+    bool? isRepeatable,
+    double? opacity,
+    EdgeInsets? padding,
+    EdgeInsets? margin,
+    double? strokeWidth,
+    Size? imageSize,
+    int? flag,
+    BoxDecoration? decoration,
+    BoxDecoration? foregroundDecoration,
+    AlignmentGeometry? alignment,
+    Duration? insertTime,
+    TextStyle? textStyle,
+  }) {
+    return DanmuModel(
+      id: id ?? this.id,
+      text: text ?? this.text,
+      startTime: startTime ?? this.startTime,
+      spans: spans ?? this.spans,
+      isClickable: isClickable ?? this.isClickable,
+      imageProvider: imageProvider ?? this.imageProvider,
+      package: package ?? this.package,
+      isRepeatable: isRepeatable ?? this.isRepeatable,
+      opacity: opacity ?? this.opacity,
+      padding: padding ?? this.padding,
+      margin: margin ?? this.margin,
+      strokeWidth: strokeWidth ?? this.strokeWidth,
+      imageSize: imageSize ?? this.imageSize,
+      flag: flag ?? this.flag,
+      decoration: decoration ?? this.decoration,
+      foregroundDecoration: foregroundDecoration ?? this.foregroundDecoration,
+      alignment: alignment ?? this.alignment,
+      insertTime: insertTime ?? this.insertTime,
+      textStyle: textStyle ?? this.textStyle,
+    );
+  }
 }
