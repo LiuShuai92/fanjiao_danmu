@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:fanjiao_danmu/fanjiao_danmu/widget/bubble_box_widget.dart';
 import 'package:flutter/widgets.dart';
 
 import 'fanjiao_danmu.dart';
@@ -7,19 +8,15 @@ import 'fanjiao_danmu.dart';
 mixin FanjiaoDanmuTooltipMixin {
   Rect _menuRect = Rect.zero;
 
-  Rect get menuRect => _menuRect;
+  double? _pointerBias;
 
-  double? _menuPeakBias;
+  double get pointerBias => _pointerBias ?? 0;
 
-  double get menuPeakBias => _menuPeakBias ?? 0;
+  bool? _isUpward;
 
-  bool? _menuIsAbove;
+  bool get isUpward => _isUpward ?? true;
 
-  bool get menuIsAbove => _menuIsAbove ?? false;
-
-  Size get menuSize => const Size(96, 35);
-
-  Color get bubbleColor => const Color(0xFF836BFF);
+  Size get menuSize => const Size(160, 36);
 
   Widget get tooltipContent;
 
@@ -31,18 +28,20 @@ mixin FanjiaoDanmuTooltipMixin {
     }
     x = (position.dx - menuSize.width / 2)
         .clamp(0, stageRect.right - menuSize.width);
-    _menuIsAbove = danmuRect.bottom > stageRect.bottom - menuSize.height;
-    if (menuIsAbove) {
-      y = danmuRect.top - menuSize.height;
-    } else {
+    _isUpward = danmuRect.bottom < stageRect.bottom - menuSize.height;
+    if (isUpward) {
       y = danmuRect.bottom;
+    } else {
+      y = danmuRect.top - menuSize.height;
     }
     Offset offset = Offset(x, y);
     _menuRect = offset & menuSize;
-    _menuPeakBias = position.dx.clamp(
-            math.max(danmuRect.left, stageRect.left) + danmuRect.height / 2,
-            math.min(danmuRect.right, stageRect.right) - danmuRect.height / 2) -
-        _menuRect.left;
+    _pointerBias = (position.dx.clamp(
+                math.max(danmuRect.left, stageRect.left) + danmuRect.height / 2,
+                math.min(danmuRect.right, stageRect.right) -
+                    danmuRect.height / 2) -
+            _menuRect.left) /
+        _menuRect.width;
     return true;
   }
 
@@ -50,59 +49,28 @@ mixin FanjiaoDanmuTooltipMixin {
     if (selectedItem == null) {
       return null;
     }
-    List<Widget>? children;
-    if (menuIsAbove) {
-      children = [
-        Container(
-          width: menuSize.width,
-          height: menuSize.height - 5,
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.all(Radius.circular(8)),
-            color: bubbleColor,
-          ),
-          child: tooltipContent,
-        ),
-        Padding(
-          padding: EdgeInsets.only(left: menuPeakBias - 5.5),
-          child: Image.asset(
-            "assets/images/arrow_down.png",
-            width: 11,
-            height: 5,
-            color: bubbleColor,
-            package: package,
-          ),
-        ),
-      ];
-    } else {
-      children = [
-        Padding(
-          padding: EdgeInsets.only(left: menuPeakBias - 5.5),
-          child: Image.asset(
-            "assets/images/arrow_up.png",
-            width: 11,
-            height: 5,
-            color: bubbleColor,
-            package: package,
-          ),
-        ),
-        Container(
-          width: menuSize.width,
-          height: menuSize.height - 5,
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.all(Radius.circular(8)),
-            color: bubbleColor,
-          ),
-          child: tooltipContent,
-        ),
-      ];
-    }
     return Positioned(
       left: _menuRect.left,
       top: _menuRect.top,
-      child: RepaintBoundary(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: children,
+      child: SizedBox(
+        height: _menuRect.height,
+        width: _menuRect.width,
+        child: BubbleBox(
+          isUpward: isUpward,
+          pointerBias: pointerBias,
+          strokeWidth: 1.2,
+          radius: 8,
+          pointerWidth: 10,
+          pointerHeight: 6,
+          peakRadius: 3,
+          isWrapped: false,
+          child: Padding(
+            padding: EdgeInsets.only(
+              top: isUpward ? 6 : 0,
+              bottom: isUpward ? 0 : 6,
+            ),
+            child: tooltipContent,
+          ),
         ),
       ),
     );
