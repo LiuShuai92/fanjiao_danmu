@@ -5,6 +5,10 @@ import 'package:flutter/widgets.dart';
 import 'danmu_simulation.dart';
 
 class UniformLinearSimulation extends DanmuSimulation {
+  final Offset v;
+  final Offset start;
+  final Offset end;
+
   UniformLinearSimulation(
     Offset startOffset,
     Offset endOffset,
@@ -19,10 +23,6 @@ class UniformLinearSimulation extends DanmuSimulation {
         v = (endOffset - startOffset) / duration,
         end = endOffset,
         super(rect, tolerance: tolerance, duration: duration);
-
-  final Offset v;
-  final Offset start;
-  final Offset end;
 
   @override
   Offset offset(double time) => start + v * time;

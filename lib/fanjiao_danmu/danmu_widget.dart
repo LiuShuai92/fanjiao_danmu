@@ -1,11 +1,9 @@
-import 'dart:async';
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'danmu_controller.dart';
-import 'model/danmu_item_model.dart';
+import 'danmu_item.dart';
+import 'danmu_model.dart';
 
 class DanmuWidget extends StatefulWidget {
   final DanmuController danmuController;
@@ -47,7 +45,6 @@ class _DanmuWidgetState extends State<DanmuWidget>
 
   @override
   Widget build(BuildContext context) {
-    // Widget child;
     var danmuController = widget.danmuController;
     var tooltipWidget = widget.tooltip?.call(danmuController.selected);
     List<Widget> children = [];
@@ -56,20 +53,24 @@ class _DanmuWidgetState extends State<DanmuWidget>
       Widget itemWidget;
       if (danmuItem.isImage) {
         itemWidget = Image(
+          key: danmuItem.valueKey("Image"),
           image: danmuItem.imageAsset!,
           width: danmuItem.size.width,
           height: danmuItem.size.height,
         );
       } else {
-        itemWidget = Text.rich(danmuItem.span!);
+        itemWidget =
+            Text.rich(danmuItem.span!, key: danmuItem.valueKey("RichText"));
       }
       var model = danmuItem.model;
       if (model.startTime <= danmuController.progress &&
           danmuController.filter.check(danmuItem.flag)) {
         var positioned = Positioned(
+          key: danmuItem.valueKey("Positioned"),
           left: danmuItem.position?.dx,
           top: danmuItem.position?.dy,
           child: Container(
+            key: danmuItem.valueKey("Container"),
             child: itemWidget,
             decoration: model.decoration,
             foregroundDecoration: model.foregroundDecoration,
@@ -91,21 +92,6 @@ class _DanmuWidgetState extends State<DanmuWidget>
     if (tooltipWidget != null) {
       children.add(tooltipWidget);
     }
-    /*var customPaint = CustomPaint(
-      size: widget.size,
-      isComplex: true,
-      painter: _FanjiaoDanmuPainter(
-        context,
-        controller: widget.danmuController,
-      ),
-    );
-    if (tooltipWidget != null) {
-      child = Stack(
-        children: children,
-      );
-    }else {
-      child = customPaint;
-    }*/
     return SizedBox(
       width: widget.size.width,
       height: widget.size.height,
@@ -119,7 +105,6 @@ class _DanmuWidgetState extends State<DanmuWidget>
             danmuController.tapPosition(_tapDownDetails!.localPosition);
           }
         },
-        // child: child,
         child: Stack(
           children: children,
         ),

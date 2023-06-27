@@ -1,4 +1,3 @@
-import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -141,7 +140,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
       List<DanmuItem<T>> row = scrollRows[i];
       simulation =
           HorizontalScrollSimulation(right: rect.width, left: 0, size: size);
-      if (row.isEmpty || (row.length == 1 && row.last.isSelected)) {
+      if (row.isEmpty || (row.length == 1 && row.last.isPause)) {
         simulation.y = _getY(i);
         item.simulation = simulation;
         row.add(item);
@@ -149,8 +148,8 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
       } else {
         DanmuItem<T>? last;
         try {
-          last = row.lastWhere((element) =>
-              !element.isSelected && !element.flag.isCollisionFree);
+          last = row.lastWhere(
+              (element) => !element.isPause && !element.flag.isCollisionFree);
         } catch (e) {
           last = null;
         }

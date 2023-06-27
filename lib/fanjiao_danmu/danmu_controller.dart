@@ -12,7 +12,8 @@ class DanmuController<T extends DanmuModel>
     with
         DanmuLocalListenersMixin,
         DanmuLocalStatusListenersMixin,
-        DanmuEagerListenerMixin {
+        DanmuEagerListenerMixin,
+        DanmuTickListenersMixin{
   /// return true 选中并暂停这条弹幕
   final bool Function(DanmuItem<T>?, Offset)? onTap;
   final List<DanmuItem<T>> _tempList = <DanmuItem<T>>[];
@@ -30,22 +31,11 @@ class DanmuController<T extends DanmuModel>
   Ticker? _ticker;
   Duration? _progress;
   Duration? _lastElapsedDuration;
-  bool _onceForceRefresh = false;
   bool _isFullShown = true;
   bool _isAllFullShown = true;
 
   /// 弹幕倍速播放
   double rate = 1;
-
-  ///下一桢动画会执行一次强制刷新
-  set onceForceRefresh(bool onceForceRefresh) =>
-      _onceForceRefresh = onceForceRefresh;
-
-  bool get onceForceRefresh {
-    bool result = _onceForceRefresh;
-    _onceForceRefresh = false;
-    return result;
-  }
 
   DanmuStatus get state => _status;
 
@@ -54,6 +44,8 @@ class DanmuController<T extends DanmuModel>
   bool get isAllFullShown => _isAllFullShown;
 
   bool get isSelected => selected != null;
+
+  Duration? get lastElapsedDuration => _lastElapsedDuration;
 
   Duration get progress => _progress ?? startTime;
 
@@ -68,7 +60,6 @@ class DanmuController<T extends DanmuModel>
     if (progress == oldProgress) {
       return;
     }
-    _onceForceRefresh = true;
     if (_status == DanmuStatus.idle) {
       _status = _idleBeforeStatus;
     }
@@ -80,7 +71,7 @@ class DanmuController<T extends DanmuModel>
       Offset? position = entry.simulation.isDone(entry.position!, 0);
       if (position == null) {
         _tempList.add(entry);
-      } else if (!entry.isSelected) {
+      } else if (!entry.isPause) {
         entry.position = position;
         if (!entry.simulation.isFullShown) {
           isFullShown = false;
@@ -133,6 +124,7 @@ class DanmuController<T extends DanmuModel>
   _tick(Duration elapsed) {
     Duration dElapsed = elapsed - (_lastElapsedDuration ?? elapsed);
     _lastElapsedDuration = elapsed;
+    notifyTickListeners(elapsed);
     if (_status == DanmuStatus.pause || dElapsed == Duration.zero) {
       return;
     }
@@ -156,7 +148,7 @@ class DanmuController<T extends DanmuModel>
             .offset((progress - entry.model.startTime).inMicrosecondsPerSecond);
       } else {
         Offset? position;
-        if (entry.isSelected) {
+        if (entry.isPause) {
           position = entry.simulation.isDone(entry.position!, 0);
         } else {
           position = entry.simulation
@@ -164,7 +156,7 @@ class DanmuController<T extends DanmuModel>
         }
         if (position == null) {
           _tempList.add(entry);
-        } else if (!entry.isSelected) {
+        } else if (!entry.isPause) {
           entry.position = position;
           if (entry.simulation.isFullShown) {
             isFullShown = true;
@@ -190,9 +182,12 @@ class DanmuController<T extends DanmuModel>
     notifyListeners();
   }
 
-  clearSelection() {
+  clearSelection([bool isAutoPlay = false]) {
     if (selected != null) {
       selected!.isSelected = false;
+      if(isAutoPlay){
+        selected!.play();
+      }
       selected = null;
     }
     notifyListeners();
@@ -209,6 +204,7 @@ class DanmuController<T extends DanmuModel>
     if (selectedTemp != null && selectedTemp.flag.isClickable) {
       if (onTap?.call(selectedTemp, position) ?? false) {
         selectedTemp.isSelected = true;
+        selectedTemp.pause();
         selected = selectedTemp;
       } else {
         selected = null;
@@ -219,6 +215,7 @@ class DanmuController<T extends DanmuModel>
     notifyListeners();
   }
 
+  /// 将已添加的内容重复的弹幕标记出来
   markRepeated() {
     List<String> temp = [];
     for (var entry in danmuItems) {
@@ -271,7 +268,6 @@ class DanmuController<T extends DanmuModel>
     _addEntry(model);
     if (danmuItems.isNotEmpty && isAnimating && _status == DanmuStatus.idle) {
       _status = _idleBeforeStatus;
-      _onceForceRefresh = true;
       _checkStatusChanged();
     }
   }
@@ -287,7 +283,6 @@ class DanmuController<T extends DanmuModel>
     }
     if (danmuItems.isNotEmpty && isAnimating && _status == DanmuStatus.idle) {
       _status = _idleBeforeStatus;
-      _onceForceRefresh = true;
       _checkStatusChanged();
     }
   }
@@ -330,7 +325,7 @@ class DanmuController<T extends DanmuModel>
   }
 
   /// flag [DanmuFlag]
-  changeFilter(int flag, {bool? isEnable}) {
+  changeFilter(int flag, [bool? isEnable]) {
     if (isEnable == null) {
       filter = filter.change(flag);
     } else if (isEnable) {
@@ -338,7 +333,6 @@ class DanmuController<T extends DanmuModel>
     } else {
       filter = filter.remove(flag);
     }
-    _onceForceRefresh = true;
     notifyListeners();
   }
 
@@ -391,8 +385,6 @@ class DanmuController<T extends DanmuModel>
     super.dispose();
   }
 }
-
-typedef DanmuStatusListener = Function(DanmuStatus status);
 
 enum DanmuStatus {
   dispose,

@@ -100,6 +100,8 @@ mixin DanmuLocalListenersMixin {
   }
 }
 
+typedef DanmuStatusListener = Function(DanmuStatus status);
+
 mixin DanmuLocalStatusListenersMixin {
   final ObserverList<DanmuStatusListener> _statusListeners = ObserverList<DanmuStatusListener>();
 
@@ -129,10 +131,56 @@ mixin DanmuLocalStatusListenersMixin {
   @protected
   @pragma('vm:notify-debugger-on-exception')
   void notifyStatusListeners(DanmuStatus status) {
+    /*if (kDebugMode) {
+      print('LiuShuai: DanmuStatus = $status');
+    }*/
     final List<DanmuStatusListener> localListeners = List<DanmuStatusListener>.from(_statusListeners);
     for (final DanmuStatusListener listener in localListeners) {
       if (_statusListeners.contains(listener)) {
         listener(status);
+      }
+    }
+  }
+}
+
+typedef DanmuTickListener = Function(Duration elapsed);
+
+mixin DanmuTickListenersMixin {
+  final ObserverList<DanmuTickListener> _tickListeners = ObserverList<DanmuTickListener>();
+
+  @protected
+  void didRegisterListener();
+
+  @protected
+  void didUnregisterListener();
+
+  void addTickListener(DanmuTickListener listener) {
+    didRegisterListener();
+    _tickListeners.add(listener);
+  }
+
+  void removeTickListener(DanmuTickListener listener) {
+    final bool removed = _tickListeners.remove(listener);
+    if (removed) {
+      didUnregisterListener();
+    }
+  }
+
+  @protected
+  void clearTickListeners() {
+    _tickListeners.clear();
+  }
+
+  @protected
+  @pragma('vm:notify-debugger-on-exception')
+  void notifyTickListeners(Duration elapsed) {
+    /*if (kDebugMode) {
+      print('LiuShuai: elapsed = $elapsed');
+    }*/
+    final List<DanmuTickListener> localListeners = List<DanmuTickListener>.from(_tickListeners);
+    for (final DanmuTickListener listener in localListeners) {
+      if (_tickListeners.contains(listener)) {
+        listener(elapsed);
       }
     }
   }

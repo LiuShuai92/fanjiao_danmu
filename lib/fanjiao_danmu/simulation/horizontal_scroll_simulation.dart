@@ -5,6 +5,12 @@ import 'package:flutter/widgets.dart';
 import 'danmu_simulation.dart';
 
 class HorizontalScrollSimulation extends DanmuSimulation {
+  final double right;
+  final double left;
+  final double v;
+  final Size size;
+  double y;
+
   HorizontalScrollSimulation({
     required this.right,
     required this.left,
@@ -14,15 +20,9 @@ class HorizontalScrollSimulation extends DanmuSimulation {
     double duration = 7,
   })  : v = (left - size.width - right) / duration,
         super(Rect.fromLTRB(left - size.width, 0, right, double.infinity),
-            tolerance: tolerance, duration: duration){
+            tolerance: tolerance, duration: duration) {
     isFullShown = false;
   }
-
-  final double right;
-  final double left;
-  final double v;
-  final Size size;
-  double y;
 
   @override
   Offset dOffset(double time) {

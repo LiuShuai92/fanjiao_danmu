@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
-import '../model/danmu_item_model.dart';
+import '../danmu_item.dart';
+import '../danmu_model.dart';
 
 ///用于计算弹幕插入位置
 abstract class DanmuAdapter<T extends DanmuModel> {

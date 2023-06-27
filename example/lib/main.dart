@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'jushou_danmu.dart';
 import 'my_danmu _model.dart';
 import 'utils.dart';
 
@@ -50,7 +51,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
       praiseImageProvider: const AssetImage("assets/images/icon_duck.png"),
       onTap: (DanmuItem? danmuItem, Offset position) {
         if (danmuController.isSelected) {
-          danmuController.clearSelection();
+          danmuController.clearSelection(true);
           return false;
         }
         if (danmuItem == null) {
@@ -106,65 +107,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                 }),
               ),
               danmuButton,
-              SizedBox(
-                height: 40,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: textController,
-                        textInputAction: TextInputAction.send,
-                        onSubmitted: (text) {
-                          danmuController.addDanmu(MyDanmuModel(
-                            id: ++id,
-                            likeCount: 10,
-                            text: text,
-                            decoration: const BoxDecoration(
-                              color: Color(0xCCFF9C6B),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(12)),
-                              border: Border.fromBorderSide(BorderSide(
-                                  color: Colors.white,
-                                  width: 1,
-                                  style: BorderStyle.solid)),
-                            ),
-                            startTime: danmuController.progress,
-                            textStyle: rngTextStyle,
-                            flag: DanmuFlag.announcement |
-                                DanmuFlag.collisionFree,
-                          ));
-                        },
-                      ),
-                    ),
-                    SizedBox(
-                      width: 100,
-                      height: 40,
-                      child: TextButton(
-                        onPressed: () {
-                          danmuController.addDanmu(MyDanmuModel(
-                            id: ++id,
-                            text: textController.text,
-                            decoration: const BoxDecoration(
-                              color: Color(0xCCFF9C6B),
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(12)),
-                              border: Border.fromBorderSide(BorderSide(
-                                  color: Colors.white,
-                                  width: 1,
-                                  style: BorderStyle.solid)),
-                            ),
-                            startTime: danmuController.progress,
-                            textStyle: rngTextStyle,
-                          ));
-                        },
-                        child: const Text("发送"),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              editDanmu(),
               filterButton,
               Container(
                 color: Colors.greenAccent,
@@ -202,12 +145,12 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           SizedBox(
-                            width: 26,
+                            width: 22,
                             height: 36,
                             child: OverflowBox(
                               maxWidth: 30,
                               maxHeight: 36,
-                              alignment: Alignment.bottomRight,
+                              alignment: Alignment.bottomCenter,
                               child: Image.asset(
                                 "assets/images/ic_jy.png",
                                 width: 30,
@@ -220,24 +163,18 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                             child: Row(
                               children: [
                                 Expanded(
-                                  child: GestureDetector(
-                                    child: Container(
-                                      alignment: Alignment.center,
-                                      child: const Text(
-                                        '加一',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                            decoration: TextDecoration.none,
-                                            fontSize: 12.0,
-                                            fontWeight: FontWeight.w400,
-                                            color: Colors.white),
-                                      ),
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    child: const Text(
+                                      '加一',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          decoration: TextDecoration.none,
+                                          fontSize: 12.0,
+                                          fontWeight: FontWeight.w400,
+                                          color: Colors.white),
                                     ),
-                                    onTap: () {
-                                      danmuController.clearSelection();
-                                    },
-                                    behavior: HitTestBehavior.opaque,
                                   ),
                                 ),
                                 Container(
@@ -250,24 +187,18 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                                   ),
                                 ),
                                 Expanded(
-                                  child: GestureDetector(
-                                    child: Container(
-                                      alignment: Alignment.center,
-                                      child: const Text(
-                                        '复制',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                            decoration: TextDecoration.none,
-                                            fontSize: 12.0,
-                                            fontWeight: FontWeight.w400,
-                                            color: Colors.white),
-                                      ),
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    child: const Text(
+                                      '复制',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          decoration: TextDecoration.none,
+                                          fontSize: 12.0,
+                                          fontWeight: FontWeight.w400,
+                                          color: Colors.white),
                                     ),
-                                    onTap: () {
-                                      danmuController.clearSelection();
-                                    },
-                                    behavior: HitTestBehavior.opaque,
                                   ),
                                 ),
                                 Container(
@@ -280,24 +211,18 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                                   ),
                                 ),
                                 Expanded(
-                                  child: GestureDetector(
-                                    child: Container(
-                                      alignment: Alignment.center,
-                                      child: const Text(
-                                        '举报',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                            decoration: TextDecoration.none,
-                                            fontSize: 12.0,
-                                            fontWeight: FontWeight.w400,
-                                            color: Colors.white),
-                                      ),
+                                  child: Container(
+                                    alignment: Alignment.center,
+                                    child: const Text(
+                                      '举报',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                          decoration: TextDecoration.none,
+                                          fontSize: 12.0,
+                                          fontWeight: FontWeight.w400,
+                                          color: Colors.white),
                                     ),
-                                    onTap: () {
-                                      danmuController.clearSelection();
-                                    },
-                                    behavior: HitTestBehavior.opaque,
                                   ),
                                 ),
                               ],
@@ -319,11 +244,11 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                 isTurnOn: testIsUpward,
               ),
               slider("偏移", pointerBias, 0, 1),
-              slider("边框宽度", strokeWidth, 0, 10),
-              slider("边框圆角", radius, 0, 50),
+              slider("顶点圆角", peakRadius, 0, 20),
               slider("指针宽度", pointerWidth, 0, 50),
               slider("指针高度", pointerHeight, 0, 40),
-              slider("顶点圆角", peakRadius, 0, 20),
+              slider("边框圆角", radius, 0, 50),
+              slider("边框宽度", strokeWidth, 0, 10),
               slider("宽", width, 0, 300),
               slider("高", height, 0, 200),
             ],
@@ -331,6 +256,68 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
         ),
       ),
     );
+  }
+
+  SizedBox editDanmu() {
+    return SizedBox(
+              height: 40,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: textController,
+                      textInputAction: TextInputAction.send,
+                      onSubmitted: (text) {
+                        danmuController.addDanmu(MyDanmuModel(
+                          id: ++id,
+                          likeCount: 10,
+                          text: text,
+                          decoration: const BoxDecoration(
+                            color: Color(0xCCFF9C6B),
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(12)),
+                            border: Border.fromBorderSide(BorderSide(
+                                color: Colors.white,
+                                width: 1,
+                                style: BorderStyle.solid)),
+                          ),
+                          startTime: danmuController.progress,
+                          textStyle: rngTextStyle,
+                          flag: DanmuFlag.announcement |
+                              DanmuFlag.collisionFree,
+                        ));
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    width: 100,
+                    height: 40,
+                    child: TextButton(
+                      onPressed: () {
+                        danmuController.addDanmu(MyDanmuModel(
+                          id: ++id,
+                          text: textController.text,
+                          decoration: const BoxDecoration(
+                            color: Color(0xCCFF9C6B),
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(12)),
+                            border: Border.fromBorderSide(BorderSide(
+                                color: Colors.white,
+                                width: 1,
+                                style: BorderStyle.solid)),
+                          ),
+                          startTime: danmuController.progress,
+                          textStyle: rngTextStyle,
+                        ));
+                      },
+                      child: const Text("发送"),
+                    ),
+                  ),
+                ],
+              ),
+            );
   }
 
   Map<String, dynamic> params = {};
@@ -402,7 +389,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                   ),
                   borderRadius: BorderRadius.all(Radius.circular(8)),
                 ),
-                spans: buildTestItem(text, id, likeCount),
+                spans: buildTestItemSpans(text, id, likeCount),
                 startTime: danmuController.progress,
               ));
             },
@@ -594,7 +581,19 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
         ],
       );
 
-  List<InlineSpan> buildTestItem(String text, int id, int likeCount) {
+  List<InlineSpan> buildTestItemSpans(String text, int id, int likeCount,
+      [bool isJushou = false]) {
+    print('LiuShuai: buildTestItemSpans id = $id');
+    onTap() {
+      var danmuItem = danmuController.getItem(id);
+      if (danmuItem != null) {
+        if (!danmuController.isSelected && danmuItem.flag.isClickable) {
+          updatePlusOneItem(danmuItem);
+          danmuController.updateView();
+          HapticFeedback.vibrate();
+        }
+      }
+    }
     return [
       TextSpan(
         text: text,
@@ -605,37 +604,22 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
       ),
       WidgetSpan(
         alignment: PlaceholderAlignment.middle,
-        child: Container(
+        child: SizedBox(
           width: 30,
           height: 30,
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          alignment: Alignment.bottomCenter,
-          child: OverflowBox(
-            maxWidth: 30,
-            maxHeight: 40,
-            alignment: Alignment.bottomCenter,
-            child: Image.asset(
-              "assets/images/ic_jy.png",
-              width: 30,
-              height: 36,
-              fit: BoxFit.fitWidth,
-            ),
+          child: isJushou
+              ? JushouDanmu(key: ValueKey("JushouDanmu$id"))
+              : Image.asset(
+            "assets/images/ic_jy.png",
+            width: 30,
+            height: 36,
+            fit: BoxFit.fitWidth,
           ),
         ),
       ),
       TextSpan(
         text: "+$likeCount",
-        recognizer: TapGestureRecognizer()
-          ..onTap = () {
-            var danmuItem = danmuController.getItem(id);
-            if (danmuItem != null) {
-              if (!danmuController.isSelected && danmuItem.flag.isClickable) {
-                updatePlusOneItem(danmuItem);
-                danmuController.updateView();
-                HapticFeedback.vibrate();
-              }
-            }
-          },
+        recognizer: TapGestureRecognizer()..onTap = onTap,
         style: const TextStyle(
           color: Colors.white,
           fontSize: 14,
@@ -645,10 +629,17 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
   }
 
   void updatePlusOneItem(DanmuItem<MyDanmuModel> danmuItem) {
+    print('LiuShuai: updatePlusOneItem');
     var model = danmuItem.model;
     var id = model.id;
     var likeCount = model.likeCount + 1;
     danmuItem.flag = danmuItem.flag.removeClickable;
+    danmuItem.pause();
+    danmuItem.position =
+        danmuItem.simulation.offset(danmuItem.simulation.duration / 2);
+    Future.delayed(const Duration(seconds: 3), () {
+      danmuItem.play();
+    });
     danmuItem.updateModel(model.copyWith(
       likeCount: likeCount,
       isLiked: true,
@@ -673,7 +664,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
         ),
         borderRadius: BorderRadius.all(Radius.circular(8)),
       ),
-      spans: buildTestItem(danmuItem.model.text, id, likeCount),
+      spans: buildTestItemSpans(danmuItem.model.text, id, likeCount, true),
     ));
   }
 
@@ -828,7 +819,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                       ),
                     ),
                     onTap: () {
-                      danmuController.clearSelection();
+                      danmuController.clearSelection(true);
                     },
                     behavior: HitTestBehavior.opaque,
                   ),
@@ -858,7 +849,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                       ),
                     ),
                     onTap: () {
-                      danmuController.clearSelection();
+                      danmuController.clearSelection(true);
                     },
                     behavior: HitTestBehavior.opaque,
                   ),

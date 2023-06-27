@@ -50,8 +50,8 @@ mixin FanjiaoDanmuTooltipMixin {
       return null;
     }
     return Positioned(
-      left: _menuRect.left,
-      top: _menuRect.top,
+      left: _menuRect.left + (isUpward ? 0 : 4),
+      top: _menuRect.top + (isUpward ? 4 : 0),
       child: SizedBox(
         height: _menuRect.height,
         width: _menuRect.width,

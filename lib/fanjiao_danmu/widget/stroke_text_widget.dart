@@ -8,8 +8,6 @@ class StrokeTextWidget extends StatelessWidget {
   final TextStyle textStyle;
   final _StrokeTextPainter _strokeTextPainter;
 
-  // TextBaseline? get textBaseline => textStyle.textBaseline;
-
   Rect get rect => _strokeTextPainter.rect;
 
   StrokeTextWidget(

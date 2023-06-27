@@ -64,7 +64,6 @@ class BubbleBox extends StatelessWidget {
 
 class _BubbleBoxPainter extends CustomPainter {
   final double strokeWidth;
-  final double arc;
   double peakRadius;
   double pointerBias;
   Radius radius;
@@ -92,7 +91,6 @@ class _BubbleBoxPainter extends CustomPainter {
     Color strokeColor = Colors.white,
   })  : painter = Paint()..color = Colors.black.withOpacity(opacity),
         backgroundPainter = Paint()..color = color,
-        arc = math.atan(pointerHeight / pointerWidth * 2),
         radius = Radius.circular(radius),
         paintBorderPainter = Paint()
           ..color = strokeColor
@@ -108,6 +106,7 @@ class _BubbleBoxPainter extends CustomPainter {
     if (pointerWidth < peakRadius) {
       peakRadius = pointerWidth;
     }
+    final arc = math.atan(pointerHeight / pointerWidth * 2);
     final double halfArcWidth = math.sin(arc) * peakRadius;
     final double l = peakRadius / math.cos(arc);
     var pointerStartX = width * pointerBias - pointerWidth / 2;

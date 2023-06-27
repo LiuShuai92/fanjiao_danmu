@@ -5,6 +5,10 @@ export 'horizontal_scroll_simulation.dart';
 export 'uniform_linear_simulation.dart';
 
 abstract class DanmuSimulation {
+  final Rect rect;
+  final Tolerance tolerance;
+  final double duration;
+
   /// 单位：秒
   double time = 0;
   bool isFullShown = false;
@@ -14,12 +18,6 @@ abstract class DanmuSimulation {
     this.tolerance = Tolerance.defaultTolerance,
     this.duration = 7,
   });
-
-  final Rect rect;
-
-  final Tolerance tolerance;
-
-  final double duration;
 
   Offset offset(double time);
 

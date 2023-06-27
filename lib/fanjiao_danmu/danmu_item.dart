@@ -1,16 +1,17 @@
-import 'dart:ui' as ui;
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 
-import '../danmu_controller.dart';
-import '../simulation/danmu_simulation.dart';
-import '../widget/stroke_text_widget.dart';
+import 'danmu_model.dart';
+import 'simulation/danmu_simulation.dart';
+import 'widget/stroke_text_widget.dart';
 
 class DanmuItem<T extends DanmuModel> {
   late T _model;
   late int flag;
-  bool isSelected;
+  bool isSelected = false;
+  bool _isPause = false;
   Duration? dTime;
   Offset? position;
   final ImageProvider? imageAsset;
@@ -27,6 +28,8 @@ class DanmuItem<T extends DanmuModel> {
 
   bool get isImage => _isImage;
 
+  bool get isPause => _isPause;
+
   bool get isTextSpan => span is TextSpan;
 
   Rect get rect =>
@@ -40,10 +43,12 @@ class DanmuItem<T extends DanmuModel> {
     assert(isValid);
     return model.startTime +
         Duration(
-            microseconds:
-                (_simulation!.duration * Duration.microsecondsPerSecond)
-                    .toInt());
+          microseconds:
+              (_simulation!.duration * Duration.microsecondsPerSecond).toInt(),
+        );
   }
+
+  Duration get startTime => model.startTime;
 
   Offset get startPosition {
     assert(isValid);
@@ -68,7 +73,6 @@ class DanmuItem<T extends DanmuModel> {
 
   DanmuItem({
     required T model,
-    this.isSelected = false,
     int? flag,
     this.imageAsset,
     Size imageSize = const Size(52, 20),
@@ -82,6 +86,18 @@ class DanmuItem<T extends DanmuModel> {
       textScaleFactor: textScaleFactor,
       layoutChildren: layoutChildren,
     );
+  }
+
+  void pause() {
+    _isPause = true;
+  }
+
+  void play() {
+    _isPause = false;
+  }
+
+  ValueKey valueKey(Object value){
+    return ValueKey("${model.id}$value");
   }
 
   void updateModel(
@@ -103,14 +119,15 @@ class DanmuItem<T extends DanmuModel> {
       span = _model.spans.isEmpty
           ? WidgetSpan(
               child: StrokeTextWidget(
-              _model.text,
-              textStyle: _model.textStyle,
-              opacity: _model.opacity,
-              textScaleFactor: textScaleFactor,
-              strokeWidth: _model.strokeWidth,
-            ))
+                _model.text,
+                textStyle: _model.textStyle,
+                opacity: _model.opacity,
+                textScaleFactor: textScaleFactor,
+                strokeWidth: _model.strokeWidth,
+              ),
+            )
           : TextSpan(children: _model.spans, style: _model.textStyle);
-      var placeholderDimensions = (layoutChildren ?? _layoutChildren)
+      var placeholderDimensions = (layoutChildren ?? _defaultLayoutChildren)
           .call(_extractPlaceholderSpans(span!));
       textPainter = TextPainter(textDirection: TextDirection.ltr)
         ..text = span
@@ -157,14 +174,17 @@ class DanmuItem<T extends DanmuModel> {
     return placeholderSpans;
   }
 
-  List<PlaceholderDimensions> _layoutChildren(
+  /// 暂时仅支持使用#[Size]、#[Image]、#[Container]、#[StrokeTextWidget]作为child，
+  /// 或者更改#[layoutChildren]参数。
+  List<PlaceholderDimensions> _defaultLayoutChildren(
       List<PlaceholderSpan> placeholderSpans) {
     final placeholderDimensions =
         List<PlaceholderDimensions>.generate(placeholderSpans.length, (index) {
       var placeholderSpan = placeholderSpans[index];
       var childSize = Size.zero;
       if (placeholderSpan is WidgetSpan) {
-        switch (placeholderSpan.child.runtimeType) {
+        var runtimeType = placeholderSpan.child.runtimeType;
+        switch (runtimeType) {
           case Container:
             var child = (placeholderSpan.child as Container);
             var marginSize = child.margin?.collapsedSize;
@@ -191,7 +211,7 @@ class DanmuItem<T extends DanmuModel> {
             childSize = Size(child.width ?? 0, child.height ?? 0);
             break;
           default:
-            break;
+            throw UnsupportedTypesError(runtimeType);
         }
       }
       return PlaceholderDimensions(
@@ -204,105 +224,13 @@ class DanmuItem<T extends DanmuModel> {
   }
 }
 
-class DanmuModel {
-  final int id;
-  final List<InlineSpan> spans;
-  final String text;
-  final bool isClickable;
-  final bool isRepeatable;
-  final int flag;
-  final TextStyle textStyle;
-  final Duration insertTime;
-  final Duration startTime;
-  final ImageProvider? imageProvider;
-  final String? package;
-  final BoxDecoration? decoration;
-  final BoxDecoration? foregroundDecoration;
-  final AlignmentGeometry? alignment;
-  final Size imageSize;
-  final double strokeWidth;
-  final double opacity;
-  final EdgeInsets padding;
-  final EdgeInsets margin;
+class UnsupportedTypesError<T> extends Error implements TypeError {
+  final Type _type;
 
-  String get plainText {
-    String plainText = "";
-    for (var span in spans) {
-      plainText += span.toPlainText(
-          includeSemanticsLabels: false, includePlaceholders: false);
-    }
-    return plainText;
-  }
+  UnsupportedTypesError(this._type);
 
-  DanmuModel({
-    required this.id,
-    required this.text,
-    required this.startTime,
-    this.spans = const [],
-    this.isClickable = true,
-    this.imageProvider,
-    this.package,
-    this.isRepeatable = false,
-    this.opacity = 1,
-    this.padding = const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
-    this.margin = const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
-    this.strokeWidth = 1,
-    this.imageSize = const Size(52, 20),
-    this.flag = DanmuFlag.scroll | DanmuFlag.clickable,
-    this.decoration,
-    this.foregroundDecoration,
-    this.alignment,
-    Duration? insertTime,
-    this.textStyle = const TextStyle(
-      color: Colors.white,
-      fontSize: 18,
-      fontWeight: FontWeight.w500,
-      decoration: TextDecoration.none,
-    ),
-  })  : assert(textStyle != null),
-        insertTime = insertTime ?? startTime;
-
-  DanmuModel copyWith({
-    int? id,
-    String? text,
-    Duration? startTime,
-    List<InlineSpan>? spans,
-    bool? isClickable,
-    ImageProvider? imageProvider,
-    String? package,
-    bool? isRepeatable,
-    double? opacity,
-    EdgeInsets? padding,
-    EdgeInsets? margin,
-    double? strokeWidth,
-    Size? imageSize,
-    int? flag,
-    BoxDecoration? decoration,
-    BoxDecoration? foregroundDecoration,
-    AlignmentGeometry? alignment,
-    Duration? insertTime,
-    TextStyle? textStyle,
-  }) {
-    return DanmuModel(
-      id: id ?? this.id,
-      text: text ?? this.text,
-      startTime: startTime ?? this.startTime,
-      spans: spans ?? this.spans,
-      isClickable: isClickable ?? this.isClickable,
-      imageProvider: imageProvider ?? this.imageProvider,
-      package: package ?? this.package,
-      isRepeatable: isRepeatable ?? this.isRepeatable,
-      opacity: opacity ?? this.opacity,
-      padding: padding ?? this.padding,
-      margin: margin ?? this.margin,
-      strokeWidth: strokeWidth ?? this.strokeWidth,
-      imageSize: imageSize ?? this.imageSize,
-      flag: flag ?? this.flag,
-      decoration: decoration ?? this.decoration,
-      foregroundDecoration: foregroundDecoration ?? this.foregroundDecoration,
-      alignment: alignment ?? this.alignment,
-      insertTime: insertTime ?? this.insertTime,
-      textStyle: textStyle ?? this.textStyle,
-    );
-  }
+  @override
+  String toString() =>
+      "默认layoutChildren方法暂时不支持$_type类型的尺寸获取，支持使用Size、Image、Container或StrokeTextWidget，或者更改layoutChildren参数。";
 }
+
