@@ -96,7 +96,7 @@ class DanmuItem<T extends DanmuModel> {
     _isPause = false;
   }
 
-  ValueKey valueKey(Object value){
+  ValueKey valueKey([Object? value]){
     return ValueKey("${model.id}$value");
   }
 

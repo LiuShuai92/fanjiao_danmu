@@ -36,12 +36,16 @@ mixin FanjiaoDanmuTooltipMixin {
     }
     Offset offset = Offset(x, y);
     _menuRect = offset & menuSize;
-    _pointerBias = (position.dx.clamp(
-                math.max(danmuRect.left, stageRect.left) + danmuRect.height / 2,
-                math.min(danmuRect.right, stageRect.right) -
-                    danmuRect.height / 2) -
-            _menuRect.left) /
-        _menuRect.width;
+    var lowerLimit = math.max(danmuRect.left, stageRect.left) + 4;
+    var upperLimit = math.min(danmuRect.right, stageRect.right) - 4;
+    if (lowerLimit > upperLimit) {
+      _pointerBias =
+          ((lowerLimit + upperLimit) / 2 - _menuRect.left) / _menuRect.width;
+    } else {
+      _pointerBias =
+          (position.dx.clamp(lowerLimit, upperLimit) - _menuRect.left) /
+              _menuRect.width;
+    }
     return true;
   }
 
@@ -50,6 +54,7 @@ mixin FanjiaoDanmuTooltipMixin {
       return null;
     }
     return Positioned(
+      key: selectedItem.valueKey("tooltip"),
       left: _menuRect.left + (isUpward ? 0 : 4),
       top: _menuRect.top + (isUpward ? 4 : 0),
       child: SizedBox(

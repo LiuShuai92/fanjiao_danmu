@@ -16,6 +16,7 @@ class MyDanmuModel extends DanmuModel {
     String? package,
     bool isRepeatable = false,
     double opacity = 1,
+    double? specifyY,
     EdgeInsets padding = const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
     EdgeInsets margin = const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
     double strokeWidth = 1,
@@ -36,6 +37,7 @@ class MyDanmuModel extends DanmuModel {
           text: text,
           startTime: startTime,
           spans: spans,
+          specifyY: specifyY,
           imageProvider: imageProvider,
           package: package,
           isRepeatable: isRepeatable,
@@ -54,12 +56,13 @@ class MyDanmuModel extends DanmuModel {
 
   @override
   MyDanmuModel copyWith(
-      {int? id,
+      {bool? isLiked,
       int? likeCount,
+      int? id,
       String? text,
+      double? specifyY,
       Duration? startTime,
       List<InlineSpan>? spans,
-      bool? isLiked,
       bool? isClickable,
       ImageProvider<Object>? imageProvider,
       String? package,
@@ -76,12 +79,13 @@ class MyDanmuModel extends DanmuModel {
       Duration? insertTime,
       TextStyle? textStyle}) {
     return MyDanmuModel(
-      id: id ?? this.id,
+      isLiked: isLiked ?? this.isLiked,
       likeCount: likeCount ?? this.likeCount,
+      id: id ?? this.id,
       text: text ?? this.text,
+      specifyY: specifyY ?? this.specifyY,
       startTime: startTime ?? this.startTime,
       spans: spans ?? this.spans,
-      isLiked: isLiked ?? this.isLiked,
       imageProvider: imageProvider ?? this.imageProvider,
       package: package ?? this.package,
       isRepeatable: isRepeatable ?? this.isRepeatable,

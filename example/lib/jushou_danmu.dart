@@ -27,7 +27,7 @@ class _JushouDanmuState extends State<JushouDanmu> {
       children: [
         AnimatedPositioned(
           top: top,
-          duration: const Duration(milliseconds: 700),
+          duration: const Duration(milliseconds: 300),
           child: Image.asset(
             "assets/images/ic_jy.png",
             width: 30,

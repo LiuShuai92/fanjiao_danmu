@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import '../danmu_controller.dart';
 import '../danmu_item.dart';
 import '../danmu_model.dart';
 
@@ -18,5 +19,5 @@ abstract class DanmuAdapter<T extends DanmuModel> {
 
   removeItem(DanmuItem<T> item);
 
-  clear();
+  clear([int filter = DanmuFlag.all]);
 }

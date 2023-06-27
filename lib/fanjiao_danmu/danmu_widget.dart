@@ -53,24 +53,22 @@ class _DanmuWidgetState extends State<DanmuWidget>
       Widget itemWidget;
       if (danmuItem.isImage) {
         itemWidget = Image(
-          key: danmuItem.valueKey("Image"),
           image: danmuItem.imageAsset!,
           width: danmuItem.size.width,
           height: danmuItem.size.height,
         );
       } else {
         itemWidget =
-            Text.rich(danmuItem.span!, key: danmuItem.valueKey("RichText"));
+            Text.rich(danmuItem.span!);
       }
       var model = danmuItem.model;
       if (model.startTime <= danmuController.progress &&
-          danmuController.filter.check(danmuItem.flag)) {
+          danmuController.filter.contain(danmuItem.flag)) {
         var positioned = Positioned(
-          key: danmuItem.valueKey("Positioned"),
+          key: danmuItem.valueKey(),
           left: danmuItem.position?.dx,
           top: danmuItem.position?.dy,
           child: Container(
-            key: danmuItem.valueKey("Container"),
             child: itemWidget,
             decoration: model.decoration,
             foregroundDecoration: model.foregroundDecoration,
@@ -106,6 +104,7 @@ class _DanmuWidgetState extends State<DanmuWidget>
           }
         },
         child: Stack(
+          clipBehavior: Clip.none,
           children: children,
         ),
       ),

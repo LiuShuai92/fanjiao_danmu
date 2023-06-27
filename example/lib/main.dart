@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:fanjiao_danmu/fanjiao_danmu/adapter/fanjiao_danmu_adapter.dart';
 import 'package:fanjiao_danmu/fanjiao_danmu/danmu_tooltip.dart';
@@ -94,18 +95,22 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                color: Colors.greenAccent,
-                child: LayoutBuilder(builder: (context, constraints) {
-                  return RepaintBoundary(
-                    child: DanmuWidget(
-                      size: Size(constraints.maxWidth, 300),
-                      danmuController: danmuController,
-                      tooltip: tooltip,
+              LayoutBuilder(builder: (context, constraints) {
+                return Container(
+                  color: Colors.greenAccent,
+                  width: constraints.maxWidth,
+                  height: 300,
+                  child: OverflowBox(
+                    child: RepaintBoundary(
+                      child: DanmuWidget(
+                        size: Size(constraints.maxWidth, 300),
+                        danmuController: danmuController,
+                        tooltip: tooltip,
+                      ),
                     ),
-                  );
-                }),
-              ),
+                  ),
+                );
+              }),
               danmuButton,
               editDanmu(),
               filterButton,
@@ -260,64 +265,61 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
 
   SizedBox editDanmu() {
     return SizedBox(
-              height: 40,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: textController,
-                      textInputAction: TextInputAction.send,
-                      onSubmitted: (text) {
-                        danmuController.addDanmu(MyDanmuModel(
-                          id: ++id,
-                          likeCount: 10,
-                          text: text,
-                          decoration: const BoxDecoration(
-                            color: Color(0xCCFF9C6B),
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(12)),
-                            border: Border.fromBorderSide(BorderSide(
-                                color: Colors.white,
-                                width: 1,
-                                style: BorderStyle.solid)),
-                          ),
-                          startTime: danmuController.progress,
-                          textStyle: rngTextStyle,
-                          flag: DanmuFlag.announcement |
-                              DanmuFlag.collisionFree,
-                        ));
-                      },
-                    ),
+      height: 40,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Expanded(
+            child: TextField(
+              controller: textController,
+              textInputAction: TextInputAction.send,
+              onSubmitted: (text) {
+                danmuController.addDanmu(MyDanmuModel(
+                  id: ++id,
+                  likeCount: 10,
+                  text: text,
+                  decoration: const BoxDecoration(
+                    color: Color(0xCCFF9C6B),
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                    border: Border.fromBorderSide(BorderSide(
+                        color: Colors.white,
+                        width: 1,
+                        style: BorderStyle.solid)),
                   ),
-                  SizedBox(
-                    width: 100,
-                    height: 40,
-                    child: TextButton(
-                      onPressed: () {
-                        danmuController.addDanmu(MyDanmuModel(
-                          id: ++id,
-                          text: textController.text,
-                          decoration: const BoxDecoration(
-                            color: Color(0xCCFF9C6B),
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(12)),
-                            border: Border.fromBorderSide(BorderSide(
-                                color: Colors.white,
-                                width: 1,
-                                style: BorderStyle.solid)),
-                          ),
-                          startTime: danmuController.progress,
-                          textStyle: rngTextStyle,
-                        ));
-                      },
-                      child: const Text("发送"),
-                    ),
+                  startTime: danmuController.progress,
+                  textStyle: rngTextStyle,
+                  flag: DanmuFlag.announcement | DanmuFlag.collisionFree,
+                ));
+              },
+            ),
+          ),
+          SizedBox(
+            width: 100,
+            height: 40,
+            child: TextButton(
+              onPressed: () {
+                danmuController.addDanmu(MyDanmuModel(
+                  id: ++id,
+                  text: textController.text,
+                  decoration: const BoxDecoration(
+                    color: Color(0xCCFF9C6B),
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                    border: Border.fromBorderSide(BorderSide(
+                        color: Colors.white,
+                        width: 1,
+                        style: BorderStyle.solid)),
                   ),
-                ],
-              ),
-            );
+                  startTime: danmuController.progress,
+                  textStyle: rngTextStyle,
+                ));
+              },
+              child: const Text("发送"),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Map<String, dynamic> params = {};
@@ -421,39 +423,49 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
           getButton(
             "全屏弹幕",
             () {
-              danmuController.addDanmu(MyDanmuModel(
-                id: ++id,
-                text: rngText,
-                spans: [
-                  WidgetSpan(
-                    child: StrokeTextWidget(
-                      "来啦来啦！！期待下一集！",
-                      textStyle: const TextStyle(
-                        fontSize: 36,
-                        fontWeight: FontWeight.w800,
-                        fontFamily: "AlimamaShuHeiTi",
+              danmuController.clearDanmu(DanmuFlag.specify);
+              var progress =
+                  danmuController.progress - const Duration(seconds: 7);
+              var text = "来啦来啦！！期待下一集！";
+              var list = List<MyDanmuModel>.generate(15, (index) {
+                return MyDanmuModel(
+                  id: ++id,
+                  text: text,
+                  spans: [
+                    WidgetSpan(
+                      child: StrokeTextWidget(
+                        text,
+                        textStyle: TextStyle(
+                          fontSize: rngSize,
+                          fontWeight: FontWeight.w800,
+                          fontFamily: "AlimamaShuHeiTi",
+                        ),
+                        linearGradient: RawLinearGradient(
+                          LocalPosition.topCenter,
+                          LocalPosition.bottomCenter,
+                          [
+                            const Color(0xFFE1C6F8),
+                            const Color(0xFFFFFBEA),
+                            const Color(0xFFFFA8D9),
+                          ],
+                          [0, 0.5, 1],
+                        ),
+                        strokeWidth: 1.5,
+                        // opacity: 1,
+                        strokeColor: const Color(0xFF41357F),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 2, horizontal: 8),
                       ),
-                      linearGradient: RawLinearGradient(
-                        LocalPosition.topCenter,
-                        LocalPosition.bottomCenter,
-                        [
-                          const Color(0xFFE1C6F8),
-                          const Color(0xFFFFFBEA),
-                          const Color(0xFFFFA8D9),
-                        ],
-                        [0, 0.5, 1],
-                      ),
-                      strokeWidth: 1.5,
-                      // opacity: 1,
-                      strokeColor: const Color(0xFF41357F),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 2, horizontal: 8),
                     ),
-                  ),
-                ],
-                startTime: danmuController.progress,
-                flag: DanmuFlag.announcement | DanmuFlag.collisionFree,
-              ));
+                  ],
+                  startTime: progress + Duration(milliseconds: rngInt(14000)),
+                  specifyY: rngDouble(500),
+                  flag: DanmuFlag.scroll |
+                      DanmuFlag.clickable |
+                      DanmuFlag.specify,
+                );
+              });
+              danmuController.addAllDanmu(list);
             },
           ),
           getButton(
@@ -583,7 +595,6 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
 
   List<InlineSpan> buildTestItemSpans(String text, int id, int likeCount,
       [bool isJushou = false]) {
-    print('LiuShuai: buildTestItemSpans id = $id');
     onTap() {
       var danmuItem = danmuController.getItem(id);
       if (danmuItem != null) {
@@ -594,6 +605,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
         }
       }
     }
+
     return [
       TextSpan(
         text: text,
@@ -604,16 +616,26 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
       ),
       WidgetSpan(
         alignment: PlaceholderAlignment.middle,
-        child: SizedBox(
+        child: Container(
           width: 30,
           height: 30,
-          child: isJushou
-              ? JushouDanmu(key: ValueKey("JushouDanmu$id"))
-              : Image.asset(
-            "assets/images/ic_jy.png",
-            width: 30,
-            height: 36,
-            fit: BoxFit.fitWidth,
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          alignment: Alignment.bottomCenter,
+          child: GestureDetector(
+            onTap: onTap,
+            child: OverflowBox(
+              maxWidth: 30,
+              maxHeight: 36,
+              alignment: Alignment.bottomCenter,
+              child: isJushou
+                  ? JushouDanmu()
+                  : Image.asset(
+                      "assets/images/ic_jy.png",
+                      width: 30,
+                      height: 36,
+                      fit: BoxFit.fitWidth,
+                    ),
+            ),
           ),
         ),
       ),
@@ -629,7 +651,6 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
   }
 
   void updatePlusOneItem(DanmuItem<MyDanmuModel> danmuItem) {
-    print('LiuShuai: updatePlusOneItem');
     var model = danmuItem.model;
     var id = model.id;
     var likeCount = model.likeCount + 1;
@@ -640,7 +661,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
     Future.delayed(const Duration(seconds: 3), () {
       danmuItem.play();
     });
-    danmuItem.updateModel(model.copyWith(
+    var danmuModel = model.copyWith(
       likeCount: likeCount,
       isLiked: true,
       alignment: Alignment.bottomCenter,
@@ -665,7 +686,8 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
         borderRadius: BorderRadius.all(Radius.circular(8)),
       ),
       spans: buildTestItemSpans(danmuItem.model.text, id, likeCount, true),
-    ));
+    );
+    danmuItem.updateModel(danmuModel);
   }
 
   Widget get filterButton => Wrap(

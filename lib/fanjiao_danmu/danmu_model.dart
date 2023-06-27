@@ -9,6 +9,7 @@ class DanmuModel {
   final bool isClickable;
   final bool isRepeatable;
   final int flag;
+  final double? specifyY;
   final TextStyle textStyle;
   final Duration insertTime;
   final Duration startTime;
@@ -38,6 +39,7 @@ class DanmuModel {
     required this.startTime,
     this.spans = const [],
     this.isClickable = true,
+    this.specifyY,
     this.imageProvider,
     this.package,
     this.isRepeatable = false,
@@ -58,12 +60,14 @@ class DanmuModel {
       decoration: TextDecoration.none,
     ),
   })  : assert(textStyle != null),
+        assert(!flag.isSpecify || specifyY != null, "如果需要指定y坐标，必须传入specifyY值"),
         insertTime = insertTime ?? startTime;
 
   DanmuModel copyWith({
     int? id,
     String? text,
     Duration? startTime,
+    double? specifyY,
     List<InlineSpan>? spans,
     bool? isClickable,
     ImageProvider? imageProvider,
@@ -85,6 +89,7 @@ class DanmuModel {
       id: id ?? this.id,
       text: text ?? this.text,
       startTime: startTime ?? this.startTime,
+      specifyY: specifyY ?? this.specifyY,
       spans: spans ?? this.spans,
       isClickable: isClickable ?? this.isClickable,
       imageProvider: imageProvider ?? this.imageProvider,

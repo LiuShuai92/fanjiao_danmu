@@ -110,10 +110,11 @@ class DanmuController<T extends DanmuModel>
     _progress = startTime;
   }
 
-  clearDanmu() {
-    danmuItems.clear();
-    adapter.clear();
+  clearDanmu([int filter = DanmuFlag.all]) {
+    danmuItems.removeWhere((element) => filter.pick(element.flag));
+    adapter.clear(filter);
     selected = null;
+    notifyListeners();
   }
 
   setup(BuildContext context, TickerProvider vsync, Rect rect) {
@@ -133,7 +134,6 @@ class DanmuController<T extends DanmuModel>
     _internalSetValue(newProgress);
     if (state == DanmuStatus.completed) {
       clearDanmu();
-      notifyListeners();
       return;
     }
     if (danmuItems.isEmpty) {
@@ -252,7 +252,7 @@ class DanmuController<T extends DanmuModel>
         }
       }
     }
-    if (filter.check(model.flag)) {
+    if (filter.contain(model.flag)) {
       var item = adapter.getItem(model);
       if (item != null) {
         item.position = item.simulation
@@ -380,6 +380,7 @@ class DanmuController<T extends DanmuModel>
     _ticker = null;
     _lastElapsedDuration = null;
     _status = DanmuStatus.dispose;
+    clearTickListeners();
     clearStatusListeners();
     clearListeners();
     super.dispose();
@@ -436,6 +437,9 @@ extension DanmuFlag on int {
   ///可点击
   static const int clickable = 1 << 8;
 
+  ///指定y坐标
+  static const int specify = 1 << 9;
+
   ///全部不允许
   static const int none = 0;
 
@@ -447,10 +451,13 @@ extension DanmuFlag on int {
       DanmuFlag.repeated |
       DanmuFlag.colorful |
       DanmuFlag.announcement |
+      DanmuFlag.specify |
       DanmuFlag.collisionFree |
       DanmuFlag.clickable;
 
-  bool check(int flag) => this & flag == flag;
+  bool pick(int flag) => this & flag != none;
+
+  bool contain(int flag) => this & flag == flag;
 
   int add(int flag) => this | flag;
 
@@ -458,23 +465,25 @@ extension DanmuFlag on int {
 
   int change(int flag) => this ^ flag;
 
-  bool get isScroll => check(scroll);
+  bool get isScroll => contain(scroll);
 
-  bool get isTop => check(top);
+  bool get isTop => contain(top);
 
-  bool get isBottom => check(bottom);
+  bool get isBottom => contain(bottom);
 
-  bool get isAdvanced => check(advanced);
+  bool get isAdvanced => contain(advanced);
 
-  bool get isRepeated => check(repeated);
+  bool get isRepeated => contain(repeated);
 
-  bool get isColorful => check(colorful);
+  bool get isColorful => contain(colorful);
 
-  bool get isAnnouncement => check(announcement);
+  bool get isAnnouncement => contain(announcement);
 
-  bool get isCollisionFree => check(collisionFree);
+  bool get isCollisionFree => contain(collisionFree);
 
-  bool get isClickable => check(clickable);
+  bool get isClickable => contain(clickable);
+
+  bool get isSpecify => contain(specify);
 
   int get addScroll => add(scroll);
 
@@ -494,6 +503,8 @@ extension DanmuFlag on int {
 
   int get addClickable => add(clickable);
 
+  int get addSpecify => add(specify);
+
   int get removeScroll => remove(scroll);
 
   int get removeTop => remove(top);
@@ -512,6 +523,8 @@ extension DanmuFlag on int {
 
   int get removeClickable => remove(clickable);
 
+  int get removeSpecify => remove(specify);
+
   int get changeScroll => change(scroll);
 
   int get changeTop => change(top);
@@ -529,4 +542,6 @@ extension DanmuFlag on int {
   int get changeCollisionFree => change(collisionFree);
 
   int get changeClickable => change(clickable);
+
+  int get changeSpecify => change(specify);
 }

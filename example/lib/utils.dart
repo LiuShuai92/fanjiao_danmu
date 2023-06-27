@@ -22,5 +22,11 @@ String get rngText {
   return text;
 }
 
+double get rngSize => 18.0 + rng.nextInt(35);
+
+double rngDouble(int max) => rng.nextInt(max * 10) / 10;
+
+int rngInt(int max) => rng.nextInt(max);
+
 Color get rngColor =>
     Color.fromARGB(255, rng.nextInt(255), rng.nextInt(255), rng.nextInt(255));

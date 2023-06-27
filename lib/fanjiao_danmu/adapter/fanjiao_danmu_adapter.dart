@@ -13,11 +13,12 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
   final List<DanmuItem<T>?> centerRows = [];
   final Map<String, ImageProvider> imageMap;
   final double rowHeight;
+  bool _isInit = false;
   int? _maxLines;
 
   int? get maxLines => _maxLines;
 
-  int get _randomScrollLine => _random.nextInt(scrollRows.length - 1);
+  int get _randomRowIndex => _random.nextInt(scrollRows.length - 1);
 
   double _getY(int lineIndex) => lineIndex * rowHeight;
 
@@ -29,6 +30,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
   @override
   initData(Rect rect, {int? maxLines}) {
     super.initData(rect);
+    _isInit = true;
     scrollRows.clear();
     centerRows.clear();
     var lines = rect.height ~/ rowHeight;
@@ -40,19 +42,24 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
   }
 
   @override
-  clear() {
-    for (var element in scrollRows) {
-      element.clear();
+  clear([int filter = DanmuFlag.all]) {
+    for (var scrollRow in scrollRows) {
+      scrollRow.removeWhere((element) => filter.pick(element.flag));
     }
     for (int i = 0; i < centerRows.length; i++) {
-      centerRows[i] = null;
+      centerRows.removeWhere(
+          (element) => element == null ? true : filter.pick(element.flag));
     }
   }
 
   @override
   DanmuItem<T>? getItem(T model) {
     DanmuItem<T>? item;
-    if (model.flag.isTop) {
+    if (model.flag.isScroll) {
+      item = _getScrollItem(model);
+    } else if (model.flag.isSpecify) {
+      item = _getSpecifyClampItem(model);
+    } else if (model.flag.isTop) {
       item = _getTopCenterItem(model);
     } else if (model.flag.isBottom) {
       item = _getBottomCenterItem(model);
@@ -66,6 +73,9 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
 
   @override
   removeItem(DanmuItem<T> item) {
+    if (item.flag.isSpecify) {
+      return;
+    }
     if (item.flag.isScroll) {
       for (var row in scrollRows) {
         if (row.remove(item)) {
@@ -85,8 +95,17 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
     imageMap.clear();
   }
 
+  DanmuItem<T>? _getSpecifyClampItem(T model) {
+    assert(_isInit, "需要先调用 initData()");
+    DanmuItem<T>? item = transformText(model);
+    Offset offset =
+        Offset(rect.center.dx - item.size.width / 2, model.specifyY ?? 0);
+    item.simulation = ClampSimulation(clampOffset: offset);
+    return item;
+  }
+
   DanmuItem<T>? _getTopCenterItem(T model) {
-    assert(_maxLines != null, "需要先调用 initData()");
+    assert(_isInit, "需要先调用 initData()");
     DanmuItem<T>? item;
     for (int i = 0; i < centerRows.length; i++) {
       var centerRow = centerRows[i];
@@ -103,7 +122,7 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
   }
 
   DanmuItem<T>? _getBottomCenterItem(T model) {
-    assert(_maxLines != null, "需要先调用 initData()");
+    assert(_isInit, "需要先调用 initData()");
     DanmuItem<T>? item;
     for (int i = centerRows.length - 1; i >= 0; i--) {
       var centerRow = centerRows[i];
@@ -120,14 +139,21 @@ class FanjiaoDanmuAdapter<T extends DanmuModel> extends DanmuAdapter<T> {
   }
 
   DanmuItem<T>? _getScrollItem(T model) {
-    assert(_maxLines != null, "需要先调用 initData()");
+    assert(_isInit, "需要先调用 initData()");
     DanmuItem<T> item = transformText(model);
     var marginSize = model.margin.collapsedSize;
     var size = item.size + Offset(marginSize.width, marginSize.height);
-    if (!item.isValid && item.flag.isCollisionFree) {
+    var flag = item.flag;
+    if (flag.isSpecify) {
       HorizontalScrollSimulation simulation =
           HorizontalScrollSimulation(right: rect.width, left: 0, size: size);
-      var index = _randomScrollLine;
+      item.simulation = simulation;
+      simulation.y = model.specifyY ?? 0;
+      return item;
+    } else if (flag.isCollisionFree) {
+      HorizontalScrollSimulation simulation =
+          HorizontalScrollSimulation(right: rect.width, left: 0, size: size);
+      var index = _randomRowIndex;
       item.simulation = simulation;
       scrollRows[index].add(item);
       simulation.y = _getY(index);
