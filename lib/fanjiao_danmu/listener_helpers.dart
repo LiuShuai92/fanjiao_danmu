@@ -131,9 +131,9 @@ mixin DanmuLocalStatusListenersMixin {
   @protected
   @pragma('vm:notify-debugger-on-exception')
   void notifyStatusListeners(DanmuStatus status) {
-    /*if (kDebugMode) {
+    if (kDebugMode) {
       print('LiuShuai: DanmuStatus = $status');
-    }*/
+    }
     final List<DanmuStatusListener> localListeners = List<DanmuStatusListener>.from(_statusListeners);
     for (final DanmuStatusListener listener in localListeners) {
       if (_statusListeners.contains(listener)) {

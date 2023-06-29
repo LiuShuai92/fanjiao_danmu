@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:ui';
+import 'dart:math' as math;
 
 import 'package:fanjiao_danmu/fanjiao_danmu/adapter/fanjiao_danmu_adapter.dart';
 import 'package:fanjiao_danmu/fanjiao_danmu/danmu_tooltip.dart';
 import 'package:fanjiao_danmu/fanjiao_danmu/fanjiao_danmu.dart';
 import 'package:fanjiao_danmu/fanjiao_danmu/widget/bubble_box_widget.dart';
+import 'package:fanjiao_danmu/fanjiao_danmu/widget/middle_widget.dart';
 import 'package:fanjiao_danmu/fanjiao_danmu/widget/stroke_text_widget.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -94,19 +96,22 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
         body: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               LayoutBuilder(builder: (context, constraints) {
+                var maxWidth = constraints.maxWidth;
+                if(maxWidth == 0){
+                  maxWidth = window.physicalSize.width / window.devicePixelRatio;
+                }
                 return Container(
                   color: Colors.greenAccent,
-                  width: constraints.maxWidth,
                   height: 300,
-                  child: OverflowBox(
-                    child: RepaintBoundary(
-                      child: DanmuWidget(
-                        size: Size(constraints.maxWidth, 300),
-                        danmuController: danmuController,
-                        tooltip: tooltip,
-                      ),
+                  child: RepaintBoundary(
+                    child: DanmuWidget(
+                      width: maxWidth,
+                      height: 300,
+                      danmuController: danmuController,
+                      tooltip: tooltip,
                     ),
                   ),
                 );
@@ -136,7 +141,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                     isUpward: testIsUpward,
                     pointerBias: pointerBias,
                     strokeWidth: strokeWidth,
-                    radius: radius,
+                    borderRadius: radius,
                     pointerWidth: pointerWidth,
                     pointerHeight: pointerHeight,
                     peakRadius: peakRadius,
@@ -600,7 +605,6 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
       if (danmuItem != null) {
         if (!danmuController.isSelected && danmuItem.flag.isClickable) {
           updatePlusOneItem(danmuItem);
-          danmuController.updateView();
           HapticFeedback.vibrate();
         }
       }
@@ -616,25 +620,27 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
       ),
       WidgetSpan(
         alignment: PlaceholderAlignment.middle,
-        child: Container(
-          width: 30,
-          height: 30,
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          alignment: Alignment.bottomCenter,
-          child: GestureDetector(
-            onTap: onTap,
-            child: OverflowBox(
-              maxWidth: 30,
-              maxHeight: 36,
-              alignment: Alignment.bottomCenter,
-              child: isJushou
-                  ? JushouDanmu()
-                  : Image.asset(
-                      "assets/images/ic_jy.png",
-                      width: 30,
-                      height: 36,
-                      fit: BoxFit.fitWidth,
-                    ),
+        child: Middle(
+          child: Container(
+            width: 30,
+            height: 30,
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            alignment: Alignment.bottomCenter,
+            child: GestureDetector(
+              onTap: onTap,
+              child: OverflowBox(
+                maxWidth: 30,
+                maxHeight: 36,
+                alignment: Alignment.bottomCenter,
+                child: isJushou
+                    ? JushouDanmu()
+                    : Image.asset(
+                        "assets/images/ic_jy.png",
+                        width: 30,
+                        height: 36,
+                        fit: BoxFit.fitWidth,
+                      ),
+              ),
             ),
           ),
         ),
@@ -654,10 +660,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
     var model = danmuItem.model;
     var id = model.id;
     var likeCount = model.likeCount + 1;
-    danmuItem.flag = danmuItem.flag.removeClickable;
     danmuItem.pause();
-    danmuItem.position =
-        danmuItem.simulation.offset(danmuItem.simulation.duration / 2);
     Future.delayed(const Duration(seconds: 3), () {
       danmuItem.play();
     });
@@ -667,6 +670,28 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
       alignment: Alignment.bottomCenter,
       margin: const EdgeInsets.only(top: 6, right: 10),
       padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+      /*foregroundDecoration: const BoxDecoration(
+          border: Border.symmetric(
+              horizontal: BorderSide(color: Colors.transparent, width: 20)),
+          gradient: LinearGradient(
+            colors: [
+              Color(0x66FFFFFF),
+              Colors.transparent,
+              Colors.black,
+              Colors.black,
+              Colors.transparent,
+              Colors.transparent,
+            ],
+              stops:[
+                0.0,
+                0.3,
+                0.3,
+                0.7,
+                0.7,
+                1.0,
+              ],
+          ),
+          backgroundBlendMode: BlendMode.dstIn),*/
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -687,7 +712,9 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
       ),
       spans: buildTestItemSpans(danmuItem.model.text, id, likeCount, true),
     );
-    danmuItem.updateModel(danmuModel);
+    danmuItem.flag = danmuItem.flag.removeClickable;
+    var time = danmuItem.simulation.duration / 2;
+    danmuController.updateItem(danmuItem, danmuModel, time: time);
   }
 
   Widget get filterButton => Wrap(

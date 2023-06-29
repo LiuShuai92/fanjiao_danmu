@@ -33,7 +33,7 @@ class UniformLinearSimulation extends DanmuSimulation {
   @override
   Offset? isDone(Offset o, double dt) {
     Offset result = o + dOffset(dt);
-    if (rect.contains(result)) {
+    if (stageRect.contains(result)) {
       return null;
     }
     return result;

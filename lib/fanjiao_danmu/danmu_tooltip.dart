@@ -64,7 +64,7 @@ mixin FanjiaoDanmuTooltipMixin {
           isUpward: isUpward,
           pointerBias: pointerBias,
           strokeWidth: 1.2,
-          radius: 8,
+          borderRadius: 8,
           pointerWidth: 10,
           pointerHeight: 6,
           peakRadius: 3,

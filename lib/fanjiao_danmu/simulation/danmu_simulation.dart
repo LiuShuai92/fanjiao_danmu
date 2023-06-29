@@ -1,11 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 
 export 'horizontal_scroll_simulation.dart';
 export 'uniform_linear_simulation.dart';
 
 abstract class DanmuSimulation {
-  final Rect rect;
+  Rect stageRect;
   final Tolerance tolerance;
   final double duration;
 
@@ -14,7 +15,7 @@ abstract class DanmuSimulation {
   bool isFullShown = false;
 
   DanmuSimulation(
-    this.rect, {
+    this.stageRect, {
     this.tolerance = Tolerance.defaultTolerance,
     this.duration = 7,
   });

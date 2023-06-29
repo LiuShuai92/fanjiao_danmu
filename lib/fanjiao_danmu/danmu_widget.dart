@@ -5,15 +5,17 @@ import 'danmu_controller.dart';
 import 'danmu_item.dart';
 import 'danmu_model.dart';
 
-class DanmuWidget extends StatefulWidget {
+class DanmuWidget extends StatefulWidget{
   final DanmuController danmuController;
-  final Size size;
+  final double width;
+  final double height;
 
   Positioned? Function<T extends DanmuModel>(DanmuItem<T>?)? tooltip;
 
   DanmuWidget({
     Key? key,
-    required this.size,
+    required this.width,
+    required this.height,
     required this.danmuController,
     this.tooltip,
   })  : assert(danmuController != null),
@@ -24,14 +26,14 @@ class DanmuWidget extends StatefulWidget {
 }
 
 class _DanmuWidgetState extends State<DanmuWidget>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   TapUpDetails? _tapDownDetails;
 
   @override
   void initState() {
     super.initState();
     widget.danmuController.setup(context, this,
-        Rect.fromLTRB(0, 0, widget.size.width, widget.size.height));
+        Rect.fromLTRB(0, 0, widget.width, widget.height));
     widget.danmuController.addListener(() {
       setState(() {});
     });
@@ -91,8 +93,8 @@ class _DanmuWidgetState extends State<DanmuWidget>
       children.add(tooltipWidget);
     }
     return SizedBox(
-      width: widget.size.width,
-      height: widget.size.height,
+      width: widget.width,
+      height: widget.height,
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTapUp: (details) {
@@ -110,6 +112,9 @@ class _DanmuWidgetState extends State<DanmuWidget>
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 /*class _FanjiaoDanmuPainter extends CustomPainter {

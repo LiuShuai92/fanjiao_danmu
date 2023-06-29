@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/physics.dart';
 import 'package:flutter/widgets.dart';
 
 import 'danmu_simulation.dart';
@@ -12,9 +13,9 @@ class HorizontalScrollSimulation extends DanmuSimulation {
   double y;
 
   HorizontalScrollSimulation({
+    required this.size,
     required this.right,
     required this.left,
-    required this.size,
     this.y = 0,
     Tolerance tolerance = Tolerance.defaultTolerance,
     double duration = 7,
@@ -30,17 +31,35 @@ class HorizontalScrollSimulation extends DanmuSimulation {
   }
 
   @override
-  Offset offset(double time) => Offset(right + v * time, y);
+  Offset offset(double time) => Offset(stageRect.right + v * time, y);
 
   @override
   Offset? isDone(Offset o, double dt) {
     Offset result = o + dOffset(dt);
     var dx = result.dx;
-    if (dx < rect.left) {
+    if (dx < stageRect.left) {
       return null;
-    } else if (!isFullShown && dx < rect.right - size.width) {
+    } else if (!isFullShown && dx < stageRect.right - size.width) {
       isFullShown = true;
     }
     return result;
+  }
+
+  HorizontalScrollSimulation copyWith({
+    Size? size,
+    double? right,
+    double? left,
+    double? y,
+    Tolerance? tolerance,
+    double? duration,
+  }) {
+    return HorizontalScrollSimulation(
+      size: size ?? this.size,
+      right: right ?? this.right,
+      left: left ?? this.left,
+      y: y ?? this.y,
+      tolerance: tolerance ?? this.tolerance,
+      duration: duration ?? this.duration,
+    );
   }
 }

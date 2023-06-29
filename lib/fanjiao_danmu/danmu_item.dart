@@ -2,12 +2,14 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import 'danmu_model.dart';
 import 'simulation/danmu_simulation.dart';
+import 'widget/middle_widget.dart';
 import 'widget/stroke_text_widget.dart';
 
-class DanmuItem<T extends DanmuModel> {
+class DanmuItem<T extends DanmuModel> extends ContainerBoxParentData<RenderBox> {
   late T _model;
   late int flag;
   bool isSelected = false;
@@ -96,7 +98,7 @@ class DanmuItem<T extends DanmuModel> {
     _isPause = false;
   }
 
-  ValueKey valueKey([Object? value]){
+  ValueKey valueKey([Object? value]) {
     return ValueKey("${model.id}$value");
   }
 
@@ -174,7 +176,7 @@ class DanmuItem<T extends DanmuModel> {
     return placeholderSpans;
   }
 
-  /// 暂时仅支持使用#[Size]、#[Image]、#[Container]、#[StrokeTextWidget]作为child，
+  /// 暂时仅支持使用#[Size]、#[Image]、#[Container]、#[StrokeTextWidget]、#[Middle]作为child，
   /// 或者更改#[layoutChildren]参数。
   List<PlaceholderDimensions> _defaultLayoutChildren(
       List<PlaceholderSpan> placeholderSpans) {
@@ -183,36 +185,7 @@ class DanmuItem<T extends DanmuModel> {
       var placeholderSpan = placeholderSpans[index];
       var childSize = Size.zero;
       if (placeholderSpan is WidgetSpan) {
-        var runtimeType = placeholderSpan.child.runtimeType;
-        switch (runtimeType) {
-          case Container:
-            var child = (placeholderSpan.child as Container);
-            var marginSize = child.margin?.collapsedSize;
-            var constrainDimensions = child.constraints
-                ?.constrainDimensions(double.infinity, double.infinity);
-            if (constrainDimensions != null) {
-              childSize =
-                  Size(constrainDimensions.width, constrainDimensions.height);
-            }
-            if (marginSize != null) {
-              childSize += marginSize.bottomRight(Offset.zero);
-            }
-            break;
-          case SizedBox:
-            var child = (placeholderSpan.child as SizedBox);
-            childSize = Size(child.width ?? 0, child.height ?? 0);
-            break;
-          case StrokeTextWidget:
-            var child = (placeholderSpan.child as StrokeTextWidget);
-            childSize = child.rect.size;
-            break;
-          case Image:
-            var child = (placeholderSpan.child as Image);
-            childSize = Size(child.width ?? 0, child.height ?? 0);
-            break;
-          default:
-            throw UnsupportedTypesError(runtimeType);
-        }
+        childSize = getWidgetSize(placeholderSpan.child);
       }
       return PlaceholderDimensions(
         size: childSize,
@@ -221,6 +194,65 @@ class DanmuItem<T extends DanmuModel> {
       );
     });
     return placeholderDimensions;
+  }
+
+  Size getWidgetSize(Widget widget) {
+    Size childSize = Size.zero;
+    switch (widget.runtimeType) {
+      case Container:
+        widget = (widget as Container);
+        var marginSize = widget.margin?.collapsedSize;
+        var constrainDimensions = widget.constraints
+            ?.constrainDimensions(double.infinity, double.infinity);
+        if (constrainDimensions != null) {
+          childSize =
+              Size(constrainDimensions.width, constrainDimensions.height);
+        }
+        if (marginSize != null) {
+          childSize += marginSize.bottomRight(Offset.zero);
+        }
+        break;
+      case SizedBox:
+        widget = (widget as SizedBox);
+        childSize = Size(widget.width ?? 0, widget.height ?? 0);
+        break;
+      case StrokeTextWidget:
+        widget = (widget as StrokeTextWidget);
+        childSize = widget.rect.size;
+        break;
+      case Image:
+        widget = (widget as Image);
+        childSize = Size(widget.width ?? 0, widget.height ?? 0);
+        break;
+      case Middle:
+        widget = (widget as Middle);
+        childSize = getWidgetSize(widget.child);
+        break;
+      default:
+        throw UnsupportedTypesError(runtimeType);
+    }
+    return childSize;
+  }
+
+
+// 获取目标Widget相对于另一个Widget的位置
+  Offset getWidgetOffset(BuildContext context, GlobalObjectKey targetKey) {
+    // 获取目标Widget的RenderObject
+    RenderBox targetBox = targetKey.currentContext!.findRenderObject() as RenderBox;
+
+    // 获取目标Widget在全局坐标系中的位置
+    Offset targetOffset = targetBox.localToGlobal(Offset.zero);
+
+    // 获取当前Widget的RenderObject
+    RenderBox thisBox = context.findRenderObject() as RenderBox;
+
+    // 获取当前Widget在全局坐标系中的位置
+    Offset thisOffset = thisBox.localToGlobal(Offset.zero);
+
+    // 计算目标Widget相对于当前Widget的偏移量
+    Offset offset = targetOffset - thisOffset;
+
+    return offset;
   }
 }
 
@@ -233,4 +265,3 @@ class UnsupportedTypesError<T> extends Error implements TypeError {
   String toString() =>
       "默认layoutChildren方法暂时不支持$_type类型的尺寸获取，支持使用Size、Image、Container或StrokeTextWidget，或者更改layoutChildren参数。";
 }
-

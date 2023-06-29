@@ -1,19 +1,20 @@
 import 'dart:collection';
 
+import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/foundation.dart' as foundation;
 
 import 'fanjiao_danmu.dart';
 import 'listener_helpers.dart';
+import 'simulation/clamp_simulation.dart';
 
 class DanmuController<T extends DanmuModel>
     with
         DanmuLocalListenersMixin,
         DanmuLocalStatusListenersMixin,
         DanmuEagerListenerMixin,
-        DanmuTickListenersMixin{
+        DanmuTickListenersMixin {
   /// return true 选中并暂停这条弹幕
   final bool Function(DanmuItem<T>?, Offset)? onTap;
   final List<DanmuItem<T>> _tempList = <DanmuItem<T>>[];
@@ -122,10 +123,40 @@ class DanmuController<T extends DanmuModel>
     adapter.initData(rect);
   }
 
+  updateItem(DanmuItem<T> item, T model, {double? time, Offset? position}) {
+    item.updateModel(model);
+    updateSimulation(item);
+    if (position != null) {
+      item.position = position;
+    } else if (time != null) {
+      item.position = item.simulation.offset(time);
+    }
+    notifyListeners();
+  }
+
+  updateSimulation(DanmuItem<T> item) {
+    var simulation = item.simulation;
+    switch (simulation.runtimeType) {
+      case ClampSimulation:
+        var clampSimulation = simulation as ClampSimulation;
+        Offset offset = Offset(
+            adapter.rect.center.dx - item.size.width / 2, item.position!.dy);
+        item.simulation = clampSimulation.copyWith(clampOffset: offset);
+        break;
+      case HorizontalScrollSimulation:
+        var horizontalScrollSimulation =
+            simulation as HorizontalScrollSimulation;
+        item.simulation = horizontalScrollSimulation.copyWith(size: item.size);
+        break;
+      default:
+        break;
+    }
+  }
+
   _tick(Duration elapsed) {
     Duration dElapsed = elapsed - (_lastElapsedDuration ?? elapsed);
     _lastElapsedDuration = elapsed;
-    notifyTickListeners(elapsed);
+    // notifyTickListeners(elapsed);
     if (_status == DanmuStatus.pause || dElapsed == Duration.zero) {
       return;
     }
@@ -185,7 +216,7 @@ class DanmuController<T extends DanmuModel>
   clearSelection([bool isAutoPlay = false]) {
     if (selected != null) {
       selected!.isSelected = false;
-      if(isAutoPlay){
+      if (isAutoPlay) {
         selected!.play();
       }
       selected = null;
