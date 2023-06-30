@@ -173,7 +173,6 @@ class RenderBubbleBox extends RenderProxyBox {
     super.layout(constraints, parentUsesSize: parentUsesSize);
   }
 
-
   @override
   void performLayout() {
     print('LiuShuai: performLayout');

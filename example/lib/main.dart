@@ -670,28 +670,6 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
       alignment: Alignment.bottomCenter,
       margin: const EdgeInsets.only(top: 6, right: 10),
       padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
-      /*foregroundDecoration: const BoxDecoration(
-          border: Border.symmetric(
-              horizontal: BorderSide(color: Colors.transparent, width: 20)),
-          gradient: LinearGradient(
-            colors: [
-              Color(0x66FFFFFF),
-              Colors.transparent,
-              Colors.black,
-              Colors.black,
-              Colors.transparent,
-              Colors.transparent,
-            ],
-              stops:[
-                0.0,
-                0.3,
-                0.3,
-                0.7,
-                0.7,
-                1.0,
-              ],
-          ),
-          backgroundBlendMode: BlendMode.dstIn),*/
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,

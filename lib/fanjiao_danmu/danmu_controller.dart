@@ -27,7 +27,7 @@ class DanmuController<T extends DanmuModel>
   DanmuStatus _lastReportedStatus = DanmuStatus.dispose;
   DanmuAdapter<T> adapter;
   int maxSize;
-  int filter;
+  int _filter;
   DanmuItem<T>? selected;
   Ticker? _ticker;
   Duration? _progress;
@@ -53,6 +53,13 @@ class DanmuController<T extends DanmuModel>
   bool get isEnable => _ticker != null;
 
   bool get isAnimating => isEnable && _ticker!.isActive;
+
+  int get filter => _filter;
+
+  set filter(int filter) {
+    _filter = filter;
+    notifyListeners();
+  }
 
   set progress(Duration newProgress) {
     Duration oldProgress = _progress ?? startTime;
@@ -99,8 +106,8 @@ class DanmuController<T extends DanmuModel>
     this.maxSize = 100,
     this.onTap,
     this.praiseImageProvider,
-    this.filter = DanmuFlag.all,
-  });
+    int filter = DanmuFlag.all,
+  }): _filter = filter;
 
   setDuration(
     Duration duration, {
