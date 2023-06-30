@@ -9,7 +9,7 @@ import 'simulation/danmu_simulation.dart';
 import 'widget/middle_widget.dart';
 import 'widget/stroke_text_widget.dart';
 
-class DanmuItem<T extends DanmuModel> extends ContainerBoxParentData<RenderBox> {
+class DanmuItem<T extends DanmuModel> {
   late T _model;
   late int flag;
   bool isSelected = false;
@@ -234,11 +234,11 @@ class DanmuItem<T extends DanmuModel> extends ContainerBoxParentData<RenderBox> 
     return childSize;
   }
 
-
 // 获取目标Widget相对于另一个Widget的位置
   Offset getWidgetOffset(BuildContext context, GlobalObjectKey targetKey) {
     // 获取目标Widget的RenderObject
-    RenderBox targetBox = targetKey.currentContext!.findRenderObject() as RenderBox;
+    RenderBox targetBox =
+        targetKey.currentContext!.findRenderObject() as RenderBox;
 
     // 获取目标Widget在全局坐标系中的位置
     Offset targetOffset = targetBox.localToGlobal(Offset.zero);

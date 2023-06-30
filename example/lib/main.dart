@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'jushou_danmu.dart';
-import 'my_danmu _model.dart';
+import 'my_danmu_model.dart';
 import 'utils.dart';
 
 void main() {

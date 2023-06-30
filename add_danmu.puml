@@ -1,0 +1,21 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+participant User order 10
+participant Controller order 20
+participant Adapter order 30
+participant DanmuWidget order 40
+participant ItemWidget order 50
+autonumber
+
+User -> Controller: addDanmu(model)
+Controller -> Adapter: addEntry(model)
+Adapter -> ItemWidget: create
+Controller <-- ItemWidget: (ItemWidget)
+Controller -> DanmuWidget: setState
+DanmuWidget -> ItemWidget: setupParentData(Item)
+ItemWidget -> ItemWidget: layout(add middle offset)
+ItemWidget -> DanmuWidget: parentData(Item)
+DanmuWidget -> DanmuWidget: draw
+DanmuWidget --> User: view
+
+@enduml
