@@ -5,17 +5,24 @@ participant Controller order 20
 participant Adapter order 30
 participant DanmuWidget order 40
 participant ItemWidget order 50
+participant Simulation order 60
 autonumber
 
 User -> Controller: addDanmu(model)
 Controller -> Adapter: addEntry(model)
 Adapter -> ItemWidget: create
 Controller <-- ItemWidget: (ItemWidget)
+group 重复
 Controller -> DanmuWidget: setState
-DanmuWidget -> ItemWidget: setupParentData(Item)
-ItemWidget -> ItemWidget: layout(add middle offset)
-ItemWidget -> DanmuWidget: parentData(Item)
+DanmuWidget -> ItemWidget: setupParentData(ItemData)
+ItemWidget -> ItemWidget: layout(middle)
+alt simulation == null
+ItemWidget -> Simulation: create(middle offset)
+ItemWidget <-- Simulation: simulation
+end
+ItemWidget -> DanmuWidget: parentData(ItemData)
 DanmuWidget -> DanmuWidget: draw
 DanmuWidget --> User: view
+end
 
 @enduml
