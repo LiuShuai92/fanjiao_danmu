@@ -493,9 +493,8 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                   startTime: progress + Duration(milliseconds: rngInt(14000)),
                   specifyY: rngDouble(500),
                   flag: DanmuFlag.scroll |
-                      DanmuFlag.clickable |
                       DanmuFlag.specify |
-                      DanmuFlag.overlay,
+                      DanmuFlag.otherStage,
                 );
               });
               danmuController.addAllDanmu(list);
