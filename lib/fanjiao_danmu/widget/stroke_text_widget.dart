@@ -157,7 +157,7 @@ class RawLinearGradient {
   final TileMode tileMode;
   final Float64List? matrix4;
 
-  RawLinearGradient(
+  const RawLinearGradient(
     this.from,
     this.to,
     this.colors, [
