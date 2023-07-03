@@ -456,47 +456,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
             "全屏弹幕",
             () {
               danmuController.clearDanmu(DanmuFlag.specify);
-              var progress =
-                  danmuController.progress - const Duration(seconds: 7);
-              var text = "来啦来啦！！期待下一集！";
-              var list = List<MyDanmuModel>.generate(15, (index) {
-                return MyDanmuModel(
-                  id: ++id,
-                  text: text,
-                  spans: [
-                    WidgetSpan(
-                      child: StrokeTextWidget(
-                        text,
-                        textStyle: TextStyle(
-                          fontSize: rngSize,
-                          fontWeight: FontWeight.w800,
-                          fontFamily: "AlimamaShuHeiTi",
-                        ),
-                        linearGradient: RawLinearGradient(
-                          LocalPosition.topCenter,
-                          LocalPosition.bottomCenter,
-                          [
-                            const Color(0xFFE1C6F8),
-                            const Color(0xFFFFFBEA),
-                            const Color(0xFFFFA8D9),
-                          ],
-                          [0, 0.5, 1],
-                        ),
-                        strokeWidth: 1.5,
-                        // opacity: 1,
-                        strokeColor: const Color(0xFF41357F),
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 2, horizontal: 8),
-                      ),
-                    ),
-                  ],
-                  startTime: progress + Duration(milliseconds: rngInt(14000)),
-                  specifyY: rngDouble(500),
-                  flag: DanmuFlag.scroll |
-                      DanmuFlag.specify |
-                      DanmuFlag.otherStage,
-                );
-              });
+              var list = globalDanmus("来啦来啦！！期待下一集！", danmuController.progress);
               danmuController.addAllDanmu(list);
             },
           ),

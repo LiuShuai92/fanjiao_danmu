@@ -502,6 +502,8 @@ extension DanmuFlag on int {
       DanmuFlag.overlay |
       DanmuFlag.otherStage;
 
+  bool exclude(int flag) => this & flag == none;
+
   bool pick(int flag) => this & flag != none;
 
   bool contain(int flag) => this & flag == flag;
