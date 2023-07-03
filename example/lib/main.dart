@@ -35,6 +35,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
   bool isPlaying = false;
   int id = 0;
   String selectedText = '';
+  List<Widget> frontChildren = [];
 
   GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
 
@@ -92,176 +93,189 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
         appBar: AppBar(
           title: const Text('Danmu example'),
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              LayoutBuilder(builder: (context, constraints) {
-                var maxWidth = constraints.maxWidth;
-                if(maxWidth == 0){
-                  maxWidth = window.physicalSize.width / window.devicePixelRatio;
-                }
-                return Container(
-                  color: Colors.greenAccent,
-                  height: 300,
-                  child: RepaintBoundary(
-                    child: DanmuWidget(
-                      width: maxWidth,
+        body: Stack(
+          children: [
+            SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  LayoutBuilder(builder: (context, constraints) {
+                    var maxWidth = constraints.maxWidth;
+                    if (maxWidth == 0) {
+                      maxWidth =
+                          window.physicalSize.width / window.devicePixelRatio;
+                    }
+                    return Container(
+                      color: Colors.greenAccent,
                       height: 300,
-                      danmuController: danmuController,
-                      tooltip: tooltip,
+                      child: RepaintBoundary(
+                        child: DanmuWidget(
+                          width: maxWidth,
+                          height: 300,
+                          danmuController: danmuController,
+                          tooltip: tooltip,
+                          buildFrontChildren: (children) {
+                            Future.delayed(Duration.zero,(){
+                              setState(() {
+                                frontChildren = children;
+                              });
+                            });
+                          },
+                        ),
+                      ),
+                    );
+                  }),
+                  danmuButton,
+                  editDanmu(),
+                  filterButton,
+                  Container(
+                    color: Colors.greenAccent,
+                    constraints: const BoxConstraints(minHeight: 40),
+                    width: double.infinity,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      selectedText,
+                      style: const TextStyle(color: Colors.grey),
                     ),
                   ),
-                );
-              }),
-              danmuButton,
-              editDanmu(),
-              filterButton,
-              Container(
-                color: Colors.greenAccent,
-                constraints: const BoxConstraints(minHeight: 40),
-                width: double.infinity,
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  selectedText,
-                  style: const TextStyle(color: Colors.grey),
-                ),
-              ),
-              Container(
-                color: Colors.amber,
-                height: 200,
-                width: 300,
-                alignment: Alignment.center,
-                child: SizedBox(
-                  height: height,
-                  width: width,
-                  child: BubbleBox(
-                    isUpward: testIsUpward,
-                    pointerBias: pointerBias,
-                    strokeWidth: strokeWidth,
-                    borderRadius: radius,
-                    pointerWidth: pointerWidth,
-                    pointerHeight: pointerHeight,
-                    peakRadius: peakRadius,
-                    isWrapped: false,
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        top: testIsUpward ? pointerHeight : 0,
-                        bottom: testIsUpward ? 0 : pointerHeight,
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          SizedBox(
-                            width: 22,
-                            height: 36,
-                            child: OverflowBox(
-                              maxWidth: 30,
-                              maxHeight: 36,
-                              alignment: Alignment.bottomCenter,
-                              child: Image.asset(
-                                "assets/images/ic_jy.png",
-                                width: 30,
+                  Container(
+                    color: Colors.amber,
+                    height: 200,
+                    width: 300,
+                    alignment: Alignment.center,
+                    child: SizedBox(
+                      height: height,
+                      width: width,
+                      child: BubbleBox(
+                        isUpward: testIsUpward,
+                        pointerBias: pointerBias,
+                        strokeWidth: strokeWidth,
+                        borderRadius: radius,
+                        pointerWidth: pointerWidth,
+                        pointerHeight: pointerHeight,
+                        peakRadius: peakRadius,
+                        isWrapped: false,
+                        child: Padding(
+                          padding: EdgeInsets.only(
+                            top: testIsUpward ? pointerHeight : 0,
+                            bottom: testIsUpward ? 0 : pointerHeight,
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              SizedBox(
+                                width: 22,
                                 height: 36,
-                                fit: BoxFit.contain,
+                                child: OverflowBox(
+                                  maxWidth: 30,
+                                  maxHeight: 36,
+                                  alignment: Alignment.bottomCenter,
+                                  child: Image.asset(
+                                    "assets/images/ic_jy.png",
+                                    width: 30,
+                                    height: 36,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
                               ),
-                            ),
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        alignment: Alignment.center,
+                                        child: const Text(
+                                          '加一',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                              decoration: TextDecoration.none,
+                                              fontSize: 12.0,
+                                              fontWeight: FontWeight.w400,
+                                              color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      width: 1.0,
+                                      alignment: Alignment.center,
+                                      child: Container(
+                                        width: 1.0,
+                                        height: 12.0,
+                                        color: Colors.white.withOpacity(0.19),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Container(
+                                        alignment: Alignment.center,
+                                        child: const Text(
+                                          '复制',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                              decoration: TextDecoration.none,
+                                              fontSize: 12.0,
+                                              fontWeight: FontWeight.w400,
+                                              color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      width: 1.0,
+                                      alignment: Alignment.center,
+                                      child: Container(
+                                        width: 1.0,
+                                        height: 12.0,
+                                        color: Colors.white.withOpacity(0.19),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Container(
+                                        alignment: Alignment.center,
+                                        child: const Text(
+                                          '举报',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                              decoration: TextDecoration.none,
+                                              fontSize: 12.0,
+                                              fontWeight: FontWeight.w400,
+                                              color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
-                          Expanded(
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Container(
-                                    alignment: Alignment.center,
-                                    child: const Text(
-                                      '加一',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                          decoration: TextDecoration.none,
-                                          fontSize: 12.0,
-                                          fontWeight: FontWeight.w400,
-                                          color: Colors.white),
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  width: 1.0,
-                                  alignment: Alignment.center,
-                                  child: Container(
-                                    width: 1.0,
-                                    height: 12.0,
-                                    color: Colors.white.withOpacity(0.19),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Container(
-                                    alignment: Alignment.center,
-                                    child: const Text(
-                                      '复制',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                          decoration: TextDecoration.none,
-                                          fontSize: 12.0,
-                                          fontWeight: FontWeight.w400,
-                                          color: Colors.white),
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  width: 1.0,
-                                  alignment: Alignment.center,
-                                  child: Container(
-                                    width: 1.0,
-                                    height: 12.0,
-                                    color: Colors.white.withOpacity(0.19),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Container(
-                                    alignment: Alignment.center,
-                                    child: const Text(
-                                      '举报',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                          decoration: TextDecoration.none,
-                                          fontSize: 12.0,
-                                          fontWeight: FontWeight.w400,
-                                          color: Colors.white),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
-                ),
+                  SwitchButton(
+                    "朝上",
+                    (isTurnOn) {
+                      setState(() {
+                        params["朝上"] = !isTurnOn;
+                      });
+                    },
+                    isTurnOn: testIsUpward,
+                  ),
+                  slider("偏移", pointerBias, 0, 1),
+                  slider("顶点圆角", peakRadius, 0, 20),
+                  slider("指针宽度", pointerWidth, 0, 50),
+                  slider("指针高度", pointerHeight, 0, 40),
+                  slider("边框圆角", radius, 0, 50),
+                  slider("边框宽度", strokeWidth, 0, 10),
+                  slider("宽", width, 0, 300),
+                  slider("高", height, 0, 200),
+                ],
               ),
-              SwitchButton(
-                "朝上",
-                (isTurnOn) {
-                  setState(() {
-                    params["朝上"] = !isTurnOn;
-                  });
-                },
-                isTurnOn: testIsUpward,
-              ),
-              slider("偏移", pointerBias, 0, 1),
-              slider("顶点圆角", peakRadius, 0, 20),
-              slider("指针宽度", pointerWidth, 0, 50),
-              slider("指针高度", pointerHeight, 0, 40),
-              slider("边框圆角", radius, 0, 50),
-              slider("边框宽度", strokeWidth, 0, 10),
-              slider("宽", width, 0, 300),
-              slider("高", height, 0, 200),
-            ],
-          ),
+            ),
+            ...frontChildren,
+          ],
         ),
       ),
     );
@@ -480,7 +494,8 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                   specifyY: rngDouble(500),
                   flag: DanmuFlag.scroll |
                       DanmuFlag.clickable |
-                      DanmuFlag.specify,
+                      DanmuFlag.specify |
+                      DanmuFlag.front,
                 );
               });
               danmuController.addAllDanmu(list);

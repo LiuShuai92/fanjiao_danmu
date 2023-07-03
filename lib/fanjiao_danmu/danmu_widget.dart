@@ -9,6 +9,7 @@ class DanmuWidget extends StatefulWidget{
   final DanmuController danmuController;
   final double width;
   final double height;
+  final Function(List<Widget> frontChildren)? buildFrontChildren;
 
   Positioned? Function<T extends DanmuModel>(DanmuItem<T>?)? tooltip;
 
@@ -18,6 +19,7 @@ class DanmuWidget extends StatefulWidget{
     required this.height,
     required this.danmuController,
     this.tooltip,
+    this.buildFrontChildren,
   })  : assert(danmuController != null),
         super(key: key);
 
@@ -92,7 +94,11 @@ class _DanmuWidgetState extends State<DanmuWidget>
       }
     }
     if (frontChildren.isNotEmpty) {
-      children.addAll(frontChildren);
+      if(widget.buildFrontChildren != null){
+        widget.buildFrontChildren!.call(frontChildren);
+      }else {
+        children.addAll(frontChildren);
+      }
     }
     if (selected != null) {
       children.add(selected);
