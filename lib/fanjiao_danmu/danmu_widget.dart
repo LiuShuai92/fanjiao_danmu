@@ -9,7 +9,7 @@ class DanmuWidget extends StatefulWidget{
   final DanmuController danmuController;
   final double width;
   final double height;
-  final Function(List<Widget> frontChildren)? buildFrontChildren;
+  final Function(List<Widget> otherChildren)? buildOtherChildren;
 
   Positioned? Function<T extends DanmuModel>(DanmuItem<T>?)? tooltip;
 
@@ -19,7 +19,7 @@ class DanmuWidget extends StatefulWidget{
     required this.height,
     required this.danmuController,
     this.tooltip,
-    this.buildFrontChildren,
+    this.buildOtherChildren,
   })  : assert(danmuController != null),
         super(key: key);
 
@@ -53,6 +53,7 @@ class _DanmuWidgetState extends State<DanmuWidget>
     var tooltipWidget = widget.tooltip?.call(danmuController.selected);
     List<Widget> children = [];
     List<Widget> frontChildren = [];
+    List<Widget> otherChildren = [];
     Positioned? selected;
     for (var danmuItem in danmuController.danmuItems) {
       Widget itemWidget;
@@ -82,23 +83,26 @@ class _DanmuWidgetState extends State<DanmuWidget>
             margin: model.margin,
           ),
         );
+        if (danmuItem.flag.isOtherStage) {
+          otherChildren.add(positioned);
+          continue;
+        }
         if (danmuItem.isSelected) {
           selected = positioned;
           continue;
         }
-        if (danmuItem.flag.isFront) {
+        if (danmuItem.flag.isOverlay) {
           frontChildren.add(positioned);
           continue;
         }
         children.add(positioned);
       }
     }
+    if (otherChildren.isNotEmpty && widget.buildOtherChildren != null) {
+      widget.buildOtherChildren!.call(otherChildren);
+    }
     if (frontChildren.isNotEmpty) {
-      if(widget.buildFrontChildren != null){
-        widget.buildFrontChildren!.call(frontChildren);
-      }else {
-        children.addAll(frontChildren);
-      }
+      children.addAll(frontChildren);
     }
     if (selected != null) {
       children.add(selected);

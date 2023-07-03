@@ -35,7 +35,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
   bool isPlaying = false;
   int id = 0;
   String selectedText = '';
-  List<Widget> frontChildren = [];
+  List<Widget> otherChildren = [];
 
   GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
 
@@ -115,10 +115,10 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                           height: 300,
                           danmuController: danmuController,
                           tooltip: tooltip,
-                          buildFrontChildren: (children) {
+                          buildOtherChildren: (children) {
                             Future.delayed(Duration.zero,(){
                               setState(() {
-                                frontChildren = children;
+                                otherChildren = children;
                               });
                             });
                           },
@@ -274,7 +274,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                 ],
               ),
             ),
-            ...frontChildren,
+            ...otherChildren,
           ],
         ),
       ),
@@ -495,7 +495,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                   flag: DanmuFlag.scroll |
                       DanmuFlag.clickable |
                       DanmuFlag.specify |
-                      DanmuFlag.front,
+                      DanmuFlag.overlay,
                 );
               });
               danmuController.addAllDanmu(list);
@@ -718,7 +718,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
       ),
       spans: buildTestItemSpans(danmuItem.model.text, id, likeCount, true),
     );
-    danmuItem.flag = danmuItem.flag.removeClickable.addFront;
+    danmuItem.flag = danmuItem.flag.removeClickable.addOverlay;
     var time = danmuItem.simulation.duration / 2;
     danmuController.updateItem(danmuItem, danmuModel, time: time);
   }

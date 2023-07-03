@@ -476,8 +476,11 @@ extension DanmuFlag on int {
   ///指定y坐标
   static const int specify = 1 << 9;
 
-  ///显示在前面的
-  static const int front = 1 << 10;
+  ///覆盖在上面的
+  static const int overlay = 1 << 10;
+
+  ///显示在其他Stack上的
+  static const int otherStage = 1 << 11;
 
   ///全部不允许
   static const int none = 0;
@@ -493,7 +496,8 @@ extension DanmuFlag on int {
       DanmuFlag.specify |
       DanmuFlag.collisionFree |
       DanmuFlag.clickable |
-      DanmuFlag.front;
+      DanmuFlag.overlay |
+      DanmuFlag.otherStage;
 
   bool pick(int flag) => this & flag != none;
 
@@ -525,7 +529,9 @@ extension DanmuFlag on int {
 
   bool get isSpecify => contain(specify);
 
-  bool get isFront => contain(front);
+  bool get isOverlay => contain(overlay);
+
+  bool get isOtherStage => contain(otherStage);
 
   int get addScroll => add(scroll);
 
@@ -547,7 +553,9 @@ extension DanmuFlag on int {
 
   int get addSpecify => add(specify);
 
-  int get addFront => add(front);
+  int get addOverlay => add(overlay);
+
+  int get addOtherStage => add(otherStage);
 
   int get removeScroll => remove(scroll);
 
@@ -569,7 +577,9 @@ extension DanmuFlag on int {
 
   int get removeSpecify => remove(specify);
 
-  int get removeFront => remove(front);
+  int get removeOverlay => remove(overlay);
+
+  int get removeOtherStage => remove(otherStage);
 
   int get changeScroll => change(scroll);
 
@@ -591,5 +601,7 @@ extension DanmuFlag on int {
 
   int get changeSpecify => change(specify);
 
-  int get changeFront => change(front);
+  int get changeOverlay => change(overlay);
+
+  int get changeOtherStage => change(otherStage);
 }
