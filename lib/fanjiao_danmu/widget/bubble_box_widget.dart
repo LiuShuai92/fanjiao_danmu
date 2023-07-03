@@ -162,26 +162,7 @@ class RenderBubbleBox extends RenderProxyBox {
   }
 
   @override
-  void setupParentData(covariant RenderObject child) {
-    print('LiuShuai: setupParentData');
-    super.setupParentData(child);
-  }
-
-  @override
-  void layout(Constraints constraints, {bool parentUsesSize = false}) {
-    print('LiuShuai: layout');
-    super.layout(constraints, parentUsesSize: parentUsesSize);
-  }
-
-  @override
-  void performLayout() {
-    print('LiuShuai: performLayout');
-    super.performLayout();
-  }
-
-  @override
   void paint(PaintingContext context, Offset offset) {
-    print('LiuShuai: paint');
     if (child == null) {
       return;
     }
