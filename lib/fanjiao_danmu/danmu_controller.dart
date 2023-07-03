@@ -18,7 +18,6 @@ class DanmuController<T extends DanmuModel>
   /// return true 选中并暂停这条弹幕
   final bool Function(DanmuItem<T>?, Offset)? onTap;
   final List<DanmuItem<T>> _tempList = <DanmuItem<T>>[];
-  final ImageProvider? praiseImageProvider;
   Duration startTime = Duration.zero;
   Duration endTime = const Duration(hours: 24);
   Queue<DanmuItem<T>> danmuItems = Queue<DanmuItem<T>>();
@@ -105,7 +104,6 @@ class DanmuController<T extends DanmuModel>
     required this.adapter,
     this.maxSize = 100,
     this.onTap,
-    this.praiseImageProvider,
     int filter = DanmuFlag.all,
   }): _filter = filter;
 

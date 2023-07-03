@@ -51,7 +51,6 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
               "https://www.fanjiao.co/h5/img/logo.12b2d5a6.png"),
         },
       ),
-      praiseImageProvider: const AssetImage("assets/images/icon_duck.png"),
       onTap: (DanmuItem? danmuItem, Offset position) {
         if (danmuController.isSelected) {
           danmuController.clearSelection(true);
