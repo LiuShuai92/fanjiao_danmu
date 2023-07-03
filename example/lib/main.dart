@@ -690,7 +690,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
       ),
       spans: buildTestItemSpans(danmuItem.model.text, id, likeCount, true),
     );
-    danmuItem.flag = danmuItem.flag.removeClickable;
+    danmuItem.flag = danmuItem.flag.removeClickable.addFront;
     var time = danmuItem.simulation.duration / 2;
     danmuController.updateItem(danmuItem, danmuModel, time: time);
   }

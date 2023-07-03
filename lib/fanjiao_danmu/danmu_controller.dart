@@ -478,6 +478,9 @@ extension DanmuFlag on int {
   ///指定y坐标
   static const int specify = 1 << 9;
 
+  ///显示在前面的
+  static const int front = 1 << 10;
+
   ///全部不允许
   static const int none = 0;
 
@@ -491,7 +494,8 @@ extension DanmuFlag on int {
       DanmuFlag.announcement |
       DanmuFlag.specify |
       DanmuFlag.collisionFree |
-      DanmuFlag.clickable;
+      DanmuFlag.clickable |
+      DanmuFlag.front;
 
   bool pick(int flag) => this & flag != none;
 
@@ -523,6 +527,8 @@ extension DanmuFlag on int {
 
   bool get isSpecify => contain(specify);
 
+  bool get isFront => contain(front);
+
   int get addScroll => add(scroll);
 
   int get addTop => add(top);
@@ -542,6 +548,8 @@ extension DanmuFlag on int {
   int get addClickable => add(clickable);
 
   int get addSpecify => add(specify);
+
+  int get addFront => add(front);
 
   int get removeScroll => remove(scroll);
 
@@ -563,6 +571,8 @@ extension DanmuFlag on int {
 
   int get removeSpecify => remove(specify);
 
+  int get removeFront => remove(front);
+
   int get changeScroll => change(scroll);
 
   int get changeTop => change(top);
@@ -582,4 +592,6 @@ extension DanmuFlag on int {
   int get changeClickable => change(clickable);
 
   int get changeSpecify => change(specify);
+
+  int get changeFront => change(front);
 }

@@ -50,6 +50,7 @@ class _DanmuWidgetState extends State<DanmuWidget>
     var danmuController = widget.danmuController;
     var tooltipWidget = widget.tooltip?.call(danmuController.selected);
     List<Widget> children = [];
+    List<Widget> frontChildren = [];
     Positioned? selected;
     for (var danmuItem in danmuController.danmuItems) {
       Widget itemWidget;
@@ -83,8 +84,15 @@ class _DanmuWidgetState extends State<DanmuWidget>
           selected = positioned;
           continue;
         }
+        if (danmuItem.flag.isFront) {
+          frontChildren.add(positioned);
+          continue;
+        }
         children.add(positioned);
       }
+    }
+    if (frontChildren.isNotEmpty) {
+      children.addAll(frontChildren);
     }
     if (selected != null) {
       children.add(selected);
