@@ -140,12 +140,9 @@ class DanmuItem<T extends DanmuModel> {
       var textStyle = span!.style;
       if (textStyle != null) {
         var textStrokeSpanStyle = textStyle.copyWith(
-            fontWeight: FontWeight.values[math.min(
-                textStyle.fontWeight?.index ?? 0 + 1,
-                FontWeight.values.length - 1)],
             foreground: Paint()
               ..style = PaintingStyle.stroke
-              ..strokeWidth = 1
+              ..strokeWidth = _model.strokeWidth * 2
               ..color = Colors.black);
         textStrokeSpan = _model.spans.isEmpty
             ? TextSpan(text: _model.text, style: textStrokeSpanStyle)

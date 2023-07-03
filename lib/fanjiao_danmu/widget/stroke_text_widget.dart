@@ -82,19 +82,10 @@ class _StrokeTextPainter extends CustomPainter {
   })  : _painter = Paint()..color = Colors.black.withOpacity(opacity),
         textPainter = TextPainter(textDirection: TextDirection.ltr),
         textStrokePainter = TextPainter(textDirection: TextDirection.ltr) {
-    textSpan = TextSpan(text: text, style: textStyle);
-    textPainter
-      ..text = textSpan
-      ..textScaleFactor = textScaleFactor
-      ..layout();
-
     var textStrokeSpanStyle = textStyle.copyWith(
-        fontWeight: FontWeight.values[math.min(
-            (textStyle.fontWeight?.index ?? 0) + 1,
-            FontWeight.values.length - 1)],
         foreground: Paint()
           ..style = PaintingStyle.stroke
-          ..strokeWidth = strokeWidth * textScaleFactor
+          ..strokeWidth = strokeWidth * textScaleFactor * 2
           ..color = strokeColor);
     TextSpan textStrokeSpan = TextSpan(text: text, style: textStrokeSpanStyle);
 
@@ -117,11 +108,13 @@ class _StrokeTextPainter extends CustomPainter {
         text: text,
         style: textStyle.copyWith(foreground: Paint()..shader = shader),
       );
-      textPainter
-        ..text = textSpan
-        ..textScaleFactor = textScaleFactor
-        ..layout();
+    } else {
+      textSpan = TextSpan(text: text, style: textStyle);
     }
+    textPainter
+      ..text = textSpan
+      ..textScaleFactor = textScaleFactor
+      ..layout();
   }
 
   @override

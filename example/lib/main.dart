@@ -305,6 +305,20 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
               onPressed: () {
                 danmuController.addDanmu(MyDanmuModel(
                   id: ++id,
+                  text: "biu~biu~biu~biu~biu~biu~biu~biu~",
+                  flag: DanmuFlag.scroll | DanmuFlag.collisionFree,
+                  decoration: const BoxDecoration(
+                    color: Color(0xCCFF9C6B),
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                    border: Border.fromBorderSide(BorderSide(
+                        color: Colors.white,
+                        width: 1,
+                        style: BorderStyle.solid)),
+                  ),
+                  startTime: danmuController.progress,
+                ));
+                /*danmuController.addDanmu(MyDanmuModel(
+                  id: ++id,
                   text: textController.text,
                   decoration: const BoxDecoration(
                     color: Color(0xCCFF9C6B),
@@ -316,7 +330,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                   ),
                   startTime: danmuController.progress,
                   textStyle: rngTextStyle,
-                ));
+                ));*/
               },
               child: const Text("发送"),
             ),
