@@ -69,6 +69,13 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
         }
         return result;
       },
+      buildOtherChildren: (children) {
+        Future.delayed(Duration.zero,(){
+          setState(() {
+            otherChildren = children;
+          });
+        });
+      },
     );
 
     danmuController.setDuration(duration);
@@ -115,13 +122,6 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                           height: 300,
                           danmuController: danmuController,
                           tooltip: tooltip,
-                          buildOtherChildren: (children) {
-                            Future.delayed(Duration.zero,(){
-                              setState(() {
-                                otherChildren = children;
-                              });
-                            });
-                          },
                         ),
                       ),
                     );
