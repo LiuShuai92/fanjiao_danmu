@@ -11,7 +11,7 @@ var rng = math.Random();
 
 TextStyle get rngTextStyle => TextStyle(
       color: rngColor,
-      fontSize: 18,
+      fontSize: 16,
       fontWeight: FontWeight.w500,
       decoration: TextDecoration.none,
     );

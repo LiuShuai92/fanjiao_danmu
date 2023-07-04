@@ -15,7 +15,7 @@ class StrokeTextWidget extends StatelessWidget {
     Key? key,
     this.textStyle = const TextStyle(
       color: Colors.white,
-      fontSize: 18,
+      fontSize: 16,
       fontWeight: FontWeight.w500,
       decoration: TextDecoration.none,
     ),
@@ -68,7 +68,7 @@ class _StrokeTextPainter extends CustomPainter {
     this.text, {
     this.textStyle = const TextStyle(
       color: Colors.white,
-      fontSize: 18,
+      fontSize: 16,
       fontWeight: FontWeight.w500,
       decoration: TextDecoration.none,
     ),
