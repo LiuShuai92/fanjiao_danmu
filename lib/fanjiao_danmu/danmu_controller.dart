@@ -121,6 +121,7 @@ class DanmuController<T extends DanmuModel>
   clearDanmu([int filter = DanmuFlag.all]) {
     danmuItems.removeWhere((element) => filter.pick(element.flag));
     adapter.clear(filter);
+    buildOtherChildren?.call([]);
     selected = null;
     notifyListeners();
   }
@@ -228,7 +229,6 @@ class DanmuController<T extends DanmuModel>
       }
       selected = null;
     }
-    buildOtherChildren?.call([]);
     notifyListeners();
   }
 
