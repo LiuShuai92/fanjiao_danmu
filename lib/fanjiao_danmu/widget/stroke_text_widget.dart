@@ -25,7 +25,7 @@ class StrokeTextWidget extends StatelessWidget {
     double opacity = 1,
     BoxDecoration? decoration,
     EdgeInsets padding = EdgeInsets.zero,
-    Color strokeColor = Colors.black,
+    Color strokeColor = const Color(0x80000000),
   })  : _strokeTextPainter = _StrokeTextPainter(
           text,
           textStyle: textStyle,
