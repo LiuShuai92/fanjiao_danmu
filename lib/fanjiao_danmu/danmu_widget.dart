@@ -5,7 +5,7 @@ import 'danmu_controller.dart';
 import 'danmu_item.dart';
 import 'danmu_model.dart';
 
-class DanmuWidget extends StatefulWidget{
+class DanmuWidget extends StatefulWidget {
   final DanmuController danmuController;
   final double width;
   final double height;
@@ -32,8 +32,8 @@ class _DanmuWidgetState extends State<DanmuWidget>
   @override
   void initState() {
     super.initState();
-    widget.danmuController.setup(context, this,
-        Rect.fromLTRB(0, 0, widget.width, widget.height));
+    widget.danmuController
+        .setup(context, this, Rect.fromLTRB(0, 0, widget.width, widget.height));
     widget.danmuController.addListener(() {
       setState(() {});
     });
@@ -62,8 +62,7 @@ class _DanmuWidgetState extends State<DanmuWidget>
           height: danmuItem.size.height,
         );
       } else {
-        itemWidget =
-            Text.rich(danmuItem.span!);
+        itemWidget = Text.rich(danmuItem.span!);
       }
       var model = danmuItem.model;
       if (model.startTime <= danmuController.progress &&
@@ -76,7 +75,7 @@ class _DanmuWidgetState extends State<DanmuWidget>
             child: itemWidget,
             decoration: model.decoration,
             foregroundDecoration: model.foregroundDecoration,
-            alignment: model.alignment,
+            alignment: model.alignment ?? Alignment.center,
             padding: model.padding,
             margin: model.margin,
           ),

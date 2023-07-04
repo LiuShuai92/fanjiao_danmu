@@ -624,7 +624,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                       "assets/images/ic_jy.png",
                       width: 30,
                       height: 36,
-                      fit: BoxFit.fitWidth,
+                      fit: BoxFit.contain,
                     ),
             ),
           ),

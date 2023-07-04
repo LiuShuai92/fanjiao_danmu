@@ -107,7 +107,7 @@ class DanmuController<T extends DanmuModel>
     this.onTap,
     this.buildOtherChildren,
     int filter = DanmuFlag.all,
-  }): _filter = filter;
+  }) : _filter = filter;
 
   setDuration(
     Duration duration, {
@@ -268,61 +268,70 @@ class DanmuController<T extends DanmuModel>
     }
   }
 
-  _addEntry(T model) {
+  bool _addEntry(T model) {
     if (model.spans.isEmpty &&
         model.text.isEmpty &&
         model.imageProvider == null) {
-      return;
+      return false;
     }
     if (model.startTime > endTime) {
-      return;
+      return false;
     }
     if (danmuItems.length > maxSize) {
-      return;
-    }
-    for (var element in danmuItems) {
-      if (element.model.id == model.id) {
-        return;
-      }
-      if (!filter.isRepeated) {
-        if (element.model.plainText == model.plainText) {
-          return;
-        }
-      }
+      return false;
     }
     if (filter.contain(model.flag)) {
+      for (var element in danmuItems) {
+        if (element.model.id == model.id) {
+          return false;
+        }
+        if (!filter.isRepeated) {
+          if (element.model.plainText == model.plainText) {
+            return false;
+          }
+        }
+      }
       var item = adapter.getItem(model);
       if (item != null) {
         item.position = item.simulation
             .offset((progress - item.model.startTime).inMicrosecondsPerSecond);
         danmuItems.add(item);
       }
+      return item != null;
+    } else {
+      return false;
     }
   }
 
   ///最好按照时间顺序插入弹幕
-  addDanmu(T model) {
+  bool addDanmu(T model) {
     assert(isEnable);
-    _addEntry(model);
+    var result = _addEntry(model);
     if (danmuItems.isNotEmpty && isAnimating && _status == DanmuStatus.idle) {
       _status = _idleBeforeStatus;
       _checkStatusChanged();
     }
+    return result;
   }
 
   ///传入的列表最好按照时间顺序排序
-  addAllDanmu(Iterable<T> models) {
+  bool addAllDanmu(Iterable<T> models) {
     assert(isEnable);
-    if (danmuItems.length > maxSize) {
-      return;
-    }
+    bool result = false;
     for (var model in models) {
-      _addEntry(model);
+      bool t = _addEntry(model);
+      if(t){
+        result = true;
+      }
+      if (danmuItems.length > maxSize) {
+        return result;
+      }
     }
     if (danmuItems.isNotEmpty && isAnimating && _status == DanmuStatus.idle) {
       _status = _idleBeforeStatus;
       _checkStatusChanged();
     }
+    return result;
   }
 
   _internalSetValue(Duration progress) {
