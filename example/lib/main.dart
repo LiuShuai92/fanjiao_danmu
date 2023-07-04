@@ -651,6 +651,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
     Future.delayed(const Duration(seconds: 3), () {
       danmuItem.play();
     });
+    danmuItem.flag = danmuItem.flag.removeClickable.addOverlay;
     var danmuModel = model.copyWith(
       likeCount: likeCount,
       isLiked: true,
@@ -677,7 +678,6 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
       ),
       spans: buildTestItemSpans(danmuItem.model.text, id, likeCount, true),
     );
-    danmuItem.flag = danmuItem.flag.removeClickable.addOverlay;
     var time = danmuItem.simulation.duration / 2;
     danmuController.updateItem(danmuItem, danmuModel, time: time);
   }
