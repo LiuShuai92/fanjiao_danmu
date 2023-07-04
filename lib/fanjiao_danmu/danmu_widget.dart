@@ -96,7 +96,7 @@ class _DanmuWidgetState extends State<DanmuWidget>
         children.add(positioned);
       }
     }
-    if (otherChildren.isNotEmpty && danmuController.buildOtherChildren != null) {
+    if (danmuController.buildOtherChildren != null) {
       danmuController.buildOtherChildren!.call(otherChildren);
     }
     if (frontChildren.isNotEmpty) {

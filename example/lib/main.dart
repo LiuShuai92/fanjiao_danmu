@@ -455,7 +455,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
           getButton(
             "全屏弹幕",
             () {
-              danmuController.clearDanmu(DanmuFlag.specify);
+              danmuController.clearDanmu(DanmuFlag.otherStage);
               var list = globalDanmus("来啦来啦！！期待下一集！", danmuController.progress);
               danmuController.addAllDanmu(list);
             },
