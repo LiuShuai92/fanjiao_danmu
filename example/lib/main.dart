@@ -607,27 +607,25 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
       ),
       WidgetSpan(
         alignment: PlaceholderAlignment.middle,
-        child: Middle(
-          child: Container(
-            width: 30,
-            height: 30,
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            alignment: Alignment.bottomCenter,
-            child: GestureDetector(
-              onTap: onTap,
-              child: OverflowBox(
-                maxWidth: 30,
-                maxHeight: 36,
-                alignment: Alignment.bottomCenter,
-                child: isJushou
-                    ? JushouDanmu()
-                    : Image.asset(
-                        "assets/images/ic_jy.png",
-                        width: 30,
-                        height: 36,
-                        fit: BoxFit.fitWidth,
-                      ),
-              ),
+        child: Container(
+          width: 30,
+          height: 30,
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          alignment: Alignment.bottomCenter,
+          child: GestureDetector(
+            onTap: onTap,
+            child: OverflowBox(
+              maxWidth: 30,
+              maxHeight: 36,
+              alignment: Alignment.bottomCenter,
+              child: isJushou
+                  ? JushouDanmu()
+                  : Image.asset(
+                      "assets/images/ic_jy.png",
+                      width: 30,
+                      height: 36,
+                      fit: BoxFit.fitWidth,
+                    ),
             ),
           ),
         ),
