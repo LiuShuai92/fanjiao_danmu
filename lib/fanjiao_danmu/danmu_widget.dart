@@ -35,7 +35,9 @@ class _DanmuWidgetState extends State<DanmuWidget>
     widget.danmuController
         .setup(context, this, Rect.fromLTRB(0, 0, widget.width, widget.height));
     widget.danmuController.addListener(() {
-      setState(() {});
+      if(mounted){
+        setState(() {});
+      }
     });
   }
 

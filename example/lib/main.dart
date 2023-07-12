@@ -1,19 +1,18 @@
 import 'dart:async';
 import 'dart:ui';
-import 'dart:math' as math;
 
 import 'package:fanjiao_danmu/fanjiao_danmu/adapter/fanjiao_danmu_adapter.dart';
 import 'package:fanjiao_danmu/fanjiao_danmu/danmu_tooltip.dart';
 import 'package:fanjiao_danmu/fanjiao_danmu/fanjiao_danmu.dart';
 import 'package:fanjiao_danmu/fanjiao_danmu/widget/bubble_box_widget.dart';
-import 'package:fanjiao_danmu/fanjiao_danmu/widget/middle_widget.dart';
-import 'package:fanjiao_danmu/fanjiao_danmu/widget/stroke_text_widget.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'jushou_danmu.dart';
 import 'my_danmu_model.dart';
+import 'my_thumb_shape.dart';
+import 'my_track_shape.dart';
 import 'utils.dart';
 
 void main() {
@@ -70,7 +69,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
         return result;
       },
       buildOtherChildren: (children) {
-        Future.delayed(Duration.zero,(){
+        Future.delayed(Duration.zero, () {
           setState(() {
             otherChildren = children;
           });
@@ -372,16 +371,26 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
             "$name: ${currentValue.toStringAsFixed(2)}",
             style: const TextStyle(color: Colors.black87),
           ),
-          Slider(
-            value: currentValue,
-            onChanged: (double value) {
-              setState(() {
-                params[name] = value;
-              });
-            },
-            label: params[name].toString(),
-            min: min,
-            max: max,
+          SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              overlayColor: const Color(0x1A836BFE),
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+              trackShape: const MyTrackShape(),
+              thumbShape: const MyThumbShape(),
+              trackHeight: 4,
+              rangeThumbShape: const RoundRangeSliderThumbShape(enabledThumbRadius: 8),
+            ),
+            child: Slider(
+              value: currentValue,
+              onChanged: (double value) {
+                setState(() {
+                  params[name] = value;
+                });
+              },
+              label: params[name].toString(),
+              min: min,
+              max: max,
+            ),
           ),
         ],
       ),

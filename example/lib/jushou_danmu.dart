@@ -38,7 +38,4 @@ class _JushouDanmuState extends State<JushouDanmu> {
       ],
     );
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }
