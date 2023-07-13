@@ -225,6 +225,12 @@ class DanmuItem<T extends DanmuModel> {
         widget = (widget as Middle);
         childSize = getWidgetSize(widget.child);
         break;
+      case GestureDetector:
+        widget = (widget as GestureDetector);
+        if (widget.child != null) {
+          childSize = getWidgetSize(widget.child!);
+        }
+        break;
       default:
         throw UnsupportedTypesError(runtimeType);
     }
