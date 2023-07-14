@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'dart:ui' hide TextStyle;
 
 import 'package:fanjiao_danmu/fanjiao_danmu/danmu_controller.dart';
 import 'package:fanjiao_danmu/fanjiao_danmu/widget/stroke_text_widget.dart';
@@ -54,13 +53,13 @@ List<MyDanmuModel> globalDanmus(String text, Duration progress){
               fontWeight: FontWeight.w800,
               fontFamily: "AlimamaShuHeiTi",
             ),
-            linearGradient: RawLinearGradient(
+            linearGradient: const RawLinearGradient(
               LocalPosition.topCenter,
               LocalPosition.bottomCenter,
               [
-                const Color(0xFFFFB3AF),
-                const Color(0xFFFFFCF0),
-                const Color(0xFFFFEA9D),
+                Color(0xFFFFB3AF),
+                Color(0xFFFFFCF0),
+                Color(0xFFFFEA9D),
               ],
               [0, 0.5, 1],
             ),
@@ -89,13 +88,13 @@ List<MyDanmuModel> globalDanmus(String text, Duration progress){
               fontWeight: FontWeight.w800,
               fontFamily: "AlimamaShuHeiTi",
             ),
-            linearGradient: RawLinearGradient(
+            linearGradient: const RawLinearGradient(
               LocalPosition.topCenter,
               LocalPosition.bottomCenter,
               [
-                const Color(0xFFEFFFA9),
-                const Color(0xFFFFFEF0),
-                const Color(0xFFC9F6FD),
+                Color(0xFFEFFFA9),
+                Color(0xFFFFFEF0),
+                Color(0xFFC9F6FD),
               ],
               [0, 0.5, 1],
             ),
@@ -124,13 +123,13 @@ List<MyDanmuModel> globalDanmus(String text, Duration progress){
               fontWeight: FontWeight.w800,
               fontFamily: "AlimamaShuHeiTi",
             ),
-            linearGradient: RawLinearGradient(
+            linearGradient: const RawLinearGradient(
               LocalPosition.topCenter,
               LocalPosition.bottomCenter,
               [
-                const Color(0xFFE1C6F8),
-                const Color(0xFFFFFBEA),
-                const Color(0xFFFFA8D9),
+                Color(0xFFE1C6F8),
+                Color(0xFFFFFBEA),
+                Color(0xFFFFA8D9),
               ],
               [0, 0.5, 1],
             ),
@@ -159,13 +158,13 @@ List<MyDanmuModel> globalDanmus(String text, Duration progress){
               fontWeight: FontWeight.w800,
               fontFamily: "AlimamaShuHeiTi",
             ),
-            linearGradient: RawLinearGradient(
+            linearGradient: const RawLinearGradient(
               LocalPosition.topCenter,
               LocalPosition.bottomCenter,
               [
-                const Color(0xFFE1C6F8),
-                const Color(0xFFFFFBEA),
-                const Color(0xFFFFA8D9),
+                Color(0xFFE1C6F8),
+                Color(0xFFFFFBEA),
+                Color(0xFFFFA8D9),
               ],
               [0, 0.5, 1],
             ),
@@ -194,13 +193,13 @@ List<MyDanmuModel> globalDanmus(String text, Duration progress){
               fontWeight: FontWeight.w800,
               fontFamily: "AlimamaShuHeiTi",
             ),
-            linearGradient: RawLinearGradient(
+            linearGradient: const RawLinearGradient(
               LocalPosition.topCenter,
               LocalPosition.bottomCenter,
               [
-                const Color(0xFFEFFFA9),
-                const Color(0xFFFFFEF0),
-                const Color(0xFFC9F6FD),
+                Color(0xFFEFFFA9),
+                Color(0xFFFFFEF0),
+                Color(0xFFC9F6FD),
               ],
               [0, 0.5, 1],
             ),
@@ -229,13 +228,13 @@ List<MyDanmuModel> globalDanmus(String text, Duration progress){
               fontWeight: FontWeight.w800,
               fontFamily: "AlimamaShuHeiTi",
             ),
-            linearGradient: RawLinearGradient(
+            linearGradient: const RawLinearGradient(
               LocalPosition.topCenter,
               LocalPosition.bottomCenter,
               [
-                const Color(0xFFFFB3AF),
-                const Color(0xFFFFFCF0),
-                const Color(0xFFFFEA9D),
+                Color(0xFFFFB3AF),
+                Color(0xFFFFFCF0),
+                Color(0xFFFFEA9D),
               ],
               [0, 0.5, 1],
             ),
@@ -264,13 +263,13 @@ List<MyDanmuModel> globalDanmus(String text, Duration progress){
               fontWeight: FontWeight.w800,
               fontFamily: "AlimamaShuHeiTi",
             ),
-            linearGradient: RawLinearGradient(
+            linearGradient: const RawLinearGradient(
               LocalPosition.topCenter,
               LocalPosition.bottomCenter,
               [
-                const Color(0xFFE1C6F8),
-                const Color(0xFFFFFBEA),
-                const Color(0xFFFFA8D9),
+                Color(0xFFE1C6F8),
+                Color(0xFFFFFBEA),
+                Color(0xFFFFA8D9),
               ],
               [0, 0.5, 1],
             ),
