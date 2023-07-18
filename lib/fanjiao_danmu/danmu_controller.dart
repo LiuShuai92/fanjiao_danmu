@@ -422,7 +422,6 @@ class DanmuController<T extends DanmuModel>
       }
       return true;
     }());
-    clearDanmu();
     _ticker!.dispose();
     _ticker = null;
     _lastElapsedDuration = null;
@@ -430,6 +429,7 @@ class DanmuController<T extends DanmuModel>
     clearTickListeners();
     clearStatusListeners();
     clearListeners();
+    clearDanmu();
     super.dispose();
   }
 }
