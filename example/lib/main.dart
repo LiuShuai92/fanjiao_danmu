@@ -1,10 +1,11 @@
 import 'dart:async';
-import 'dart:ui';
+import 'dart:ui' as ui;
 
 import 'package:fanjiao_danmu/fanjiao_danmu/adapter/fanjiao_danmu_adapter.dart';
 import 'package:fanjiao_danmu/fanjiao_danmu/danmu_tooltip.dart';
 import 'package:fanjiao_danmu/fanjiao_danmu/fanjiao_danmu.dart';
 import 'package:fanjiao_danmu/fanjiao_danmu/widget/bubble_box_widget.dart';
+import 'package:fanjiao_danmu/fanjiao_danmu/widget/stroke_text_widget.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -93,6 +94,13 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
     double width = params["宽"] ?? 160;
     double height = params["高"] ?? 36;
     bool testIsUpward = params["朝上"] ?? true;
+    double leading = params["leading"] ?? 1;
+    double textLineHeight = params["行高"] ?? 1.5;
+    double fontSize = params["字号"] ?? 16;
+    double maxWidth = params["最大宽度"] ?? 200;
+    int maxLines = params["最大行数"] ?? 3;
+    double borderPadding = params["边距"] ?? 4;
+
     return MaterialApp(
       home: Scaffold(
         key: scaffoldKey,
@@ -109,8 +117,8 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                   LayoutBuilder(builder: (context, constraints) {
                     var maxWidth = constraints.maxWidth;
                     if (maxWidth == 0) {
-                      maxWidth =
-                          window.physicalSize.width / window.devicePixelRatio;
+                      maxWidth = ui.window.physicalSize.width /
+                          ui.window.devicePixelRatio;
                     }
                     return Container(
                       color: Colors.greenAccent,
@@ -270,6 +278,39 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                   slider("边框宽度", strokeWidth, 0, 10),
                   slider("宽", width, 0, 300),
                   slider("高", height, 0, 200),
+                  Container(
+                    height: 500,
+                    alignment: Alignment.center,
+                    child: StrokeTextWidget(
+                      '1 要画在文本附"近的装"饰(如下划线)要画在asdasdasdasdasdasd文本附"近的装"饰(如下划线)要画在文本附"近的装"饰(如下划线)要画在文本附"近的装"饰(如下划线)',
+                      textAlign: TextAlign.center,
+                      strutStyle: StrutStyle(
+                          // forceStrutHeight: true,
+                          height: textLineHeight,
+                          leading: leading),
+                      strokeColor: const Color(0xFF836BFF),
+                      textScaleFactor: 1.0,
+                      strokeWidth: 1,
+                      textDecorationPadding: borderPadding,
+                      maxLines: maxLines.toInt(),
+                      maxWidth: maxWidth,
+                      textDecoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(6.0),
+                          color: const Color(0XFF000000).withOpacity(0.4)),
+                      textStyle: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: fontSize,
+                        decoration: TextDecoration.none,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  slider("字号", fontSize, 5, 40),
+                  slider("行高", textLineHeight, 0, 5),
+                  slider("leading", leading, 0, 5),
+                  slider("最大宽度", maxWidth, 50, 300),
+                  slider("最大行数", maxLines, 1, 10),
+                  slider("边距", borderPadding, 0, 10),
                 ],
               ),
             ),
@@ -318,7 +359,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
               onPressed: () {
                 danmuController.addDanmu(MyDanmuModel(
                   id: ++id,
-                  text: "biu~biu~biu~biu~biu~biu~biu~biu~",
+                  text: textController.text,
                   flag: DanmuFlag.scroll | DanmuFlag.collisionFree,
                   decoration: const BoxDecoration(
                     color: Color(0xCCFF9C6B),
@@ -330,20 +371,6 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                   ),
                   startTime: danmuController.progress,
                 ));
-                /*danmuController.addDanmu(MyDanmuModel(
-                  id: ++id,
-                  text: textController.text,
-                  decoration: const BoxDecoration(
-                    color: Color(0xCCFF9C6B),
-                    borderRadius: BorderRadius.all(Radius.circular(12)),
-                    border: Border.fromBorderSide(BorderSide(
-                        color: Colors.white,
-                        width: 1,
-                        style: BorderStyle.solid)),
-                  ),
-                  startTime: danmuController.progress,
-                  textStyle: rngTextStyle,
-                ));*/
               },
               child: const Text("发送"),
             ),
@@ -355,11 +382,11 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
 
   Map<String, dynamic> params = {};
 
-  Widget slider(String name, double initialValue, double min, double max) {
-    var currentValue = params[name];
+  Widget slider<T extends num>(String name, T initialValue, double min, double max) {
+    double? currentValue = params[name]?.toDouble();
     if (currentValue == null) {
       params[name] = initialValue;
-      currentValue = initialValue;
+      currentValue = initialValue.toDouble();
     }
     return Padding(
       padding: const EdgeInsets.all(8.0),
@@ -378,13 +405,18 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
               trackShape: const MyTrackShape(),
               thumbShape: const MyThumbShape(),
               trackHeight: 4,
-              rangeThumbShape: const RoundRangeSliderThumbShape(enabledThumbRadius: 8),
+              rangeThumbShape:
+                  const RoundRangeSliderThumbShape(enabledThumbRadius: 8),
             ),
             child: Slider(
               value: currentValue,
               onChanged: (double value) {
                 setState(() {
-                  params[name] = value;
+                  if(initialValue is int){
+                    params[name] = value.toInt();
+                  }else {
+                    params[name] = value;
+                  }
                 });
               },
               label: params[name].toString(),
