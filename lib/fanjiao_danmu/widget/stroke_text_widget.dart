@@ -24,7 +24,7 @@ class StrokeTextWidget extends StatelessWidget {
     double textScaleFactor = 1,
     double strokeWidth = 1,
     double minWidth = 0,
-    double maxWidth = 1,
+    double maxWidth = double.infinity,
     double opacity = 1,
     double textDecorationPadding = 0,
     int? maxLines,
