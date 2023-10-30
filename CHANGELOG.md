@@ -2,6 +2,10 @@
 
 ## 0.5.3
 
+* 修正StrokeTextWidget maxWidth 默认值为double.infinity
+
+## 0.5.2
+
 * StrokeTextWidget增加给每行文字设置背景的功能
 
 ## 0.5.1
