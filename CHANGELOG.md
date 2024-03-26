@@ -1,5 +1,9 @@
 # 更新日志
 
+## 0.5.4
+
+* buildOtherChildren放到build之前
+
 ## 0.5.3
 
 * 修正StrokeTextWidget maxWidth 默认值为double.infinity
