@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:fanjiao_danmu/fanjiao_danmu/widget/bubble_box_widget.dart';
 import 'package:flutter/widgets.dart';
@@ -16,7 +17,7 @@ mixin FanjiaoDanmuTooltipMixin {
 
   bool get isUpward => _isUpward ?? true;
 
-  Size get menuSize => const Size(160, 36);
+  Size get tooltipSize;
 
   Widget get tooltipContent;
 
@@ -26,16 +27,16 @@ mixin FanjiaoDanmuTooltipMixin {
         danmuRect.right < stageRect.left + danmuRect.height) {
       return false;
     }
-    x = (position.dx - menuSize.width / 2)
-        .clamp(0, stageRect.right - menuSize.width);
-    _isUpward = danmuRect.bottom < stageRect.bottom - menuSize.height;
+    x = (position.dx - tooltipSize.width / 2)
+        .clamp(0, stageRect.right - tooltipSize.width);
+    _isUpward = danmuRect.bottom < stageRect.bottom - tooltipSize.height;
     if (isUpward) {
       y = danmuRect.bottom;
     } else {
-      y = danmuRect.top - menuSize.height;
+      y = danmuRect.top - tooltipSize.height;
     }
     Offset offset = Offset(x, y);
-    _menuRect = offset & menuSize;
+    _menuRect = offset & tooltipSize;
     var lowerLimit = math.max(danmuRect.left, stageRect.left) + 4;
     var upperLimit = math.min(danmuRect.right, stageRect.right) - 4;
     if (lowerLimit > upperLimit) {

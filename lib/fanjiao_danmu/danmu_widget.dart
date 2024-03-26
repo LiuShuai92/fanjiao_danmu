@@ -28,6 +28,9 @@ class DanmuWidget extends StatefulWidget {
 class _DanmuWidgetState extends State<DanmuWidget>
     with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   TapUpDetails? _tapDownDetails;
+  List<Widget> children = [];
+  List<Widget> frontChildren = [];
+  List<Widget> otherChildren = [];
 
   @override
   void initState() {
@@ -35,6 +38,7 @@ class _DanmuWidgetState extends State<DanmuWidget>
     widget.danmuController
         .setup(context, this, Rect.fromLTRB(0, 0, widget.width, widget.height));
     widget.danmuController.addListener(() {
+      update();
       if(mounted){
         setState(() {});
       }
@@ -50,10 +54,33 @@ class _DanmuWidgetState extends State<DanmuWidget>
   @override
   Widget build(BuildContext context) {
     var danmuController = widget.danmuController;
+    return SizedBox(
+      width: widget.width,
+      height: widget.height,
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTapUp: (details) {
+          _tapDownDetails = details;
+        },
+        onTap: () {
+          if (_tapDownDetails != null) {
+            danmuController.tapPosition(_tapDownDetails!.localPosition);
+          }
+        },
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: children,
+        ),
+      ),
+    );
+  }
+
+  void update() {
+    DanmuController<DanmuModel> danmuController = widget.danmuController;
+    children.clear();
+    frontChildren.clear();
+    otherChildren.clear();
     var tooltipWidget = widget.tooltip?.call(danmuController.selected);
-    List<Widget> children = [];
-    List<Widget> frontChildren = [];
-    List<Widget> otherChildren = [];
     Positioned? selected;
     for (var danmuItem in danmuController.danmuItems) {
       Widget itemWidget;
@@ -109,30 +136,13 @@ class _DanmuWidgetState extends State<DanmuWidget>
     if (tooltipWidget != null) {
       children.add(tooltipWidget);
     }
-    return SizedBox(
-      width: widget.width,
-      height: widget.height,
-      child: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTapUp: (details) {
-          _tapDownDetails = details;
-        },
-        onTap: () {
-          if (_tapDownDetails != null) {
-            danmuController.tapPosition(_tapDownDetails!.localPosition);
-          }
-        },
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: children,
-        ),
-      ),
-    );
   }
 
   @override
   bool get wantKeepAlive => true;
 }
+
+
 
 /*class _FanjiaoDanmuPainter extends CustomPainter {
   final BuildContext context;

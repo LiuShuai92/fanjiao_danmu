@@ -1,7 +1,8 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
-class MyTrackShape extends SliderTrackShape with BaseSliderTrackShape {
+class MyTrackShape extends RoundedRectSliderTrackShape
+    with BaseSliderTrackShape {
   const MyTrackShape();
 
   @override
@@ -13,20 +14,14 @@ class MyTrackShape extends SliderTrackShape with BaseSliderTrackShape {
     required Animation<double> enableAnimation,
     required TextDirection textDirection,
     required Offset thumbCenter,
+    Offset? secondaryOffset,
     bool isDiscrete = false,
     bool isEnabled = false,
     double additionalActiveTrackHeight = 2,
   }) {
-    assert(context != null);
-    assert(offset != null);
-    assert(parentBox != null);
-    assert(sliderTheme != null);
     assert(sliderTheme.disabledInactiveTrackColor != null);
     assert(sliderTheme.inactiveTrackColor != null);
     assert(sliderTheme.thumbShape != null);
-    assert(enableAnimation != null);
-    assert(textDirection != null);
-    assert(thumbCenter != null);
     if (sliderTheme.trackHeight == null || sliderTheme.trackHeight! <= 0) {
       return;
     }

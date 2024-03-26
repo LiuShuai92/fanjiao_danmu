@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/physics.dart';
 
 export 'horizontal_scroll_simulation.dart';
 export 'uniform_linear_simulation.dart';

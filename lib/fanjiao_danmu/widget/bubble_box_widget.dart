@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -126,6 +127,7 @@ class RenderBubbleBox extends RenderProxyBox {
     _strokeColor = value;
     _paintBorderPainter ??= Paint()..style = PaintingStyle.stroke;
     _paintBorderPainter!.color = value;
+    markNeedsPaint();
   }
 
   double get strokeWidth => _strokeWidth!;
@@ -137,6 +139,7 @@ class RenderBubbleBox extends RenderProxyBox {
     _strokeWidth = value;
     _paintBorderPainter ??= Paint()..style = PaintingStyle.stroke;
     _paintBorderPainter!.strokeWidth = value;
+    markNeedsPaint();
   }
 
   Paint get backgroundPainter => _backgroundPainter!;
@@ -148,6 +151,7 @@ class RenderBubbleBox extends RenderProxyBox {
     _color = value;
     _backgroundPainter ??= Paint();
     _backgroundPainter!.color = value;
+    markNeedsPaint();
   }
 
   Paint get painter => _painter!;
@@ -159,17 +163,18 @@ class RenderBubbleBox extends RenderProxyBox {
     _opacity = value;
     _painter ??= Paint();
     _painter!.color = Colors.black.withOpacity(value);
+    markNeedsPaint();
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child == null) {
+      // layer = null;
       return;
     }
     var rect = offset & size;
     final width = size.width;
     final height = size.height;
-    final Canvas canvas = context.canvas;
     pointerWidth = width < pointerWidth ? width : pointerWidth;
     pointerHeight = height < pointerHeight ? height : pointerHeight;
     if (pointerWidth < peakRadius) {
@@ -267,10 +272,14 @@ class RenderBubbleBox extends RenderProxyBox {
       ],
     );*/
     var inflateRect = rect.inflate(strokeWidth / 2);
+    Canvas canvas = context.canvas;
     canvas.saveLayer(inflateRect, painter);
     canvas.drawPath(innerPath, backgroundPainter);
     canvas.drawPath(path, paintBorderPainter);
     canvas.restore();
     context.paintChild(child!, offset);
   }
+
+  @override
+  bool get alwaysNeedsCompositing => child != null;
 }

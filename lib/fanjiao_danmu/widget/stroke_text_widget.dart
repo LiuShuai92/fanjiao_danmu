@@ -198,6 +198,48 @@ class _StrokeTextPainter extends CustomPainter {
   }
 }
 
+///计算字符串的长度如字符串的长度大于等于最大可显示的宽度，截取字符串
+List<StringData> getMaxWidthStrings(
+    String text, TextStyle textStyle, double contentMaxWidth,
+    {bool reverse = true}) {
+  var strArrays = <StringData>[];
+  if (text.isEmpty) {
+    return strArrays;
+  }
+  var textPainter = TextPainter(
+    text: TextSpan(text: text, style: textStyle),
+    textAlign: TextAlign.center,
+    textDirection: TextDirection.ltr,
+  );
+  textPainter.layout(maxWidth: contentMaxWidth);
+  final computeLineMetrics = textPainter.computeLineMetrics();
+  TextPosition prePosition = const TextPosition(offset: 0);
+  for (var line in computeLineMetrics) {
+    var textPosition = textPainter
+        .getPositionForOffset(Offset(line.left + line.width, line.baseline));
+    var string = text.substring(prePosition.offset, textPosition.offset);
+    strArrays.add(StringData(string, line.width));
+    prePosition = textPosition;
+  }
+  if (reverse) {
+    return strArrays.reversed.toList();
+  } else {
+    return strArrays.toList();
+  }
+}
+
+class StringData {
+  final double width;
+  final String text;
+
+  const StringData(this.text, this.width);
+
+  @override
+  String toString() {
+    return text;
+  }
+}
+
 class RawLinearGradient {
   final LocalPosition from;
   final LocalPosition to;

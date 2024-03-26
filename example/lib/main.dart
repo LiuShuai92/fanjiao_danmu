@@ -30,6 +30,11 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
   late DanmuController<MyDanmuModel> danmuController;
   late TextEditingController textController;
+  static const Map<String, ImageProvider<Object>> imageMap = {
+    '[举手]': AssetImage("assets/images/ic_jy.png"),
+    '[bilibili]': AssetImage("assets/images/bilibili.png"),
+    '[饭角]': NetworkImage("https://www.fanjiao.co/h5/img/logo.12b2d5a6.png"),
+  };
   Timer? timer;
   Duration duration = const Duration(seconds: 3780);
   bool isPlaying = false;
@@ -45,12 +50,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
     danmuController = DanmuController(
       adapter: FanjiaoDanmuAdapter(
         rowHeight: 50,
-        imageMap: {
-          '[举手]': const AssetImage("assets/images/ic_jy.png"),
-          '[bilibili]': const AssetImage("assets/images/bilibili.png"),
-          '[饭角]': const NetworkImage(
-              "https://www.fanjiao.co/h5/img/logo.12b2d5a6.png"),
-        },
+        imageMap: imageMap,
       ),
       onTap: (DanmuItem? danmuItem, Offset position) {
         if (danmuController.isSelected) {
@@ -77,9 +77,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
         });
       },
     );
-
     danmuController.setDuration(duration);
-
     textController = TextEditingController()..text = '[饭角]';
   }
 
@@ -135,6 +133,14 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                   }),
                   danmuButton,
                   editDanmu(),
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
+                    width: double.infinity,
+                    child: const Text(
+                      "过滤条件:",
+                      style: TextStyle(color: Colors.black87, fontSize: 16),
+                    ),
+                  ),
                   filterButton,
                   Container(
                     color: Colors.greenAccent,
@@ -261,11 +267,11 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                       ),
                     ),
                   ),
-                  SwitchButton(
+                  SwitchItem(
                     "朝上",
                     (isTurnOn) {
                       setState(() {
-                        params["朝上"] = !isTurnOn;
+                        params["朝上"] = isTurnOn;
                       });
                     },
                     isTurnOn: testIsUpward,
@@ -311,6 +317,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                   slider("最大宽度", maxWidth, 50, 300),
                   slider("最大行数", maxLines, 1, 10),
                   slider("边距", borderPadding, 0, 10),
+                  const SizedBox(height: 100, width: 0),
                 ],
               ),
             ),
@@ -382,7 +389,8 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
 
   Map<String, dynamic> params = {};
 
-  Widget slider<T extends num>(String name, T initialValue, double min, double max) {
+  Widget slider<T extends num>(
+      String name, T initialValue, double min, double max) {
     double? currentValue = params[name]?.toDouble();
     if (currentValue == null) {
       params[name] = initialValue;
@@ -412,9 +420,9 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
               value: currentValue,
               onChanged: (double value) {
                 setState(() {
-                  if(initialValue is int){
+                  if (initialValue is int) {
                     params[name] = value.toInt();
-                  }else {
+                  } else {
                     params[name] = value;
                   }
                 });
@@ -451,16 +459,16 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                   border: Border(
                     left: BorderSide(
                         color: Color(0x66FFFFFF),
-                        strokeAlign: StrokeAlign.outside),
+                        strokeAlign: BorderSide.strokeAlignOutside),
                     top: BorderSide(
                         color: Color(0x66FFFFFF),
-                        strokeAlign: StrokeAlign.outside),
+                        strokeAlign: BorderSide.strokeAlignOutside),
                     right: BorderSide(
                         color: Color(0x66FFFFFF),
-                        strokeAlign: StrokeAlign.outside),
+                        strokeAlign: BorderSide.strokeAlignOutside),
                     bottom: BorderSide(
                         color: Color(0x66FFFFFF),
-                        strokeAlign: StrokeAlign.outside),
+                        strokeAlign: BorderSide.strokeAlignOutside),
                   ),
                   borderRadius: BorderRadius.all(Radius.circular(8)),
                 ),
@@ -705,13 +713,17 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
         ),
         border: Border(
           left: BorderSide(
-              color: Color(0x66FFFFFF), strokeAlign: StrokeAlign.outside),
+              color: Color(0x66FFFFFF),
+              strokeAlign: BorderSide.strokeAlignOutside),
           top: BorderSide(
-              color: Color(0x66FFFFFF), strokeAlign: StrokeAlign.outside),
+              color: Color(0x66FFFFFF),
+              strokeAlign: BorderSide.strokeAlignOutside),
           right: BorderSide(
-              color: Color(0x66FFFFFF), strokeAlign: StrokeAlign.outside),
+              color: Color(0x66FFFFFF),
+              strokeAlign: BorderSide.strokeAlignOutside),
           bottom: BorderSide(
-              color: Color(0x66FFFFFF), strokeAlign: StrokeAlign.outside),
+              color: Color(0x66FFFFFF),
+              strokeAlign: BorderSide.strokeAlignOutside),
         ),
         borderRadius: BorderRadius.all(Radius.circular(8)),
       ),
@@ -721,46 +733,52 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
     danmuController.updateItem(danmuItem, danmuModel, time: time);
   }
 
-  Widget get filterButton => Wrap(
-        spacing: 8.0, // gap between adjacent chips
-        runSpacing: 4.0, // gap between lines
+  Widget get filterButton => GridView(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 4,
+          crossAxisSpacing: 4,
+          childAspectRatio: 4,
+        ),
         children: [
-          SwitchButton(
+          SwitchItem(
             "滚动",
             (isTurnOn) {
               danmuController.changeFilter(DanmuFlag.scroll);
             },
             isTurnOn: danmuController.filter.isScroll,
           ),
-          SwitchButton(
+          SwitchItem(
             "顶部",
             (isTurnOn) {
               danmuController.changeFilter(DanmuFlag.top);
             },
             isTurnOn: danmuController.filter.isTop,
           ),
-          SwitchButton(
+          SwitchItem(
             "底部",
             (isTurnOn) {
               danmuController.changeFilter(DanmuFlag.bottom);
             },
             isTurnOn: danmuController.filter.isBottom,
           ),
-          SwitchButton(
+          SwitchItem(
             "彩色",
             (isTurnOn) {
               danmuController.changeFilter(DanmuFlag.colorful);
             },
             isTurnOn: danmuController.filter.isColorful,
           ),
-          SwitchButton(
+          SwitchItem(
             "高级",
             (isTurnOn) {
               danmuController.changeFilter(DanmuFlag.advanced);
             },
             isTurnOn: danmuController.filter.isAdvanced,
           ),
-          SwitchButton(
+          SwitchItem(
             "重复",
             (isTurnOn) {
               danmuController.markRepeated();
@@ -768,8 +786,8 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
             },
             isTurnOn: danmuController.filter.isRepeated,
           ),
-          SwitchButton(
-            "播放/暂停",
+          SwitchItem(
+            isPlaying ? "播放" : "暂停",
             (isTurnOn) {
               isPlaying = isTurnOn;
               if (isTurnOn) {
@@ -778,7 +796,7 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                 danmuController.pause();
               }
             },
-            isTurnOn: !isPlaying,
+            isTurnOn: isPlaying,
           ),
         ],
       );
@@ -801,21 +819,33 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
   }
 
   @override
+  Size get tooltipSize => const Size(160, 36);
+
+  @override
   Widget get tooltipContent => Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          SizedBox(
-            width: 26,
-            height: 36,
-            child: OverflowBox(
-              maxWidth: 30,
-              maxHeight: 36,
-              alignment: Alignment.bottomRight,
-              child: Image.asset(
-                "assets/images/ic_jy.png",
-                width: 30,
-                height: 36,
-                fit: BoxFit.contain,
+          GestureDetector(
+            onTap: () {
+              if (danmuController.isSelected) {
+                var danmuItem = danmuController.selected!;
+                updatePlusOneItem(danmuItem);
+                danmuController.clearSelection();
+              }
+            },
+            child: SizedBox(
+              width: 26,
+              height: 36,
+              child: OverflowBox(
+                maxWidth: 30,
+                maxHeight: 36,
+                alignment: Alignment.bottomRight,
+                child: Image.asset(
+                  "assets/images/ic_jy.png",
+                  width: 30,
+                  height: 36,
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
           ),
@@ -914,12 +944,12 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
       );
 }
 
-class SwitchButton extends StatefulWidget {
+class SwitchItem extends StatefulWidget {
   final String text;
   final bool isTurnOn;
   final Function(bool) onTap;
 
-  const SwitchButton(
+  const SwitchItem(
     this.text,
     this.onTap, {
     Key? key,
@@ -927,10 +957,10 @@ class SwitchButton extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<SwitchButton> createState() => _SwitchButtonState();
+  State<SwitchItem> createState() => _SwitchItemState();
 }
 
-class _SwitchButtonState extends State<SwitchButton> {
+class _SwitchItemState extends State<SwitchItem> {
   bool isTurnOn = true;
 
   @override
@@ -941,22 +971,27 @@ class _SwitchButtonState extends State<SwitchButton> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        widget.onTap.call(isTurnOn);
-        setState(() {
-          isTurnOn = !isTurnOn;
-        });
-      },
-      child: Container(
-        constraints: BoxConstraints.loose(const Size(82, 40)),
-        color: isTurnOn ? Colors.amber : Colors.grey,
-        alignment: Alignment.center,
-        padding: const EdgeInsets.all(8),
-        child: Text(
-          widget.text,
-          style: const TextStyle(color: Colors.white),
-        ),
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 140),
+      color: isTurnOn ? Colors.amber : Colors.grey,
+      alignment: Alignment.center,
+      padding: const EdgeInsets.all(4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            widget.text,
+            style: const TextStyle(color: Colors.white),
+          ),
+          Switch(
+              value: isTurnOn,
+              onChanged: (value) {
+                widget.onTap.call(value);
+                setState(() {
+                  isTurnOn = value;
+                });
+              })
+        ],
       ),
     );
   }
