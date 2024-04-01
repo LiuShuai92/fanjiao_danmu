@@ -279,12 +279,6 @@ class RenderBubbleBox extends RenderProxyBox {
     canvas.drawPath(innerPath, backgroundPainter);
     canvas.drawPath(path, paintBorderPainter);
     canvas.restore();
-    double y;
-    if (isUpward) {
-      y = height;
-    } else {
-      y = -tipsHeight - gap;
-    }
     context.paintChild(child!, offset);
   }
 
