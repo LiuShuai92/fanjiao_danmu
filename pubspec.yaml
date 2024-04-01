@@ -1,5 +1,5 @@
 name: fanjiao_danmu
-description: 仿bilibili弹幕
+description: 弹幕
 homepage: https://github.com/LiuShuai92/fanjiao_danmu
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -17,7 +17,7 @@ homepage: https://github.com/LiuShuai92/fanjiao_danmu
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 0.5.4
+version: 0.5.5
 
 environment:
   sdk: '>=2.17.0 <4.0.0'
