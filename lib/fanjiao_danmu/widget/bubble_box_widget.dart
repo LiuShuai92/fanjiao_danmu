@@ -39,7 +39,9 @@ class BubbleBox extends SingleChildRenderObjectWidget {
           key: key,
           child: Padding(
             padding: isWrapped
-                ? EdgeInsets.only(top: pointerHeight) +
+                ? EdgeInsets.only(
+                        top: isUpward ? pointerHeight : 0,
+                        bottom: isUpward ? 0 : pointerHeight) +
                     EdgeInsets.all(borderRadius)
                 : EdgeInsets.zero,
             child: child,
@@ -277,6 +279,12 @@ class RenderBubbleBox extends RenderProxyBox {
     canvas.drawPath(innerPath, backgroundPainter);
     canvas.drawPath(path, paintBorderPainter);
     canvas.restore();
+    double y;
+    if (isUpward) {
+      y = height;
+    } else {
+      y = -tipsHeight - gap;
+    }
     context.paintChild(child!, offset);
   }
 
