@@ -15,6 +15,7 @@ import 'my_danmu_model.dart';
 import 'my_thumb_shape.dart';
 import 'my_track_shape.dart';
 import 'utils.dart';
+import 'view/path_animation.dart';
 
 void main() {
   runApp(const MyApp());
@@ -35,7 +36,8 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
     '[bilibili]': AssetImage("assets/images/bilibili.png"),
     '[饭角]': NetworkImage("https://www.fanjiao.co/h5/img/logo.12b2d5a6.png"),
   };
-  Timer? timer;
+
+  // Timer? timer;
   Duration duration = const Duration(seconds: 3780);
   bool isPlaying = false;
   int id = 0;
@@ -155,116 +157,136 @@ class _MyAppState extends State<MyApp> with FanjiaoDanmuTooltipMixin {
                   Container(
                     color: Colors.amber,
                     height: 200,
-                    width: 300,
                     alignment: Alignment.center,
-                    child: SizedBox(
-                      height: height,
-                      width: width,
-                      child: BubbleBox(
-                        isUpward: testIsUpward,
-                        pointerBias: pointerBias,
-                        strokeWidth: strokeWidth,
-                        borderRadius: radius,
-                        pointerWidth: pointerWidth,
-                        pointerHeight: pointerHeight,
-                        peakRadius: peakRadius,
-                        isWrapped: false,
-                        child: Padding(
-                          padding: EdgeInsets.only(
-                            top: testIsUpward ? pointerHeight : 0,
-                            bottom: testIsUpward ? 0 : pointerHeight,
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              SizedBox(
-                                width: 22,
-                                height: 36,
-                                child: OverflowBox(
-                                  maxWidth: 30,
-                                  maxHeight: 36,
-                                  alignment: Alignment.bottomCenter,
-                                  child: Image.asset(
-                                    "assets/images/ic_jy.png",
-                                    width: 30,
-                                    height: 36,
-                                    fit: BoxFit.contain,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Container(
-                                        alignment: Alignment.center,
-                                        child: const Text(
-                                          '加一',
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                              decoration: TextDecoration.none,
-                                              fontSize: 12.0,
-                                              fontWeight: FontWeight.w400,
-                                              color: Colors.white),
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      width: 1.0,
-                                      alignment: Alignment.center,
-                                      child: Container(
-                                        width: 1.0,
-                                        height: 12.0,
-                                        color: Colors.white.withOpacity(0.19),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: Container(
-                                        alignment: Alignment.center,
-                                        child: const Text(
-                                          '复制',
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                              decoration: TextDecoration.none,
-                                              fontSize: 12.0,
-                                              fontWeight: FontWeight.w400,
-                                              color: Colors.white),
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      width: 1.0,
-                                      alignment: Alignment.center,
-                                      child: Container(
-                                        width: 1.0,
-                                        height: 12.0,
-                                        color: Colors.white.withOpacity(0.19),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: Container(
-                                        alignment: Alignment.center,
-                                        child: const Text(
-                                          '举报',
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                              decoration: TextDecoration.none,
-                                              fontSize: 12.0,
-                                              fontWeight: FontWeight.w400,
-                                              color: Colors.white),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
+                    child: Stack(
+                      alignment: Alignment.center,
+                      fit: StackFit.expand,
+                      children: [
+                        Positioned.fill(
+                          child: Image.asset(
+                            "assets/images/image_background.webp",
+                            fit: BoxFit.cover,
                           ),
                         ),
-                      ),
+                        Positioned(
+                          height: height,
+                          width: width,
+                          child: BubbleBox(
+                            isUpward: testIsUpward,
+                            pointerBias: pointerBias,
+                            strokeWidth: strokeWidth,
+                            borderRadius: radius,
+                            pointerWidth: pointerWidth,
+                            pointerHeight: pointerHeight,
+                            peakRadius: peakRadius,
+                            isWrapped: false,
+                            filter: ui.ImageFilter.blur(
+                              sigmaX: 8,
+                              sigmaY: 8,
+                            ),
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                top: testIsUpward ? pointerHeight : 0,
+                                bottom: testIsUpward ? 0 : pointerHeight,
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  SizedBox(
+                                    width: 22,
+                                    height: 36,
+                                    child: OverflowBox(
+                                      maxWidth: 30,
+                                      maxHeight: 36,
+                                      alignment: Alignment.bottomCenter,
+                                      child: Image.asset(
+                                        "assets/images/ic_jy.png",
+                                        width: 30,
+                                        height: 36,
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Container(
+                                            alignment: Alignment.center,
+                                            child: const Text(
+                                              '加一',
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                  decoration:
+                                                      TextDecoration.none,
+                                                  fontSize: 12.0,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Colors.white),
+                                            ),
+                                          ),
+                                        ),
+                                        Container(
+                                          width: 1.0,
+                                          alignment: Alignment.center,
+                                          child: Container(
+                                            width: 1.0,
+                                            height: 12.0,
+                                            color:
+                                                Colors.white.withOpacity(0.19),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: Container(
+                                            alignment: Alignment.center,
+                                            child: const Text(
+                                              '复制',
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                  decoration:
+                                                      TextDecoration.none,
+                                                  fontSize: 12.0,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Colors.white),
+                                            ),
+                                          ),
+                                        ),
+                                        Container(
+                                          width: 1.0,
+                                          alignment: Alignment.center,
+                                          child: Container(
+                                            width: 1.0,
+                                            height: 12.0,
+                                            color:
+                                                Colors.white.withOpacity(0.19),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: Container(
+                                            alignment: Alignment.center,
+                                            child: const Text(
+                                              '举报',
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                  decoration:
+                                                      TextDecoration.none,
+                                                  fontSize: 12.0,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Colors.white),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   SwitchItem(
@@ -992,6 +1014,43 @@ class _SwitchItemState extends State<SwitchItem> {
                 });
               })
         ],
+      ),
+    );
+  }
+}
+
+class PathAnimationDemo extends StatefulWidget {
+  @override
+  _PathAnimationDemoState createState() => _PathAnimationDemoState();
+}
+
+class _PathAnimationDemoState extends State<PathAnimationDemo>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: Duration(seconds: 5),
+      vsync: this,
+    );
+    _animation = Tween<double>(begin: 0, end: 1).animate(_controller);
+    _controller.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: CustomPaint(
+        painter: PathPainter(_animation),
       ),
     );
   }

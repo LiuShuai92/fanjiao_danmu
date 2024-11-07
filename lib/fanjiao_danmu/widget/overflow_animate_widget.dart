@@ -149,5 +149,6 @@ Future<ui.Image?> loadImage(BuildContext? context, ImageProvider? imageProvider,
 
   imageStreamListener = ImageStreamListener(listener);
   stream.addListener(imageStreamListener);
-  return completer.future;
+  var img =await completer.future;
+  return img;
 }

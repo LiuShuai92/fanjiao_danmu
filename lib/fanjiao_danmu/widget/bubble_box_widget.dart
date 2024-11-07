@@ -18,6 +18,8 @@ class BubbleBox extends SingleChildRenderObjectWidget {
   final Color strokeColor;
   final bool isUpward;
   final bool isWrapped;
+  final ImageFilter? filter;
+  final BlendMode blendMode;
 
   BubbleBox({
     required Widget child,
@@ -35,6 +37,8 @@ class BubbleBox extends SingleChildRenderObjectWidget {
     this.endPadding = 0,
     this.isUpward = true,
     this.isWrapped = true,
+    this.filter,
+    this.blendMode = BlendMode.srcOver,
   }) : super(
           key: key,
           child: Padding(
@@ -47,32 +51,6 @@ class BubbleBox extends SingleChildRenderObjectWidget {
             child: child,
           ),
         );
-
-  /*@override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: _BubbleBoxPainter(
-        pointerBias: pointerBias,
-        strokeWidth: strokeWidth,
-        radius: radius,
-        opacity: opacity,
-        peakRadius: peakRadius,
-        pointerWidth: pointerWidth,
-        pointerHeight: pointerHeight,
-        startPadding: startPadding,
-        endPadding: endPadding,
-        color: color,
-        strokeColor: strokeColor,
-        isUpward: isUpward,
-      ),
-      child: Padding(
-        padding: isWrapped
-            ? EdgeInsets.only(top: pointerHeight) + EdgeInsets.all(radius)
-            : EdgeInsets.zero,
-        child: child,
-      ),
-    );
-  }*/
 
   @override
   RenderObject createRenderObject(BuildContext context) {
@@ -96,6 +74,8 @@ class BubbleBox extends SingleChildRenderObjectWidget {
       ..strokeColor = strokeColor
       ..color = color
       ..opacity = opacity
+      ..filter = filter
+      ..blendMode = blendMode
       ..isUpward = isUpward;
   }
 }
@@ -105,7 +85,8 @@ class RenderBubbleBox extends RenderProxyBox {
   Color? _strokeColor;
   double? _strokeWidth;
   double? _opacity;
-
+  ImageFilter? filter;
+  BlendMode blendMode = BlendMode.srcOver;
   late double borderRadius;
   late double peakRadius;
   late double pointerBias;
@@ -170,10 +151,11 @@ class RenderBubbleBox extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (child == null) {
-      // layer = null;
-      return;
-    }
+    paintBackground(offset, context);
+    super.paint(context, offset);
+  }
+
+  void paintBackground(Offset offset, PaintingContext context) {
     var rect = offset & size;
     final width = size.width;
     final height = size.height;
@@ -235,7 +217,6 @@ class RenderBubbleBox extends RenderProxyBox {
       path.arcToPoint(Offset(width - borderRadius, bottom), radius: radius);
       path.lineTo(pointerEndX, bottom);
       path.lineTo(pointerEndX - pointerWidth / 2 + halfArcWidth, height - arcY);
-      // path.relativeConicTo(-halfArcWidth, arcY, -halfArcWidth * 2, 0, 1);
       path.arcTo(
           Rect.fromCircle(
               center: Offset(pointerEndX - pointerWidth / 2, height - l),
@@ -253,33 +234,29 @@ class RenderBubbleBox extends RenderProxyBox {
     path = path.shift(offset);
     final innerPath = Path();
     innerPath.addPath(path, Offset.zero);
-    /*Shader shader = ui.Gradient.linear(
-      rect.centerLeft,
-      rect.centerRight,
-      [
-        const Color(0x66FFFFFF),
-        Colors.transparent,
-        Colors.black,
-        Colors.black,
-        Colors.transparent,
-        Colors.transparent,
-      ],
-      [
-        0.0,
-        0.3,
-        0.3,
-        0.7,
-        0.7,
-        1.0,
-      ],
-    );*/
     var inflateRect = rect.inflate(strokeWidth / 2);
     Canvas canvas = context.canvas;
     canvas.saveLayer(inflateRect, painter);
     canvas.drawPath(innerPath, backgroundPainter);
     canvas.drawPath(path, paintBorderPainter);
     canvas.restore();
-    context.paintChild(child!, offset);
+    if (filter != null) {
+      context.pushClipPath(
+        needsCompositing,
+        const Offset(0, 0),
+        inflateRect,
+        path,
+        (PaintingContext innerContext, Offset innerOffset) {
+          innerContext.pushLayer(
+              BackdropFilterLayer(
+                filter: filter,
+                blendMode: blendMode,
+              ),
+              (PaintingContext innerContext, Offset innerOffset) {},
+              innerOffset);
+        },
+      );
+    }
   }
 
   @override
