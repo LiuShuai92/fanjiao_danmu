@@ -235,11 +235,6 @@ class RenderBubbleBox extends RenderProxyBox {
     final innerPath = Path();
     innerPath.addPath(path, Offset.zero);
     var inflateRect = rect.inflate(strokeWidth / 2);
-    Canvas canvas = context.canvas;
-    canvas.saveLayer(inflateRect, painter);
-    canvas.drawPath(innerPath, backgroundPainter);
-    canvas.drawPath(path, paintBorderPainter);
-    canvas.restore();
     if (filter != null) {
       context.pushClipPath(
         needsCompositing,
@@ -257,6 +252,11 @@ class RenderBubbleBox extends RenderProxyBox {
         },
       );
     }
+    Canvas canvas = context.canvas;
+    canvas.saveLayer(inflateRect, painter);
+    canvas.drawPath(innerPath, backgroundPainter);
+    canvas.drawPath(path, paintBorderPainter);
+    canvas.restore();
   }
 
   @override
