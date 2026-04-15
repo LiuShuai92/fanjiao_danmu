@@ -9,6 +9,7 @@ class DanmuWidget extends StatefulWidget {
   final DanmuController danmuController;
   final double width;
   final double height;
+  final Function(String)? callBack;
 
   Positioned? Function<T extends DanmuModel>(DanmuItem<T>?)? tooltip;
 
@@ -18,6 +19,7 @@ class DanmuWidget extends StatefulWidget {
     required this.height,
     required this.danmuController,
     this.tooltip,
+    this.callBack,
   })  : assert(danmuController != null),
         super(key: key);
 
@@ -31,6 +33,8 @@ class _DanmuWidgetState extends State<DanmuWidget>
   List<Widget> children = [];
   List<Widget> frontChildren = [];
   List<Widget> otherChildren = [];
+  // 至少展示过一条弹幕
+  bool _isShown = false;
 
   @override
   void initState() {
@@ -96,6 +100,10 @@ class _DanmuWidgetState extends State<DanmuWidget>
       var model = danmuItem.model;
       if (model.startTime <= danmuController.progress &&
           danmuController.filter.contain(danmuItem.flag)) {
+        if(!_isShown){
+          _isShown = true;
+          widget.callBack?.call("shown");
+        }
         var positioned = Positioned(
           key: danmuItem.valueKey(),
           left: danmuItem.position?.dx,
